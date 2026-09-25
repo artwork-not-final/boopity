@@ -1,0 +1,38 @@
+name: Verify self-hosted app
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Typecheck, lint, format, test, and build
+        run: npm run verify
+      - run: npm run release:audit
+      - run: npm audit --audit-level=high
+      - name: Build container (no push or deployment)
+        run: docker build --tag boopity-ci .
+      - name: Check production runtime with offline synthetic authentication
+        env:
+          BOOPITY_CONTAINER_QA: runtime-disposable
+        run: node tests/runtime-container-local.mjs boopity-ci .

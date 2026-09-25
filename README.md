@@ -1,0 +1,74 @@
+# Boopity
+
+Self-hosted pet-sitting software. One installation, one business—no Boopity
+subscription or central account.
+
+**Developer preview:** ready for controlled testing, not yet a supported production
+release. See the [remaining release checks](RELEASING.md).
+
+## What it does
+
+- Manage clients, pets, services, bookings and payment records.
+- Invite clients to book and cancel within your rules.
+- Record payments manually or connect your own Stripe account.
+- Sign in with email codes or Google.
+- Set your business name, logo and colors, with a “Powered by Boopity” footer.
+
+Built with React, Vite, Hono, Better Auth, Tailwind CSS and shadcn-derived components.
+Cloudflare is not required.
+
+## Run locally
+
+Use Node 24.21.0 (see `.nvmrc`). Run these commands from the repository root:
+
+```sh
+npm ci
+npm run build
+npm start
+```
+
+On a fresh installation, Boopity opens a private **Finish setup** link when started
+in an interactive local terminal. If it does not open, use the link in the terminal.
+Select **Start setup**, then add your name, email and a setup password in **Your account**.
+The wizard walks you through email delivery and your business settings.
+
+If you already supplied a setup password in your hosting settings, open `/setup`
+and enter it instead. You will not be asked to choose another password.
+Keep setup links, passwords and provider credentials private. See the
+[setup guide](GUIDED-INSTALLATION.md) for returning later or getting help.
+
+For development with live reload, see [Contributing](CONTRIBUTING.md).
+
+## Run with Docker
+
+```sh
+docker compose up --build
+```
+
+Open **Finish setup** in the output, or open `http://localhost:3000/setup` if you
+supplied a private setup password. The Compose file keeps data in a persistent
+volume and binds the app to localhost. For a hosted installation, configure HTTPS
+and follow the [hosting guide](SELF-HOSTING.md). This builds locally; a reviewed
+public image and one-click installer are not available yet.
+
+Boopity currently needs one always-running Node process and a persistent local
+disk. It uses SQLite and private file storage; ephemeral disks, multiple replicas
+and scale-to-zero are not supported. The initial booking model supports one
+concurrent booking per business. Other databases, storage systems and payment
+providers are extension points, not shipped integrations.
+
+## Guides
+
+- [Installation and configuration](SELF-HOSTING.md)
+- [Setup access](GUIDED-INSTALLATION.md) and [email setup](EMAIL-SETUP.md)
+- [Backups, upgrades and recovery](OPERATIONS.md)
+- [Contributing](CONTRIBUTING.md), [security](SECURITY.md) and [support](SUPPORT.md)
+- [Release checks](RELEASING.md) and [source provenance](SOURCE-REVIEW.md)
+
+## License
+
+Boopity's original application code is [MIT licensed](LICENSE), copyright (c) 2026
+Artwork Not Final LLC. Preserve the [third-party notices](THIRD-PARTY-NOTICES.md).
+The retired .NET application is not part of this source tree and is not relicensed.
+
+Public project: [artwork-not-final/boopity](https://github.com/artwork-not-final/boopity).

@@ -1,0 +1,235 @@
+# Hosting, backups and recovery
+
+Developer-preview runbook. No production support or public deployment is implied.
+Start with [SELF-HOSTING.md](SELF-HOSTING.md) for the wizard and provider settings.
+
+Maintainers can run the [populated upgrade rehearsal](RELEASING.md#populated-upgrade-rehearsal)
+against paired source snapshots and locally built images. It uses disposable data,
+not a business installation, and does not replace testing recovery on the host you use.
+
+## Deployment matrix
+
+| Environment                                                       | Status                                                      | Requirements / limits                                                                       |
+| ----------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Docker, Debian Trixie, Node 24.21.0, Linux ARM64                  | Local runtime, authentication, upgrade/rollback checks pass | One container, persistent local volume, no replicas; image release review remains open      |
+| Native Node 24.21.0 on macOS ARM64                                | Local verification and compiled startup/recovery pass       | Same-origin build, private local data directory                                             |
+| DigitalOcean Ubuntu 24.04 x64, 1 GiB, Docker + Nginx              | Approved trial: install/TLS/reboot/limited HTTP checks pass | Owner/provider/browser, populated capacity and hosted upgrade/restore gates remain open     |
+| Other Linux VPS with Node 24 or Docker                            | Intended target; not provider-certified                     | Operator-managed TLS, process supervisor and durable local disk                             |
+| Linux x64 container, Node 24.21.0                                 | Local runtime and upgrade/rollback pass under emulation     | Native-host capacity and hosted checks remain; not distribution clearance                   |
+| Container platforms with persistent local volumes                 | Conditional, not provider-certified                         | Always-on, one replica, no overlapping rolling deployments; disk must outlive the container |
+| Workers, Pages, static-only hosts, serverless functions           | Not supported by the Node reference                         | Cannot run a persistent Node process with this SQLite/filesystem model                      |
+| Shared/NFS disk, multiple replicas, scale-to-zero, Windows native | Not validated/supported                                     | Do not assume SQLite or native image dependency compatibility                               |
+
+No Cloudflare account is required. A free tier is not a promise of durable storage,
+availability, email delivery or zero cost; inspect the chosen host's current terms.
+PostgreSQL/S3 are future adapter targets, not available drivers. Local macOS and
+Linux-container checks alone do not complete the second public-host gate. The
+approved DigitalOcean trial adds partial external-host
+evidence, **not a completed second-host release validation**. The root Dockerfile
+now builds the self-hosted Node application; the retired .NET Dockerfile is not
+part of the maintained source tree. These trial results are historical evidence,
+not validation of a newly built release image.
+
+## Public origin and reverse proxy
+
+Keep the container's default non-root user. Compose drops Linux capabilities,
+disallows privilege escalation and mounts the application read-only; `/data` and
+a small temporary filesystem remain writable. The image contains no setuid/setgid
+programs. Do not add privileged mode, `SYS_ADMIN`, host namespaces or a Docker
+socket mount. Running as root or changing those restrictions invalidates the
+runtime applicability assessment in [CONTAINER-REVIEW.md](CONTAINER-REVIEW.md).
+
+Run the app as a dedicated non-root user. Bind Node to loopback (the default), or
+to a private container network. Set `APP_URL=https://care.example.com` in the
+application environment. It must be the exact public origin with no path. Configure
+Google and payment callbacks for that origin; do not copy another sitter's URLs.
+
+For a **single Nginx proxy on the same host as native Node**, the HTTPS server's
+location can use this configuration after certificates and the real server name
+are installed:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name care.example.com;
+    ssl_certificate /etc/letsencrypt/live/care.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/care.example.com/privkey.pem;
+    client_max_body_size 11m;
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host care.example.com;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Forwarded "";
+    }
+}
+```
+
+Also configure an HTTP-to-HTTPS redirect and a default virtual host that rejects
+unknown hostnames. These are host configuration, not generated by Boopity. Nginx
+can replace upstream request headers using
+[`proxy_set_header`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_set_header).
+
+For that native-loopback topology only, set `TRUSTED_PROXY_IPS=127.0.0.1`. With Docker
+or a separate proxy host, use its **actual socket peer IP**, not that example. No
+wildcards or forwarded-address chains are accepted. The public-facing proxy must
+replace, not append to, `X-Forwarded-For`. Multiple proxies/CDNs require a reviewed
+client-IP trust chain; do not blindly trust user-supplied forwarding headers.
+Incorrect trust settings collapse users into one IP rate budget. Never expose
+port 3000 directly to the internet as a workaround.
+
+Check HTTPS `/api/health`, canonical-host rejection, sign-in cookies, an OTP login,
+Google if enabled, and provider webhooks before allowing clients. Use synthetic
+accounts and explicitly authorized provider tests. The health endpoint proves
+local readiness, not email delivery, payment settlement or completed owner setup.
+
+## Request failures
+
+Each response includes a generated `X-Request-Id`. Unexpected server failures
+produce an `http.error` JSON event in the server logs with that ID, the HTTP
+method, registered route pattern, status, and error category. The event excludes
+request bodies, actual URL parameters, credentials, and exception messages/stacks.
+Failures before route handling may show the middleware pattern (`/*`).
+
+For troubleshooting, match the response ID to the server event. Invalid form
+input returns 400; unexpected internal failures return 500. Known HTTP failures
+retain their status, including 503 when explicitly raised for unavailability.
+These diagnostics are not a complete access log or an audit of provider actions.
+Do not post full hosting logs publicly: startup logs can contain private setup
+links, and third-party libraries or your reverse proxy may log separately.
+
+## Backup contract
+
+Stop **every writer** before a file-level backup, including management commands.
+Keep the complete `DATA_DIR`: database, any SQLite sidecars, private uploads,
+`settings-key`, and `auth-secret` if generated locally. Preserve the original
+host-managed authentication secret and all environment/secret-manager overrides
+separately; they are not captured in a data-volume backup. Keep the matching image
+ID/source revision and configuration record. Never store secrets in that public
+record. Verify free space and restrict backup access before copying.
+
+The examples below use a **new private backup directory** each time. They never
+delete or overwrite a prior backup. They create unencrypted local copies: encrypt
+them before off-host storage and keep encryption keys independently recoverable.
+Do not share these archives in issues or chat.
+
+### Native Node, default local data directory
+
+First stop the application with your process supervisor. From the source directory, after
+confirming `.boopity` is the installation you intend to back up:
+
+```sh
+umask 077
+mkdir -p backups
+BOOPITY_BACKUP_DIR=$(mktemp -d "$PWD/backups/snapshot.XXXXXX")
+cp -a .boopity "$BOOPITY_BACKUP_DIR/data"
+```
+
+Use the **actual** `DATA_DIR` if changed. Ensure the copy succeeds before restarting
+the original. To exercise restore, copy `data` into a new private directory; do
+not overwrite an existing installation. Keep the clone network-isolated while
+checking it. Never start two production copies from the same snapshot.
+
+### Docker Compose volume
+
+From the source directory, first identify the exact container and image. If the container ID is
+empty or ambiguous, stop and inspect `docker compose ps`; do not guess a volume.
+
+```sh
+BOOPITY_CONTAINER=$(docker compose ps -q boopity)
+BOOPITY_IMAGE=$(docker inspect --format '{{.Image}}' "$BOOPITY_CONTAINER")
+docker compose stop boopity
+umask 077
+mkdir -p backups
+BOOPITY_BACKUP_DIR=$(mktemp -d "$PWD/backups/snapshot.XXXXXX")
+docker run --rm --network none --volumes-from "$BOOPITY_CONTAINER:ro" \
+  --entrypoint tar "$BOOPITY_IMAGE" -C /data -cf - . \
+  > "$BOOPITY_BACKUP_DIR/data.tar"
+```
+
+Check the command's exit status and keep the original stopped until backup success
+is confirmed. Docker documents the helper-container pattern for
+[volume backup and restore](https://docs.docker.com/engine/storage/volumes/#back-up-restore-or-migrate-data-volumes).
+The helper above is network-isolated and runs `tar`, not the application.
+
+Restore **only your own trusted archive** into a newly created, uniquely named
+test volume. Never unpack an untrusted tar file or reuse a business volume.
+
+```sh
+BOOPITY_RESTORE_VOLUME="boopity-restore-$(date +%Y%m%d%H%M%S)"
+# Check that this name is unused before creating it.
+docker volume create "$BOOPITY_RESTORE_VOLUME"
+docker run --rm -i --network none \
+  --mount "source=$BOOPITY_RESTORE_VOLUME,target=/data" \
+  --entrypoint tar "$BOOPITY_IMAGE" -C /data -xf - \
+  < "$BOOPITY_BACKUP_DIR/data.tar"
+docker run --rm --network none \
+  --mount "source=$BOOPITY_RESTORE_VOLUME,target=/data" \
+  "$BOOPITY_IMAGE" node dist/server/manage.mjs status
+```
+
+If authentication is host-managed, supply the original secret through a private
+env file/secret mount, never a command-line value. A status command can apply local
+migrations; test first with the **matching saved image**. Missing installation keys
+now cause startup to fail instead of silently generating replacements. Do not
+"fix" that error by deleting the database or creating new keys.
+
+### Restore acceptance
+
+A backup is not proven merely because it exists or the status command succeeds.
+In the isolated clone check database `PRAGMA quick_check` and `foreign_key_check`,
+unchanged owner/membership and record counts, branding/timezone/currency/logo,
+private upload bytes, decrypted provider settings and payment balances/history.
+Test email/recovery only with intercepted delivery or separately approved test
+providers. Do not forward real webhooks to both instances.
+
+**An old backup rolls application state backward, not the payment provider.** Any
+charges/refunds or manually collected funds since the snapshot must be reconciled
+before reopening checkout. Do not create replacement attempts to fill apparent
+gaps, clear idempotency records or replay operator tokens from the backup. Review
+provider records with the owner; obtain fresh sign-in/recovery material and revoke
+stale sessions as part of an incident response. Keep the original data unchanged
+until the restore is accepted.
+
+Local regression tests cover a stopped full-directory copy, a prior schema upgrade,
+key retention, encrypted settings, uploads, branding and ledger immutability. These
+do not certify your host's backup product or recover lost external secrets.
+
+## Upgrades and rollback
+
+There are no tagged supported production releases yet. The current tested upgrade
+fixture is the pre-payment self-hosted schema (migrations 0001–0004) to the current
+schema. There is **no .NET, SaaS or Cloudflare data import**.
+
+For each future release: read the notes, retain the old image/configuration, stop
+writers, make and verify a complete backup, then test the new image against an
+isolated restored copy. Startup applies checksummed SQL migrations. Never edit
+applied migrations or run an older image against a newer database. If checks fail,
+stop and keep the original snapshot intact. An approved rollback uses both the
+old image and its old full snapshot; account for any provider activity since then.
+Reopen the original business only after health, sign-in, branding, booking and
+payment checks. Do not use overlapping rolling replicas with SQLite.
+
+## Troubleshooting
+
+| Symptom                             | Check                                                                                                                     |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 421 / wrong-host response           | `APP_URL`, browser origin and proxy Host must agree exactly                                                               |
+| Repeated 429s behind a proxy        | Actual socket IP and single trusted client address; do not disable limits                                                 |
+| Returning to unfinished setup       | Use Continue setup with your setup password or offered email-code option; installer recovery is in the setup access guide |
+| Lost installer access               | Follow the private hosting/console recovery steps; replacing installer access revokes earlier setup sessions              |
+| Cannot sign in                      | Complete email verification; use server recovery to repair delivery, not public registration                              |
+| Google redirect mismatch            | Exact callback in the wizard; correct Google project/client and allowed test identity                                     |
+| Existing installation missing keys  | Restore the matching original keys or host override; never generate replacements                                          |
+| Database locked / migration error   | Stop duplicate processes; verify local storage and the correct code/schema pair                                           |
+| Permission denied / missing uploads | Correct volume, non-root ownership, disk space; do not make data world-writable                                           |
+| Payment still processing            | Await signed provider proof/reconcile; returning from Checkout does not prove payment                                     |
+
+Use [server recovery](SELF-HOSTING.md#recover-access) when email is broken. Share
+only redacted request IDs and synthetic reproductions with maintainers. Never
+dump `.env`, provider keys, the database or one-time links while troubleshooting.
+
+See [Setup access](GUIDED-INSTALLATION.md) for the sitter-facing flow and
+[API routes](API-ROUTES.md) for supported endpoints. Unknown APIs return JSON 404;
+a real setup or provider readiness failure can still return 503. Photo/document
+prototypes and background booking notifications are not enabled by this release.

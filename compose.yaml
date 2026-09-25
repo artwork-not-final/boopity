@@ -1,0 +1,18 @@
+services:
+  boopity:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      BOOPITY_SETUP_PASSWORD: ${BOOPITY_SETUP_PASSWORD:-}
+    volumes:
+      - boopity-data:/data
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    restart: unless-stopped
+volumes:
+  boopity-data:

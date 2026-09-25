@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react"],
+  "categories": { "correctness": "error" },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/refs": "off",
+    "react/purity": "off",
+    "react/set-state-in-effect": "off"
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts"],
+      "rules": { "react/no-children-prop": "off" }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules/**",
+    "dist/**",
+    ".boopity/**",
+    ".wrangler/**",
+    ".release-candidates/**",
+    "release-candidate/**",
+    ".codex/**",
+    ".agents/**",
+    ".env*",
+    ".dev.vars*",
+    "backups/**",
+    "test-results/**",
+    "web/**",
+    "Boopity/**"
+  ]
+}

@@ -1,0 +1,26 @@
+node_modules
+dist
+.wrangler
+.boopity
+.release-candidates
+release-candidate
+.env*
+.dev.vars*
+.git
+test-results
+tests
+*.log
+*.sqlite*
+*.db*
+*.md
+!THIRD-PARTY-NOTICES.md
+!THIRD-PARTY-SOURCES.md
+!licenses/README.md
+
+# Old checkouts can retain credentials, databases and private review archives.
+/web
+/Boopity
+backups
+.idea
+.github
+*.tsbuildinfo

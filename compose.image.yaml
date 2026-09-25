@@ -1,0 +1,15 @@
+# Portable prebuilt-image installation. Obtain the reviewed image digest from a
+# release; no image has been published merely by adding this file.
+services:
+  boopity:
+    image: ${BOOPITY_IMAGE:?Set BOOPITY_IMAGE to the reviewed registry image digest}
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      BOOPITY_SETUP_PASSWORD: ${BOOPITY_SETUP_PASSWORD:-}
+    volumes:
+      - boopity-data:/data
+    restart: unless-stopped
+volumes:
+  boopity-data:

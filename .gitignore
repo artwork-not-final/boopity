@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.boopity/
+.env*
+!.env*.example
+.dev.vars*
+backups/
+test-results/
+*.sqlite*
+*.db*
+*.log
+.DS_Store
+.idea/
+
+# Local-only transition archive and the previous running installation.
+# Neither directory belongs in the self-hosted source tree.
+/web/
+/Boopity/
+/.release-candidates/
+*.tsbuildinfo

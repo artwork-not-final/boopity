@@ -1,0 +1,27 @@
+# Dependencies, generated output, private installation data, and local archives.
+node_modules/
+dist/
+.git/
+.boopity/
+.wrangler/
+.release-candidates/
+release-candidate/
+.codex/
+.agents/
+.env*
+.dev.vars*
+backups/
+test-results/
+*.sqlite*
+*.db*
+*.log
+*.tsbuildinfo
+/web/
+/Boopity/
+
+# Generated lockfile, immutable migrations, and third-party license texts.
+package-lock.json
+drizzle/
+db/self-hosted/
+licenses/
+LICENSE
