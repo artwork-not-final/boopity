@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { NewBooking } from "../src/client/NewBooking";
+import { NewBooking } from "../src/client/features/bookings/NewBooking";
 
 const data = {
   policy: {

@@ -2,16 +2,16 @@
 import { act, createElement, type ReactElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { BookingPayments } from "../src/client/payments/BookingPayments";
-import { PaymentAttempt } from "../src/client/payments/PaymentAttempt";
-import { PaymentSettings } from "../src/client/payments/PaymentSettings";
-import { PaymentRecords } from "../src/client/payments/PaymentRecords";
+import { BookingPayments } from "../src/client/features/payments/BookingPayments";
+import { PaymentAttempt } from "../src/client/features/payments/PaymentAttempt";
+import { PaymentSettings } from "../src/client/features/payments/PaymentSettings";
+import { PaymentRecords } from "../src/client/features/payments/PaymentRecords";
 import type { PaymentView, IntegrationView } from "../src/shared/payments";
 import type { PaymentRecordsView } from "../src/shared/payment-records";
-import { SEARCH_DELAY_MS } from "../src/client/live-search";
-import { Workspace } from "../src/client/Workspace";
-import { type Booking } from "../src/client/booking-types";
-import { navigateLocal } from "../src/client/workspace-location";
+import { SEARCH_DELAY_MS } from "../src/client/lib/live-search";
+import { Workspace } from "../src/client/app/Workspace";
+import { type Booking } from "../src/client/features/bookings/types";
+import { navigateLocal } from "../src/client/lib/navigation/workspace-location";
 
 const page = { offset: 0, limit: 50, hasMore: false };
 function view(): PaymentView {

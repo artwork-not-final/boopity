@@ -1,14 +1,14 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { EmailSetupGuide } from "../src/client/EmailSetupGuide";
-import { Workspace } from "../src/client/Workspace";
+import { EmailSetupGuide } from "../src/client/features/settings/EmailSetupGuide";
+import { Workspace } from "../src/client/app/Workspace";
 import {
   ownerDestination,
   settingsPath,
-  SettingsLayout,
   type SettingsSection,
-} from "../src/client/SettingsLayout";
+} from "../src/client/lib/navigation/settings-location";
+import { SettingsLayout } from "../src/client/features/settings/SettingsLayout";
 
 describe("post-installation settings", () => {
   it("points email help to the local test panel, keeping first-run wording in the wizard", () => {

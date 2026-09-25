@@ -2,8 +2,8 @@
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
-import { BookingPayments } from "../src/client/payments/BookingPayments";
-import { PaymentAttempt } from "../src/client/payments/PaymentAttempt";
+import { BookingPayments } from "../src/client/features/payments/BookingPayments";
+import { PaymentAttempt } from "../src/client/features/payments/PaymentAttempt";
 import { manual, owner, paymentFixture } from "./payment-fixture";
 
 it("starts a new checkout after the previous attempt is confirmed expired", async () => {

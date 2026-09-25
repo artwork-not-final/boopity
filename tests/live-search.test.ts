@@ -1,9 +1,12 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createLiveSearch, showSearchInput } from "../src/client/live-search";
-import { SearchBox } from "../src/client/Pagination";
-import { bookingSearchTarget } from "../src/client/booking-search";
+import {
+  createLiveSearch,
+  showSearchInput,
+} from "../src/client/lib/live-search";
+import { SearchBox } from "../src/client/components/forms/SearchBox";
+import { bookingSearchTarget } from "../src/client/features/bookings/booking-search";
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());

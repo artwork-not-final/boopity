@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { decodeResponse } from "../src/client/api-response";
+import { decodeResponse } from "../src/client/lib/http/api-response";
 import {
   paymentSettingsResponse,
   paymentViewResponse,

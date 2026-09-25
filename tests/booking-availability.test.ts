@@ -5,8 +5,8 @@ import {
   availabilityPath,
   usesDirectTime,
   type ScheduleInput,
-} from "../src/client/booking-availability";
-import { BookingAvailabilityNotice } from "../src/client/BookingAvailabilityNotice";
+} from "../src/client/features/bookings/booking-availability";
+import { BookingAvailabilityNotice } from "../src/client/features/bookings/BookingAvailabilityNotice";
 
 const now = Date.UTC(2026, 8, 14, 2); // Still September 13 in New York.
 const input: ScheduleInput = {

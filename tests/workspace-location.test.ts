@@ -7,7 +7,7 @@ import {
   workspaceHref,
   workspaceSection,
   type WorkspaceSection,
-} from "../src/client/workspace-location";
+} from "../src/client/lib/navigation/workspace-location";
 
 afterEach(() => vi.unstubAllGlobals());
 const readPath = (path: string) => {

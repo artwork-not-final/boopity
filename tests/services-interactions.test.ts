@@ -2,9 +2,9 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Workspace } from "../src/client/Workspace";
-import { navigateLocal } from "../src/client/workspace-location";
-import { SEARCH_DELAY_MS } from "../src/client/live-search";
+import { Workspace } from "../src/client/app/Workspace";
+import { navigateLocal } from "../src/client/lib/navigation/workspace-location";
+import { SEARCH_DELAY_MS } from "../src/client/lib/live-search";
 
 const original = {
   id: "walking",

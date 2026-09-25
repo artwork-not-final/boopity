@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { timeZoneLabel } from "../src/client/time-zone-label";
+import { timeZoneLabel } from "../src/client/lib/format/time-zone-label";
 
 describe("booking time zone labels", () => {
   it("uses the same readable name in standard and daylight saving time", () => {

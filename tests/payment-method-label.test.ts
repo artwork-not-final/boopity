@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { paymentMethodLabel } from "../src/client/payment-method-label";
+import { paymentMethodLabel } from "../src/client/features/payments/payment-method-label";
 import { manualMethods, manualPaymentSchema } from "../src/shared/payments";
 
 const methods = [
@@ -54,7 +54,7 @@ describe("manual payment method labels", () => {
     const source = ["BookingPayments", "PaymentAttempt"]
       .map((file) =>
         readFileSync(
-          new URL(`../src/client/payments/${file}.tsx`, import.meta.url),
+          new URL(`../src/client/features/payments/${file}.tsx`, import.meta.url),
           "utf8",
         ),
       )

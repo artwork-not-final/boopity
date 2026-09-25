@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compactPage } from "../src/client/compact-page";
+import { compactPage } from "../src/client/lib/compact-page";
 
 describe("compact presentation pagination", () => {
   it("keeps loading undefined", () =>

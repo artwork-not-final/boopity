@@ -7,7 +7,7 @@ import {
   setupHelpPath,
   restoredSetupStep,
   type SetupStep,
-} from "../src/client/setup-flow";
+} from "../src/client/lib/navigation/setup-flow";
 import { defaultBranding } from "../src/shared/branding";
 describe("setup page URLs", () => {
   it.each<[SetupStep, string]>([

@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { CalendarGrid } from "../src/client/BookingCalendar";
+import { CalendarGrid } from "../src/client/features/bookings/BookingCalendar";
 import {
   addCalendarDays,
   bookingStatus,
@@ -12,7 +12,7 @@ import {
   loadCalendarBookings,
   moveCalendar,
   type CalendarBooking,
-} from "../src/client/booking-calendar";
+} from "../src/client/features/bookings/booking-calendar";
 
 const booking: CalendarBooking = {
   id: "test-booking",

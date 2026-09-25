@@ -2,7 +2,7 @@ import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import { Choice } from "../src/client/Choice";
+import { Choice } from "../src/client/components/forms/Choice";
 
 const options = [
   { value: "dog", label: "Dog" },
@@ -126,21 +126,21 @@ describe("shared styled choices", () => {
 
   it("routes the active self-hosted pages through the shared control", () => {
     for (const file of [
-      "settings/Appearance",
-      "settings/EmailSettings",
-      "setup/SetupNavigation",
-      "Workspace",
-      "clients/Clients",
-      "clients/NewPetForm",
-      "Pagination",
-      "payments/BookingPayments",
-      "payments/PaymentRecords",
+      "features/settings/Appearance",
+      "features/settings/EmailSettings",
+      "features/setup/SetupNavigation",
+      "app/Workspace",
+      "features/clients/Clients",
+      "features/clients/NewPetForm",
+      "components/forms/PagedSelect",
+      "features/payments/BookingPayments",
+      "features/payments/PaymentRecords",
     ]) {
       const source = readFileSync(
         new URL(`../src/client/${file}.tsx`, import.meta.url),
         "utf8",
       );
-      expect(source).toMatch(/import \{ Choice \} from "\.\.?\/Choice"/);
+      expect(source).toMatch(/import \{ Choice \} from "[^"\n]*\/Choice"/);
       expect(source).not.toContain("<select");
     }
   });

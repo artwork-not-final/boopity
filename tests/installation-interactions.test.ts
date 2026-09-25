@@ -9,13 +9,13 @@ import {
 } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { SelfHostedApp } from "../src/client/SelfHostedApp";
-import { Appearance } from "../src/client/settings/Appearance";
-import { EmailSettings } from "../src/client/settings/EmailSettings";
-import { GoogleSettings } from "../src/client/settings/GoogleSettings";
-import { Identity } from "../src/client/setup/Identity";
-import { Login } from "../src/client/auth/Login";
-import { GuidedClaim } from "../src/client/setup/GuidedClaim";
+import { App } from "../src/client/app/App";
+import { Appearance } from "../src/client/features/settings/Appearance";
+import { EmailSettings } from "../src/client/features/settings/EmailSettings";
+import { GoogleSettings } from "../src/client/features/settings/GoogleSettings";
+import { Identity } from "../src/client/features/setup/Identity";
+import { Login } from "../src/client/features/auth/Login";
+import { GuidedClaim } from "../src/client/features/setup/GuidedClaim";
 import type {
   PaymentSettingsData,
   PublicInfo,
@@ -23,11 +23,11 @@ import type {
 } from "../src/shared/api-responses";
 import { defaultBranding } from "../src/shared/branding";
 import { emptyProviders } from "../src/shared/setup";
-import { saveAndRefresh } from "../src/client/setup-flow";
+import { saveAndRefresh } from "../src/client/lib/navigation/setup-flow";
 
 // Keep the actual installation coordinator/forms; workspace data is outside
 // this boundary. No requests may reach a server or an email/payment provider.
-vi.mock("../src/client/Workspace", () => ({
+vi.mock("../src/client/app/Workspace", () => ({
   Workspace: ({ settings }: { settings?: { content: ReactNode } }) =>
     settings?.content ?? createElement("p", null, "Test workspace"),
 }));
@@ -197,7 +197,7 @@ it("clears a background connection error on recovery without changing the curren
   window.history.replaceState(null, "", "/app/rates");
   installation(state(true), true);
   const healthy = respond;
-  await mount(createElement(SelfHostedApp));
+  await mount(createElement(App));
   respond = () => {
     throw new TypeError("Failed to fetch");
   };
@@ -221,7 +221,7 @@ it("lets the user retry a connection without replaying a write", async () => {
   window.history.replaceState(null, "", "/app/rates");
   installation(state(true), true);
   const healthy = respond;
-  await mount(createElement(SelfHostedApp));
+  await mount(createElement(App));
   respond = () => {
     throw new TypeError("Load failed");
   };
@@ -247,7 +247,7 @@ it("does not clear form errors or unsaved input during a successful background r
     url === "/api/setup/identity"
       ? Response.json({ error: "Please check your details." }, { status: 400 })
       : healthy(url, init);
-  await mount(createElement(SelfHostedApp));
+  await mount(createElement(App));
   await enter("Your name", "Unsaved sitter name");
   await submit();
   expect(container.textContent).toContain("Please check your details.");
@@ -769,7 +769,7 @@ it.each([false, true])(
     window.history.replaceState(null, "", "/setup");
     window.localStorage.setItem("boopity.setup.step", "email");
     installation(null, false, started);
-    await mount(createElement(SelfHostedApp));
+    await mount(createElement(App));
     expect(container.querySelector("h1")?.textContent).toBe(
       started ? "Continue setting up Boopity" : "Set up Boopity",
     );
@@ -816,7 +816,7 @@ it("scrubs a private setup link before bootstrap requests and never unlocks with
     if (url === "/api/setup/unlock") return Response.json({ ok: true });
     return handler(url, init);
   };
-  await mount(createElement(SelfHostedApp));
+  await mount(createElement(App));
   expect(container.textContent).not.toContain(token);
   expect(
     requests.every(({ init }) => !init?.method || init.method === "GET"),
@@ -839,7 +839,7 @@ it("keeps setup password help and validation feedback in the centered layout", a
     url === "/api/setup/password/unlock"
       ? Response.json({ error: "Check your setup password." }, { status: 401 })
       : handler(url, init);
-  await mount(createElement(SelfHostedApp));
+  await mount(createElement(App));
   await enter("Setup password", "synthetic-incorrect-password");
   await submit();
   const alert = container.querySelector('[role="alert"]');
@@ -879,7 +879,7 @@ it.each(["/setup/password-help", "/setup/hosting-help"])(
   async (path) => {
     window.history.replaceState(null, "", path);
     installation(null);
-    await mount(createElement(SelfHostedApp));
+    await mount(createElement(App));
     expect(window.location.pathname).toBe(path);
     expect(container.querySelector("form")).toBeNull();
     expect(container.textContent).not.toMatch(
@@ -916,7 +916,7 @@ it("resumes with an explicitly requested email code when the server allows recov
     if (url === "/api/setup/status" && unlocked) return Response.json(state());
     return handler(url, init);
   };
-  await mount(createElement(SelfHostedApp));
+  await mount(createElement(App));
   expect(container.textContent).not.toContain("Help me find my setup password");
   await click("Email me a sign-in code");
   expect(window.location.pathname).toBe("/setup/password-help");
@@ -950,13 +950,13 @@ it("resumes with an explicitly requested email code when the server allows recov
 it("keeps direct settings URLs and browser navigation outside the setup wizard", async () => {
   window.history.replaceState(null, "", "/app/settings/email");
   installation(state(true), true);
-  const root = await mount(createElement(SelfHostedApp));
+  const root = await mount(createElement(App));
   expect(window.location.pathname).toBe("/app/settings/email");
   expect(container.querySelector("h1")?.textContent).toBe("Settings");
   expect(container.textContent).toContain("Test email delivery");
   expect(container.textContent).not.toContain("Save and continue");
   await enter("Resend API key", "synthetic-unsaved-credential");
-  await act(async () => root.render(createElement(SelfHostedApp)));
+  await act(async () => root.render(createElement(App)));
   expect(input("Resend API key").value).toBe("synthetic-unsaved-credential");
   await click("Google sign-in");
   expect(window.location.pathname).toBe("/app/settings/google");
@@ -981,7 +981,7 @@ it("advances the mounted wizard after saving, keeps Back URLs and focuses the st
     url === "/api/setup/identity"
       ? Response.json({ ok: true })
       : handler(url, init);
-  await mount(createElement(SelfHostedApp));
+  await mount(createElement(App));
   expect(container.querySelector("h1")?.textContent).toBe("Your account");
   expect(container.querySelector("main")?.className).not.toContain(
     "justify-center",
@@ -1003,7 +1003,7 @@ it("does not let recovery access finish setup even with every readiness check sa
   current.actor = "recovery";
   window.history.replaceState(null, "", "/setup/recovery/review");
   installation(current, true);
-  await mount(createElement(SelfHostedApp));
+  await mount(createElement(App));
   expect(container.textContent).toContain("Recovery access");
   expect(button("Finish setup").disabled).toBe(true);
   expect(container.textContent).toContain(
@@ -1054,7 +1054,7 @@ it("keeps payment settings recovery inside the settings shell without replaying 
       return Response.json({ ok: true });
     return handler(url, init);
   };
-  await mount(createElement(SelfHostedApp));
+  await mount(createElement(App));
   expect(container.querySelector("h1")?.textContent).toBe("Settings");
   await enter("Stripe test restricted API key", "synthetic-new-credential");
   await click("Save Stripe credentials");

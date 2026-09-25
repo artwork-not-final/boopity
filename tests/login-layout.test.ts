@@ -2,11 +2,11 @@ import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import { Login } from "../src/client/auth/Login";
-import { InvitationWelcome } from "../src/client/InvitationWelcome";
-import { SetupPasswordLogin } from "../src/client/setup/SetupPasswordLogin";
+import { Login } from "../src/client/features/auth/Login";
+import { InvitationWelcome } from "../src/client/features/auth/InvitationWelcome";
+import { SetupPasswordLogin } from "../src/client/features/setup/SetupPasswordLogin";
 import { defaultBranding } from "../src/shared/branding";
-import { BrandLayout } from "../src/client/BrandLayout";
+import { BrandLayout } from "../src/client/app/BrandLayout";
 
 const info = {
   branding: { ...defaultBranding, businessName: "Maple Paws" },
@@ -156,7 +156,7 @@ describe("standalone sign-in layout", () => {
 
   it("uses the same centered page shell and footer for sign-in, invitations and setup entry", () => {
     const source = readFileSync(
-      new URL("../src/client/SelfHostedApp.tsx", import.meta.url),
+      new URL("../src/client/app/App.tsx", import.meta.url),
       "utf8",
     ).replace(/\s+/g, " ");
     expect(source).toContain(

@@ -6,7 +6,7 @@ import {
   CancellationReview,
   CancellationEmpty,
   type Cancellation,
-} from "../src/client/Cancellations";
+} from "../src/client/features/bookings/Cancellations";
 
 const item: Cancellation = {
   bookingId: "booking-a",

@@ -2,7 +2,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { SkipLink } from "../src/client/SkipLink";
+import { SkipLink } from "../src/client/components/navigation/SkipLink";
 
 let root: Root;
 let container: HTMLDivElement;

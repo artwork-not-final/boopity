@@ -25,12 +25,12 @@ const paymentCopy = () =>
     "PaymentActivityList",
     "PaymentActivityTotals",
   ]
-    .map((file) => read(`payments/${file}`))
+    .map((file) => read(`features/payments/${file}`))
     .join(" ");
 
 describe("concise self-hosted copy", () => {
   it("explains which booking fields each role can search", () => {
-    const copy = read("Bookings");
+    const copy = read("features/bookings/Bookings");
     expect(copy).toContain("Search by client, pet, or service");
     expect(copy).toContain("Search by pet or service");
     expect(copy).not.toContain('label="Find a booking"');
@@ -38,33 +38,33 @@ describe("concise self-hosted copy", () => {
   it("removes promotional payment headings and setup narration", () => {
     const copy =
       [
-        "SelfHostedApp",
-        "InstallationFields",
-        "setup/SetupAccess",
-        "setup/SetupWizard",
-        "setup/SetupNavigation",
-        "setup/HostingSetupHelp",
-        "setup/GuidedClaim",
-        "setup/Unlock",
-        "setup/Identity",
-        "setup/SetupPasswordLogin",
-        "setup/SetupPasswordHelp",
-        "auth/Login",
-        "settings/Appearance",
-        "settings/EmailSettings",
-        "settings/GoogleSettings",
-        "settings/SettingsPage",
+        "app/App",
+        "components/feedback/Notice",
+        "features/setup/SetupAccess",
+        "features/setup/SetupWizard",
+        "features/setup/SetupNavigation",
+        "features/setup/HostingSetupHelp",
+        "features/setup/GuidedClaim",
+        "features/setup/Unlock",
+        "features/setup/Identity",
+        "features/setup/SetupPasswordLogin",
+        "features/setup/SetupPasswordHelp",
+        "features/auth/Login",
+        "features/settings/Appearance",
+        "features/settings/EmailSettings",
+        "features/settings/GoogleSettings",
+        "features/settings/SettingsPage",
       ]
         .map(read)
         .join(" ") +
       paymentCopy() +
-      read("Workspace") +
-      read("Bookings") +
-      read("NewBooking") +
-      read("Rules") +
-      read("clients/Clients") +
-      read("clients/ClientPortalAccess") +
-      read("clients/PetCareForm");
+      read("app/Workspace") +
+      read("features/bookings/Bookings") +
+      read("features/bookings/NewBooking") +
+      read("features/rules/Rules") +
+      read("features/clients/Clients") +
+      read("features/clients/ClientPortalAccess") +
+      read("features/clients/PetCareForm");
     for (const removed of [
       "Payments, clearly recorded.",
       "Your business. Your payments.",
@@ -92,11 +92,11 @@ describe("concise self-hosted copy", () => {
   });
   it("keeps access, privacy and cancellation guidance at the relevant controls", () => {
     const workspace =
-      read("Workspace") +
-      read("Rules") +
-      read("BookingDetail") +
-      read("clients/ClientPortalAccess") +
-      read("clients/PetCareForm");
+      read("app/Workspace") +
+      read("features/rules/Rules") +
+      read("features/bookings/BookingDetail") +
+      read("features/clients/ClientPortalAccess") +
+      read("features/clients/PetCareForm");
     for (const required of [
       "Client cancellation deadline:",
       "Cancelling does not issue a refund.",
@@ -110,9 +110,11 @@ describe("concise self-hosted copy", () => {
       "Turning this off signs clients out.",
     ])
       expect(workspace).toContain(required);
-    expect(read("setup/Unlock")).toContain("expires after 30 minutes.");
-    expect(read("setup/SetupWizard")).toContain("Recovery access");
-    expect(read("setup/Identity")).toContain(
+    expect(read("features/setup/Unlock")).toContain(
+      "expires after 30 minutes.",
+    );
+    expect(read("features/setup/SetupWizard")).toContain("Recovery access");
+    expect(read("features/setup/Identity")).toContain(
       "You’ll verify this email to finish setting up your account.",
     );
   });

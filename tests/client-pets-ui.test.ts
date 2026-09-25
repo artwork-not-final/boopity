@@ -1,11 +1,11 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { ClientForm } from "../src/client/clients/ClientForm";
-import { NewPetForm } from "../src/client/clients/NewPetForm";
-import { PetCards } from "../src/client/clients/PetCards";
-import { PetCareForm } from "../src/client/clients/PetCareForm";
-import { speciesLabel } from "../src/client/clients/species-label";
+import { ClientForm } from "../src/client/features/clients/ClientForm";
+import { NewPetForm } from "../src/client/features/clients/NewPetForm";
+import { PetCards } from "../src/client/features/clients/PetCards";
+import { PetCareForm } from "../src/client/features/clients/PetCareForm";
+import { speciesLabel } from "../src/client/features/clients/species-label";
 
 const actions = { busy: false, run: async () => {}, close: () => {} };
 const client = {

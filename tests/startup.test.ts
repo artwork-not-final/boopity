@@ -9,7 +9,7 @@ import { createNodeApp } from "../platform/node/app";
 import { digest } from "../platform/node/control";
 import { announceStartup, canOpenSetupBrowser } from "../server/startup";
 import { readSetupLink } from "../src/shared/setup-link";
-import { Unlock } from "../src/client/setup/Unlock";
+import { Unlock } from "../src/client/features/setup/Unlock";
 
 const directories: string[] = [];
 const instances = new Set<ReturnType<typeof createRuntime>>();

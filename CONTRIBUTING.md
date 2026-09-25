@@ -89,23 +89,23 @@ permission to commit private files; run `npm run release:audit` before sharing a
 
 ## Scope and review
 
-Keep workspace features in their own modules. `src/client/services/` owns the
+Keep workspace features in their own modules. `src/client/features/services/` owns the
 service list, editor, availability controls, and service types.
-`src/client/clients/` owns client and pet lists/editors, invitation controls,
+`src/client/features/clients/` owns client and pet lists/editors, invitation controls,
 the read-only household pet page, and their types. Invitation state remains
 client-scoped in the Clients coordinator; detail components keep their existing
 keys and mounting rules.
 
-`SelfHostedApp` coordinates installation/session refresh and top-level navigation.
-`src/client/setup/` owns installer access and the setup wizard; `auth/Login` owns
-email-code and Google sign-in; `src/client/settings/` owns the settings page and
+`App` coordinates installation/session refresh and top-level navigation.
+`src/client/features/setup/` owns installer access and the setup wizard; `auth/Login` owns
+email-code and Google sign-in; `src/client/features/settings/` owns the settings page and
 business/email/Google forms shared with setup. These modules must not import
-`SelfHostedApp`. Keep the installation mutation runner's save → refresh → optional
+`App`. Keep the installation mutation runner's save → refresh → optional
 continue ordering, and preserve versioned form keys. `InstallationFields` and
 `installation-api` retain the setup/settings field accessibility and JSON/file
 request behavior.
 
-`src/client/payments/` owns booking payment controls, business-wide activity,
+`src/client/features/payments/` owns booking payment controls, business-wide activity,
 refund/correction controls, and payment settings. Keep draft and retry-key state
 in the coordinators that own it; list/history components receive data and actions.
 Settings retain their own recovery and retry handling. A retry after a failed read

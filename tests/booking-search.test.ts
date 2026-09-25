@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bookingSearchTarget } from "../src/client/booking-search";
+import { bookingSearchTarget } from "../src/client/features/bookings/booking-search";
 
 describe("finding a booking across dates", () => {
   it.each(["week", "month", "list"] as const)(

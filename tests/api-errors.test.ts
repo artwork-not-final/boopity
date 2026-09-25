@@ -2,8 +2,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
-import { workspaceApi, WorkspaceError } from "../src/client/workspace-api";
-import { decodeResponse } from "../src/client/api-response";
+import {
+  workspaceApi,
+  WorkspaceError,
+} from "../src/client/lib/http/workspace-api";
+import { decodeResponse } from "../src/client/lib/http/api-response";
 import { handleRequestError } from "../platform/http-errors";
 import { parseInput, readJson } from "../platform/http-input";
 import { createNodeApp } from "../platform/node/app";

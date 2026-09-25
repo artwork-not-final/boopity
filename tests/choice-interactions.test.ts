@@ -2,7 +2,7 @@
 import { act, createElement, useState, type ComponentProps } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { Choice } from "../src/client/Choice";
+import { Choice } from "../src/client/components/forms/Choice";
 
 const options = [
   { value: "dog", label: "Dog" },

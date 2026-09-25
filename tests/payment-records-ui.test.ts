@@ -1,10 +1,10 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { PaymentActivityList } from "../src/client/payments/PaymentActivityList";
-import { PaymentActivityTotals } from "../src/client/payments/PaymentActivityTotals";
-import { PaymentRecords } from "../src/client/payments/PaymentRecords";
-import { paymentRecordLabel } from "../src/client/payments/payment-format";
+import { PaymentActivityList } from "../src/client/features/payments/PaymentActivityList";
+import { PaymentActivityTotals } from "../src/client/features/payments/PaymentActivityTotals";
+import { PaymentRecords } from "../src/client/features/payments/PaymentRecords";
+import { paymentRecordLabel } from "../src/client/features/payments/payment-format";
 import type { PaymentRecord } from "../src/shared/payment-records";
 
 const record: PaymentRecord = {

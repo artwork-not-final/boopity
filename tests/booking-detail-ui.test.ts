@@ -5,8 +5,8 @@ import {
   BookingDetailHeader,
   BookingOverview,
   BookingTimeline,
-} from "../src/client/BookingDetail";
-import type { Booking } from "../src/client/booking-types";
+} from "../src/client/features/bookings/BookingDetail";
+import type { Booking } from "../src/client/features/bookings/types";
 
 const booking: Booking = {
   id: "visit",

@@ -1,9 +1,9 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { ServiceAvailability } from "../src/client/services/ServiceAvailability";
-import { ServiceForm } from "../src/client/services/ServiceForm";
-import { ServiceList } from "../src/client/services/ServiceList";
+import { ServiceAvailability } from "../src/client/features/services/ServiceAvailability";
+import { ServiceForm } from "../src/client/features/services/ServiceForm";
+import { ServiceList } from "../src/client/features/services/ServiceList";
 
 const service = {
   id: "test-service",

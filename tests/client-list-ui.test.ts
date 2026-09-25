@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { ClientList } from "../src/client/clients/ClientList";
+import { ClientList } from "../src/client/features/clients/ClientList";
 
 const client = {
   id: "client-test",

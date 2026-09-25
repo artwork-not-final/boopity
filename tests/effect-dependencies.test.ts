@@ -2,14 +2,14 @@
 import { act, createElement, useEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { FirstBookingGuide } from "../src/client/FirstBookingChecklist";
-import { BookingPayments } from "../src/client/payments/BookingPayments";
-import { BookingCalendar } from "../src/client/BookingCalendar";
+import { FirstBookingGuide } from "../src/client/features/bookings/FirstBookingChecklist";
+import { BookingPayments } from "../src/client/features/payments/BookingPayments";
+import { BookingCalendar } from "../src/client/features/bookings/BookingCalendar";
 import {
   navigateLocal,
   useWorkspaceLocation,
   type WorkspaceLocation,
-} from "../src/client/workspace-location";
+} from "../src/client/lib/navigation/workspace-location";
 
 const roots: Root[] = [];
 beforeEach(() => {

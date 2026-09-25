@@ -2,7 +2,7 @@
 import { StrictMode, act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { PaymentSettings } from "../src/client/payments/PaymentSettings";
+import { PaymentSettings } from "../src/client/features/payments/PaymentSettings";
 import type { PaymentSettingsData } from "../src/shared/api-responses";
 
 const roots: Root[] = [];

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   hasWorkspaceEditor,
   watchWorkspaceResume,
-} from "../src/client/workspace-refresh";
+} from "../src/client/lib/navigation/workspace-refresh";
 
 const disposals: Array<() => void> = [];
 afterEach(() => {

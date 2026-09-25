@@ -5,7 +5,7 @@ import {
   FirstBookingChecklist,
   checklistDismissed,
   dismissChecklist,
-} from "../src/client/FirstBookingChecklist";
+} from "../src/client/features/bookings/FirstBookingChecklist";
 import type { FirstBookingProgress } from "../src/shared/first-booking";
 
 afterEach(() => vi.unstubAllGlobals());

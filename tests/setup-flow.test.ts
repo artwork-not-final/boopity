@@ -14,18 +14,18 @@ import {
   installerAccess,
   setupAccessView,
   type SetupEntryMode,
-} from "../src/client/setup-flow";
-import { Appearance } from "../src/client/settings/Appearance";
-import { EmailSettings } from "../src/client/settings/EmailSettings";
-import { GoogleSettings } from "../src/client/settings/GoogleSettings";
-import { Identity } from "../src/client/setup/Identity";
-import { Login } from "../src/client/auth/Login";
-import { Unlock } from "../src/client/setup/Unlock";
-import { SetupPasswordLogin } from "../src/client/setup/SetupPasswordLogin";
-import { SetupPasswordHelp } from "../src/client/setup/SetupPasswordHelp";
-import { SetupAccess } from "../src/client/setup/SetupAccess";
-import { HostingSetupHelp } from "../src/client/setup/HostingSetupHelp";
-import { SetupNavigation } from "../src/client/setup/SetupNavigation";
+} from "../src/client/lib/navigation/setup-flow";
+import { Appearance } from "../src/client/features/settings/Appearance";
+import { EmailSettings } from "../src/client/features/settings/EmailSettings";
+import { GoogleSettings } from "../src/client/features/settings/GoogleSettings";
+import { Identity } from "../src/client/features/setup/Identity";
+import { Login } from "../src/client/features/auth/Login";
+import { Unlock } from "../src/client/features/setup/Unlock";
+import { SetupPasswordLogin } from "../src/client/features/setup/SetupPasswordLogin";
+import { SetupPasswordHelp } from "../src/client/features/setup/SetupPasswordHelp";
+import { SetupAccess } from "../src/client/features/setup/SetupAccess";
+import { HostingSetupHelp } from "../src/client/features/setup/HostingSetupHelp";
+import { SetupNavigation } from "../src/client/features/setup/SetupNavigation";
 import type { SetupState } from "../src/shared/api-responses";
 import { defaultBranding } from "../src/shared/branding";
 import { emptyProviders } from "../src/shared/setup";
@@ -364,21 +364,21 @@ describe("one sitter-facing setup path", () => {
       "utf8",
     );
     const source = [
-      "SelfHostedApp",
-      "setup/SetupAccess",
-      "setup/SetupWizard",
-      "setup/SetupNavigation",
-      "setup/HostingSetupHelp",
-      "setup/GuidedClaim",
-      "setup/Unlock",
-      "setup/Identity",
-      "setup/SetupPasswordLogin",
-      "setup/SetupPasswordHelp",
-      "auth/Login",
-      "settings/Appearance",
-      "settings/EmailSettings",
-      "settings/GoogleSettings",
-      "settings/SettingsPage",
+      "app/App",
+      "features/setup/SetupAccess",
+      "features/setup/SetupWizard",
+      "features/setup/SetupNavigation",
+      "features/setup/HostingSetupHelp",
+      "features/setup/GuidedClaim",
+      "features/setup/Unlock",
+      "features/setup/Identity",
+      "features/setup/SetupPasswordLogin",
+      "features/setup/SetupPasswordHelp",
+      "features/auth/Login",
+      "features/settings/Appearance",
+      "features/settings/EmailSettings",
+      "features/settings/GoogleSettings",
+      "features/settings/SettingsPage",
     ]
       .map(readClient)
       .join("\n");
@@ -407,19 +407,21 @@ describe("setup identity and headings", () => {
   });
   it("uses server-confirmed branding and gives the wizard only its step heading", () => {
     const source = readFileSync(
-      new URL("../src/client/SelfHostedApp.tsx", import.meta.url),
+      new URL("../src/client/app/App.tsx", import.meta.url),
       "utf8",
     );
     expect(source).toContain("savedSiteName(info?.branding.businessName)");
     expect(source).not.toContain("savedSiteName(active.businessName)");
     expect(source).toContain("!inWorkspace && !setup");
-    expect(readClient("setup/SetupWizard")).toMatch(
+    expect(readClient("features/setup/SetupWizard")).toMatch(
       /<h1\s+ref=\{wizardHeading\}/,
     );
     expect(source).toContain("wizardHeading={wizardHeading}");
     expect(source).not.toContain("Set up your business");
     expect(source).toContain("Powered by");
-    expect(readClient("setup/SetupWizard")).toContain("Recovery access");
+    expect(readClient("features/setup/SetupWizard")).toContain(
+      "Recovery access",
+    );
   });
 });
 
@@ -871,12 +873,12 @@ describe("wizard navigation", () => {
   });
   it("wires completion only to wizard forms and retains explicit verification and Back", () => {
     const source = readFileSync(
-      new URL("../src/client/SelfHostedApp.tsx", import.meta.url),
+      new URL("../src/client/app/App.tsx", import.meta.url),
       "utf8",
     );
-    const wizard = readClient("setup/SetupWizard");
+    const wizard = readClient("features/setup/SetupWizard");
     expect(wizard.match(/onContinue=\{continueSetup\}/g)).toHaveLength(4);
-    const settings = readClient("settings/SettingsPage");
+    const settings = readClient("features/settings/SettingsPage");
     expect(settings).not.toContain("onContinue=");
     expect(source).toContain("saveAndRefresh(run, refresh, afterSave)");
     expect(wizard).toContain("changeSetupStep(previousStep)");
@@ -884,7 +886,7 @@ describe("wizard navigation", () => {
     expect(wizard).toContain(
       "setup.owner?.verified && setup.pending.mailVerifiedAt",
     );
-    expect(readClient("auth/Login")).toContain("Send sign-in code");
+    expect(readClient("features/auth/Login")).toContain("Send sign-in code");
     expect(wizard).toContain("ref={wizardHeading}");
   });
 });

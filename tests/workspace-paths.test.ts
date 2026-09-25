@@ -3,8 +3,8 @@ import {
   readWorkspaceLocation,
   workspaceHref,
   type WorkspaceLocation,
-} from "../src/client/workspace-location";
-import { ownerDestination } from "../src/client/SettingsLayout";
+} from "../src/client/lib/navigation/workspace-location";
+import { ownerDestination } from "../src/client/lib/navigation/settings-location";
 const read = (path: string) => {
   const url = new URL(path, "https://sitter.test");
   return readWorkspaceLocation(url.pathname, url.search);

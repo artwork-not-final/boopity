@@ -10,7 +10,7 @@ describe("self-hosted repository root", () => {
     expect(pkg.scripts.dev).toBe("npm run dev:self-hosted");
     expect(pkg.scripts.build).toBe("npm run build:self-hosted");
     expect(pkg.scripts.start).toContain("dist/server/index.mjs");
-    expect(read("src/client/main.tsx")).toContain("SelfHostedApp");
+    expect(read("src/client/main.tsx")).toContain("App");
     expect(read("Dockerfile")).toMatch(/^FROM node:24\./);
     expect(read("Dockerfile")).not.toMatch(/dotnet|mcr\.microsoft/);
   });

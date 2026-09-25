@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readSetupLink, setupLink } from "../src/shared/setup-link";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { EmailSetupGuide } from "../src/client/EmailSetupGuide";
+import { EmailSetupGuide } from "../src/client/features/settings/EmailSetupGuide";
 
 const token = "synthetic-setup-link-0000000000000000000000000";
 describe("private wizard entry", () => {

@@ -1,12 +1,12 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { PaymentAttempt } from "../src/client/payments/PaymentAttempt";
-import { PaymentBalanceSummary } from "../src/client/payments/PaymentBalanceSummary";
+import { PaymentAttempt } from "../src/client/features/payments/PaymentAttempt";
+import { PaymentBalanceSummary } from "../src/client/features/payments/PaymentBalanceSummary";
 import {
   accountingLabel,
   paymentStatusLabel,
-} from "../src/client/payments/payment-format";
+} from "../src/client/features/payments/payment-format";
 import type { PaymentBalance, PaymentView } from "../src/shared/payments";
 
 const balance: PaymentBalance = {

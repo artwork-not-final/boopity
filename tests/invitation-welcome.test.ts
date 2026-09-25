@@ -1,7 +1,7 @@
 import { Children, createElement, isValidElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { InvitationWelcome } from "../src/client/InvitationWelcome";
+import { InvitationWelcome } from "../src/client/features/auth/InvitationWelcome";
 import { Button } from "../src/client/components/ui/button";
 
 const defaults = {

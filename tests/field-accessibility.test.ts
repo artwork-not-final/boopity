@@ -2,8 +2,8 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { Field as InstallationField } from "../src/client/InstallationFields";
-import { Field as WorkspaceField } from "../src/client/WorkspaceFields";
+import { Field as InstallationField } from "../src/client/components/forms/Field";
+import { Field as WorkspaceField } from "../src/client/components/forms/Field";
 
 let root: Root;
 let container: HTMLDivElement;

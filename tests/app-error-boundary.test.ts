@@ -2,7 +2,7 @@
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
-import { AppErrorBoundary } from "../src/client/AppErrorBoundary";
+import { AppErrorBoundary } from "../src/client/app/AppErrorBoundary";
 
 it("offers a reload without showing private exception details", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
