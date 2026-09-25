@@ -5,7 +5,7 @@ import { cpus, totalmem } from "node:os";
 import { join } from "node:path";
 import { monitorEventLoopDelay } from "node:perf_hooks";
 import { serve } from "@hono/node-server";
-import { ingressRequest } from "../../platform/node/runtime";
+import { ingressRequest } from "../../server/runtime/runtime";
 import {
   largeListFixture,
   key,

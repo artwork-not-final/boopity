@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { paymentRecords } from "../../platform/payments/records";
+import { paymentRecords } from "../../server/payments/records";
 import { paymentRecordsQuery } from "../../src/shared/payment-records";
 import {
   alice,

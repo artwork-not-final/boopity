@@ -6,7 +6,7 @@ import {
   dateRange,
   nextRecurrenceDate,
   zonedDateTimeToEpoch,
-} from "../../worker/scheduling";
+} from "../../server/business/scheduling";
 
 describe("booking calendar helpers", () => {
   it("keeps calendar arithmetic stable across month ends and date ranges", () => {

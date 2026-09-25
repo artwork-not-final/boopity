@@ -46,8 +46,8 @@ use the unmodified lockfile and normal peer resolution.
 
 The [route inventory](API-ROUTES.md) lists the mounted Node API and access boundaries.
 Update it alongside route changes; `tests/tooling/api-route-surface.test.ts` detects drift.
-Paginated CRM reads live in `platform/business/lists.ts`; the routers in
-`worker/clients.ts`, `worker/pets.ts`, and `worker/services.ts` provide owner
+Paginated CRM reads live in `server/business/lists.ts`; the routers in
+`server/business/client-routes.ts`, `server/business/pet-routes.ts`, and `server/business/service-routes.ts` provide owner
 mutations and pet detail. Do not reintroduce duplicate list handlers or mount a
 deferred prototype to reuse one of its helpers.
 

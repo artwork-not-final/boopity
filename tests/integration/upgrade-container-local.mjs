@@ -4,6 +4,7 @@ import { randomUUID, createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import {
   closeSync,
+  existsSync,
   mkdtempSync,
   openSync,
   readFileSync,
@@ -46,11 +47,21 @@ const fixture = readFileSync(
 );
 async function bundle(source) {
   // Same test contract, actual runtime code from each supplied source snapshot.
+  // The first source preview predates the server/ folder consolidation. Resolve
+  // that one implementation import against its snapshot, not the candidate.
+  const contents = existsSync(
+    join(resolve(source), "server/runtime/runtime.ts"),
+  )
+    ? fixture
+    : fixture.replace(
+        'from "../../server/runtime/runtime"',
+        'from "../../platform/node/runtime"',
+      );
   const result = await build({
     stdin: {
-      contents: fixture,
+      contents,
       loader: "ts",
-      resolveDir: join(resolve(source), "tests"),
+      resolveDir: join(resolve(source), "tests", "support"),
       sourcefile: "upgrade-container-fixture.ts",
     },
     bundle: true,

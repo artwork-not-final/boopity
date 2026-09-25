@@ -134,6 +134,9 @@ async function mount(page: ReactElement) {
   const root = createRoot(container);
   roots.push(root);
   await act(async () => root.render(page));
+  // App pages are lazy boundaries; wait for the real module loading rather than
+  // asserting against the transient Suspense status or mocking pages away.
+  await act(async () => vi.dynamicImportSettled());
   return root;
 }
 function input(label: string) {

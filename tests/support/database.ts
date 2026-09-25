@@ -1,8 +1,8 @@
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { readFileSync, readdirSync } from "node:fs";
 import { Hono } from "hono";
-import type { AppEnv, Bindings } from "../../worker/env";
-import type { SqlDatabase } from "../../platform/contracts";
+import type { AppEnv, Bindings } from "../../server/core/env";
+import type { SqlDatabase } from "../../server/core/contracts";
 
 // Exercise production SQL and real rollback semantics without mocking query results.
 export function testDatabase() {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sanitizeFileName } from "../../worker/uploads";
+import { sanitizeFileName } from "../../server/experimental/uploads";
 
 describe("sanitizeFileName", () => {
   it("removes path traversal and unsafe characters", () => {

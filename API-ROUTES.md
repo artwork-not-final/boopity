@@ -1,7 +1,7 @@
 # Application route inventory
 
 This is the Node developer preview's application API, not a versioned third-party
-integration contract. `platform/node/app.ts` is the entry point. The route-surface
+integration contract. `server/runtime/app.ts` is the entry point. The route-surface
 test compares the registered methods/paths below with the application so this
 inventory must change deliberately when a route is added or removed.
 
@@ -14,7 +14,7 @@ inventory must change deliberately when a route is added or removed.
   depending on the step. After setup, the owner uses these endpoints for settings;
   their `/setup/` name does not reopen first-time ownership claims.
 - `/api/auth/*` below is a dispatcher, not unrestricted Better Auth access. Its
-  allowlist in `worker/auth-routes.ts` permits session lookup (GET/POST), sign-out,
+  allowlist in `server/auth/routes.ts` permits session lookup (GET/POST), sign-out,
   sending/verifying sign-in email codes, Google redirect sign-in and its callback.
   Password registration/reset, email changes and raw OTP lookup remain closed.
 - `/api/business/*` requires a verified, active owner or admitted client and a
@@ -156,9 +156,9 @@ object keys/files and all applied migrations are preserved. Enabling uploads nee
 an explicit feature review covering UI, routing, body limits, validation, private
 access and backup behavior. Do not attach an old router merely to expose a helper.
 
-The remaining `worker/` name is historical: auth, validation, email and CRM helpers
-are used by Node. Other modules are retained prototypes, not mounted endpoints.
-Removing the directory wholesale would remove supported code.
+Active authentication, CRM and runtime modules live under `server/`. Retained,
+unmounted prototypes live under `server/experimental/`; production entry points
+must not import them. Architecture tests enforce that separation.
 
 ## Browser pages
 

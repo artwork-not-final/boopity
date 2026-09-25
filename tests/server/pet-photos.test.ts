@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { AppEnv, Bindings } from "../../worker/env";
-import { petPhotosApi } from "../../worker/pet-photos";
+import type { AppEnv, Bindings } from "../../server/core/env";
+import { petPhotosApi } from "../../server/experimental/pet-photos";
 import { testDatabase } from "../support/database";
 
 describe("deferred pet-photo prototype (not mounted by Node)", () => {

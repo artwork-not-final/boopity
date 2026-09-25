@@ -1,17 +1,17 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createRuntime, loadConfig } from "../../platform/node/runtime";
-import { createNodeApp } from "../../platform/node/app";
-import { PaymentService } from "../../platform/payments/service";
+import { createRuntime, loadConfig } from "../../server/runtime/runtime";
+import { createNodeApp } from "../../server/runtime/app";
+import { PaymentService } from "../../server/payments/service";
 import type {
   CheckoutInput,
   CheckoutState,
   Integration,
   PaymentProvider,
   ProviderEvent,
-} from "../../platform/payments/provider";
-import type { PaymentActor } from "../../platform/payments/ledger";
+} from "../../server/payments/provider";
+import type { PaymentActor } from "../../server/payments/ledger";
 import type { PaymentMode } from "../../src/shared/payments";
 
 export const owner: PaymentActor = {

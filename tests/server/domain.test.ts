@@ -6,7 +6,7 @@ import {
   normalizePhone,
   petInputSchema,
   serviceInputSchema,
-} from "../../worker/domain";
+} from "../../server/business/domain";
 
 describe("client and pet validation", () => {
   it("normalizes North American and international phone input", () => {

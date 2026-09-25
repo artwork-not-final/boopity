@@ -63,7 +63,7 @@ describe("test type-checking gate", () => {
   it("checks types before verification tests and uses the supported Node major", () => {
     const pkg = JSON.parse(read("package.json"));
     expect(pkg.scripts.typecheck).toBe("tsc -b && tsc -p tsconfig.tests.json");
-    expect(pkg.scripts["verify:self-hosted"]).toMatch(
+    expect(pkg.scripts["verify"]).toMatch(
       /^npm run typecheck && npm run lint && npm run format:check && npm test &&/,
     );
     expect(read(".github/workflows/verify.yml")).toContain("npm run verify");

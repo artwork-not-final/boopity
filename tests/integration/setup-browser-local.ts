@@ -6,12 +6,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { serve } from "@hono/node-server";
 import sharp from "sharp";
-import { createNodeApp } from "../../platform/node/app";
+import { createNodeApp } from "../../server/runtime/app";
 import {
   createRuntime,
   ingressRequest,
   loadConfig,
-} from "../../platform/node/runtime";
+} from "../../server/runtime/runtime";
 
 const data = mkdtempSync(join(tmpdir(), "boopity-setup-browser-"));
 const messages: { code: string; recipient: string }[] = [];

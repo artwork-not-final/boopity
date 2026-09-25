@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { createRuntime, loadConfig } from "../../platform/node/runtime";
+import { createRuntime, loadConfig } from "../../server/runtime/runtime";
 import { emptyProviders } from "../../src/shared/setup";
 
 assert.equal(process.env.BOOPITY_CONTAINER_QA, "upgrade-disposable");

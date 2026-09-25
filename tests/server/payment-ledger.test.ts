@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createRuntime } from "../../platform/node/runtime";
-import { PaymentService } from "../../platform/payments/service";
+import { createRuntime } from "../../server/runtime/runtime";
+import { PaymentService } from "../../server/payments/service";
 import {
   alice,
   bob,

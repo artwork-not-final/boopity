@@ -7,8 +7,11 @@ const read = (path: string) =>
 describe("self-hosted repository root", () => {
   it("uses the self-hosted client and Node server by default", () => {
     const pkg = JSON.parse(read("package.json"));
-    expect(pkg.scripts.dev).toBe("npm run dev:self-hosted");
-    expect(pkg.scripts.build).toBe("npm run build:self-hosted");
+    expect(pkg.scripts.dev).toBe("vite");
+    expect(pkg.scripts.build).toContain("tsc -b && vite build");
+    expect(
+      Object.keys(pkg.scripts).some((name) => name.endsWith(":self-hosted")),
+    ).toBe(false);
     expect(pkg.scripts.start).toContain("dist/server/index.mjs");
     expect(read("src/client/main.tsx")).toContain("App");
     expect(read("Dockerfile")).toMatch(/^FROM node:24\./);

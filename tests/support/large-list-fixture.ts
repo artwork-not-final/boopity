@@ -2,8 +2,8 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createRuntime, loadConfig } from "../../platform/node/runtime";
-import { createNodeApp } from "../../platform/node/app";
+import { createRuntime, loadConfig } from "../../server/runtime/runtime";
+import { createNodeApp } from "../../server/runtime/app";
 
 export type ListSize = {
   clients: number;

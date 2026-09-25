@@ -7,13 +7,13 @@ import {
   WorkspaceError,
 } from "../../src/client/lib/http/workspace-api";
 import { decodeResponse } from "../../src/client/lib/http/api-response";
-import { handleRequestError } from "../../platform/http-errors";
-import { parseInput, readJson } from "../../platform/http-input";
-import { createNodeApp } from "../../platform/node/app";
-import { loadConfig } from "../../platform/node/runtime";
-import { clientsApi } from "../../worker/clients";
+import { handleRequestError } from "../../server/core/http-errors";
+import { parseInput, readJson } from "../../server/core/http-input";
+import { createNodeApp } from "../../server/runtime/app";
+import { loadConfig } from "../../server/runtime/runtime";
+import { clientsApi } from "../../server/business/client-routes";
 import { testApp, testDatabase } from "../support/database";
-import type { AppEnv, Bindings } from "../../worker/env";
+import type { AppEnv, Bindings } from "../../server/core/env";
 
 afterEach(() => {
   vi.restoreAllMocks();

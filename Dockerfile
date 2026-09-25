@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 COPY . .
-RUN npm run build:self-hosted
+RUN npm run build
 
 FROM node AS dependencies
 WORKDIR /app

@@ -9,17 +9,17 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Hono } from "hono";
-import { LocalDatabase } from "../../platform/node/sqlite";
-import { LocalFiles } from "../../platform/node/files";
+import { LocalDatabase } from "../../server/runtime/sqlite";
+import { LocalFiles } from "../../server/runtime/files";
 import {
   createRuntime,
   ingressRequest,
   loadConfig,
-} from "../../platform/node/runtime";
-import { createNodeApp, maintenanceTick } from "../../platform/node/app";
-import { databaseLimiter } from "../../platform/limiter";
-import { runLeasedJob } from "../../platform/jobs";
-import { readInstallation, saveBranding } from "../../platform/installation";
+} from "../../server/runtime/runtime";
+import { createNodeApp, maintenanceTick } from "../../server/runtime/app";
+import { databaseLimiter } from "../../server/core/limiter";
+import { runLeasedJob } from "../../server/core/jobs";
+import { readInstallation, saveBranding } from "../../server/core/installation";
 import {
   brandingSchema,
   brandingVariables,
@@ -28,16 +28,16 @@ import {
   readableForeground,
   themePresets,
 } from "../../src/shared/branding";
-import { createAuth } from "../../worker/auth";
-import { requireSitter } from "../../worker/auth-middleware";
-import { clientsApi } from "../../worker/clients";
-import { clientList } from "../../platform/business/lists";
+import { createAuth } from "../../server/auth/auth";
+import { requireSitter } from "../../server/experimental/auth-middleware";
+import { clientsApi } from "../../server/business/client-routes";
+import { clientList } from "../../server/business/lists";
 import {
   processNotifications,
   discoverBookingReminders,
-} from "../../worker/notifications";
-import { deliverEmail } from "../../worker/email";
-import type { AppEnv } from "../../worker/env";
+} from "../../server/experimental/notifications";
+import { deliverEmail } from "../../server/auth/email";
+import type { AppEnv } from "../../server/core/env";
 
 const directories: string[] = [];
 const closers: (() => void)[] = [];

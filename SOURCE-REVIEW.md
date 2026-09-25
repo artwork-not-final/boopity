@@ -17,7 +17,8 @@ export's snapshot manifest is not a live inventory of this changing checkout;
 release archives need their own exact file list, hashes and secret scan. Git tracks
 the source and the npm lockfile records package versions and integrity hashes.
 All 16 SQL migrations are preserved, not edited to remove legacy schema names.
-The `worker/` directory contains shared portable helpers, not a requirement to host
+Portable helpers and the Node runtime now live under `server/`; unmounted
+prototypes are isolated in `server/experimental/`. There is no requirement to host
 on Cloudflare. Application behavior is covered separately by the retained tests;
 this review does not claim a new line-by-line security audit of every handler.
 

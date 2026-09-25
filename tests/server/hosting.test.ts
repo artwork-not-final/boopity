@@ -13,8 +13,8 @@ import {
   loadConfig,
   createRuntime,
   ingressRequest,
-} from "../../platform/node/runtime";
-import { createNodeApp } from "../../platform/node/app";
+} from "../../server/runtime/runtime";
+import { createNodeApp } from "../../server/runtime/app";
 // @ts-expect-error Standalone dependency-free maintainer tooling.
 import { renderBlueprint } from "../../scripts/render-blueprint.mjs";
 

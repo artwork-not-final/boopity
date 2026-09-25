@@ -89,7 +89,42 @@ customizations. `components/forms/Field` is the single label/help association
 implementation; its presentation variants preserve existing form typography.
 Keep payment-specific amount validation in the payment feature.
 
-## Tests
+## Server and build tools
+
+```text
+server/
+  index.ts, manage.ts, healthcheck.ts   Production entry points
+  startup.ts                          Startup guidance and local browser opening
+  runtime/                            Node application, configuration and adapters
+  auth/                               Better Auth, email and endpoint policy
+  business/                           Client/pet/service routes and booking rules
+  payments/                           Provider-independent lifecycle and adapters
+  core/                               Host contracts, installation and HTTP utilities
+  db/                                 Database schema and auth adapter
+  experimental/                       Retained, unmounted prototypes; not runtime code
+drizzle/, db/self-hosted/              Immutable migration history, applied in order
+```
+
+Production entry points do not import `experimental`, including for types.
+Keeping a prototype's tests is not permission to mount it. The API route inventory
+remains the contract for the supported application. All persistence paths,
+configuration variable names, SQL and migration ordering stay stable during
+structural refactors.
+
+`vite.config.ts` builds the browser, `tsconfig.app.json` checks it, and
+`tsconfig.server.json` checks the Node server without Vite browser globals.
+`tsconfig.node.json` covers build-tool configuration. Use `npm run dev`,
+`npm run build`, and `npm run verify`; historical self-hosted script aliases are
+not needed. The installed asset directory remains `dist/self-hosted` to preserve
+the server/container artifact contract, independently of configuration filenames.
+
+Workspace, setup wizard and settings entry points load with React `lazy`.
+Declarations stay at module scope. Suspense shows a status inside the branded
+shell, and the existing error boundary provides an explicit reload if a chunk
+fails. Splitting code is not authorization: server guards are unchanged. Measure
+the production manifest and initial dependency closure before adding more splits.
+
+## Verification layout
 
 ```text
 tests/client/            Rendered UI, navigation and browser-state interactions

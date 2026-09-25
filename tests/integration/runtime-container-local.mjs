@@ -37,7 +37,7 @@ const fixture = await build({
     ),
     sourcefile: "runtime-container-fixture.ts",
     loader: "ts",
-    resolveDir: join(resolve(source), "tests"),
+    resolveDir: join(resolve(source), "tests", "support"),
   },
   bundle: true,
   platform: "node",

@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import sharp from "sharp";
-import { createNodeApp } from "../../platform/node/app";
-import { createRuntime, loadConfig } from "../../platform/node/runtime";
+import { createNodeApp } from "../../server/runtime/app";
+import { createRuntime, loadConfig } from "../../server/runtime/runtime";
 import { emptyProviders } from "../../src/shared/setup";
 
 assert.equal(process.env.BOOPITY_CONTAINER_QA, "runtime-disposable");

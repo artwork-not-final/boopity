@@ -3,12 +3,12 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
-import { createRuntime, loadConfig } from "../../platform/node/runtime";
-import { createNodeApp } from "../../platform/node/app";
+import { createRuntime, loadConfig } from "../../server/runtime/runtime";
+import { createNodeApp } from "../../server/runtime/app";
 import { emptyProviders } from "../../src/shared/setup";
 import { defaultBranding } from "../../src/shared/branding";
-import { createAuth } from "../../worker/auth";
-import { digest } from "../../platform/node/control";
+import { createAuth } from "../../server/auth/auth";
+import { digest } from "../../server/runtime/control";
 import { readSetupLink, setupLink } from "../../src/shared/setup-link";
 
 const origin = "http://localhost:3000",

@@ -14,11 +14,11 @@ import {
 import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { createRuntime, loadConfig } from "../../platform/node/runtime";
-import { LocalDatabase } from "../../platform/node/sqlite";
+import { createRuntime, loadConfig } from "../../server/runtime/runtime";
+import { LocalDatabase } from "../../server/runtime/sqlite";
 import { defaultBranding } from "../../src/shared/branding";
 import { emptyProviders } from "../../src/shared/setup";
-import { readInstallation, saveBranding } from "../../platform/installation";
+import { readInstallation, saveBranding } from "../../server/core/installation";
 
 const directories: string[] = [];
 const closers: (() => void)[] = [];

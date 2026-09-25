@@ -7,8 +7,8 @@ import {
   createRuntime,
   ingressRequest,
   loadConfig,
-} from "../../platform/node/runtime";
-import { createNodeApp } from "../../platform/node/app";
+} from "../../server/runtime/runtime";
+import { createNodeApp } from "../../server/runtime/app";
 
 const data = mkdtempSync(join(tmpdir(), "boopity-portal-browser-"));
 const config = loadConfig({

@@ -1,14 +1,12 @@
 import { useInstallationState } from "./useInstallationState";
 import { BrandLayout } from "./BrandLayout";
 import { useInstallationLifecycle } from "./useInstallationLifecycle";
-import { useEffect, useState, useRef } from "react";
+import { lazy, Suspense, useEffect, useState, useRef } from "react";
 
 import { Button } from "../components/ui/button";
 import { Notice } from "../components/feedback/Notice";
 import { Card, CardContent } from "../components/ui/card";
 import { defaultBranding, type Branding } from "../../shared/branding";
-
-import { Workspace } from "./Workspace";
 
 import { InvitationWelcome } from "../features/auth/InvitationWelcome";
 import {
@@ -35,11 +33,25 @@ import { api } from "../lib/http/installation-api";
 import { Login } from "../features/auth/Login";
 import { SetupAccess } from "../features/setup/SetupAccess";
 import { Unlock } from "../features/setup/Unlock";
-import { SetupWizard } from "../features/setup/SetupWizard";
 import { steps } from "../features/setup/steps";
-import { SettingsPage } from "../features/settings/SettingsPage";
 
 import "../styles/theme.css";
+
+// Keep the entry/sign-in experience independent of the workspace and editors.
+// Module-level declarations preserve component identity and mounted drafts.
+const Workspace = lazy(() =>
+  import("./Workspace").then((module) => ({ default: module.Workspace })),
+);
+const SetupWizard = lazy(() =>
+  import("../features/setup/SetupWizard").then((module) => ({
+    default: module.SetupWizard,
+  })),
+);
+const SettingsPage = lazy(() =>
+  import("../features/settings/SettingsPage").then((module) => ({
+    default: module.SettingsPage,
+  })),
+);
 
 export function App() {
   const [hasSetupLink, setHasSetupLink] = useState(
@@ -337,143 +349,151 @@ export function App() {
           {message}
         </p>
       )}
-      {!info ? (
-        <Card>
-          <CardContent className="py-6">
-            <p>Checking your installation…</p>
-            <Button
-              className="mt-4"
-              variant="outline"
-              disabled={busy}
-              onClick={() => void retryConnection()}
-            >
-              Retry connection
-            </Button>
-          </CardContent>
-        </Card>
-      ) : access?.role === "client" ? (
-        <Workspace
-          key={access.user.email}
-          session={access}
-          openSettings={() => {}}
-          recheckAccess={refresh}
-        />
-      ) : access?.role === "pending" ? (
-        <InvitationWelcome
-          businessName={siteName}
-          signedInEmail={access.user.email}
-          invitedEmail={invitedEmail}
-          busy={busy}
-          error={displayedError}
-          onAccept={() =>
-            void action(
-              () => api("/api/portal/invitation/accept", "POST", {}),
-              "Invitation accepted.",
-            )
-          }
-          onSwitchAccount={() => void logout()}
-        />
-      ) : !setup ? (
-        info.ownerClaimed && !recovery ? (
-          <Login
-            standalone
-            error={displayedError}
-            message={message}
-            suggestedEmail={invitedEmail ?? undefined}
-            info={info}
-            busy={busy}
-            run={action}
-            after={leaveInstallerAccess}
+      <Suspense
+        fallback={
+          <p role="status" className="py-6 text-sm text-muted-foreground">
+            Loading page…
+          </p>
+        }
+      >
+        {!info ? (
+          <Card>
+            <CardContent className="py-6">
+              <p>Checking your installation…</p>
+              <Button
+                className="mt-4"
+                variant="outline"
+                disabled={busy}
+                onClick={() => void retryConnection()}
+              >
+                Retry connection
+              </Button>
+            </CardContent>
+          </Card>
+        ) : access?.role === "client" ? (
+          <Workspace
+            key={access.user.email}
+            session={access}
+            openSettings={() => {}}
+            recheckAccess={refresh}
           />
-        ) : entry === null ? (
-          <Notice>Checking setup…</Notice>
-        ) : recovery ? (
-          <div className="grid max-w-xl gap-4">
-            <Unlock
-              recovery
+        ) : access?.role === "pending" ? (
+          <InvitationWelcome
+            businessName={siteName}
+            signedInEmail={access.user.email}
+            invitedEmail={invitedEmail}
+            busy={busy}
+            error={displayedError}
+            onAccept={() =>
+              void action(
+                () => api("/api/portal/invitation/accept", "POST", {}),
+                "Invitation accepted.",
+              )
+            }
+            onSwitchAccount={() => void logout()}
+          />
+        ) : !setup ? (
+          info.ownerClaimed && !recovery ? (
+            <Login
+              standalone
+              error={displayedError}
+              message={message}
+              suggestedEmail={invitedEmail ?? undefined}
+              info={info}
               busy={busy}
               run={action}
-              linkToken={null}
-              clearLink={() => {}}
+              after={leaveInstallerAccess}
             />
-            <Button
-              variant="ghost"
-              disabled={busy}
-              onClick={leaveInstallerAccess}
-            >
-              Back to sign-in
-            </Button>
-          </div>
+          ) : entry === null ? (
+            <Notice>Checking setup…</Notice>
+          ) : recovery ? (
+            <div className="grid max-w-xl gap-4">
+              <Unlock
+                recovery
+                busy={busy}
+                run={action}
+                linkToken={null}
+                clearLink={() => {}}
+              />
+              <Button
+                variant="ghost"
+                disabled={busy}
+                onClick={leaveInstallerAccess}
+              >
+                Back to sign-in
+              </Button>
+            </div>
+          ) : (
+            <SetupAccess
+              mode={entry}
+              started={setupStarted}
+              info={info}
+              busy={busy}
+              run={action}
+              refresh={refresh}
+              linkToken={setupLinkToken}
+              clearLink={() => {
+                setSetupLinkToken(null);
+                setHasSetupLink(false);
+              }}
+              installerCode={installerCode}
+              leaveInstaller={leaveInstallerAccess}
+              afterClaim={() => changeSetupStep("appearance")}
+              clearFeedback={() => {
+                setError("");
+                setMessage("");
+              }}
+            />
+          )
+        ) : ownerReady ? (
+          <Workspace
+            key={setup.owner!.email}
+            session={{
+              user: { name: setup.owner!.name, email: setup.owner!.email },
+              role: "owner",
+            }}
+            openSettings={() => navigate(settingsPath("appearance"))}
+            recheckAccess={refresh}
+            settings={
+              destination.section
+                ? {
+                    busy,
+                    leave: navigate,
+                    content: (
+                      <SettingsPage
+                        section={destination.section}
+                        setup={setup}
+                        info={info}
+                        busy={busy}
+                        action={action}
+                        navigate={navigate}
+                        message={message}
+                        error={displayedError}
+                        setPreview={setPreview}
+                        setError={setError}
+                      />
+                    ),
+                  }
+                : undefined
+            }
+          />
         ) : (
-          <SetupAccess
-            mode={entry}
-            started={setupStarted}
+          <SetupWizard
+            setup={setup}
             info={info}
             busy={busy}
-            run={action}
-            refresh={refresh}
-            linkToken={setupLinkToken}
-            clearLink={() => {
-              setSetupLinkToken(null);
-              setHasSetupLink(false);
-            }}
-            installerCode={installerCode}
-            leaveInstaller={leaveInstallerAccess}
-            afterClaim={() => changeSetupStep("appearance")}
-            clearFeedback={() => {
-              setError("");
-              setMessage("");
-            }}
+            action={action}
+            step={step}
+            visibleSteps={visibleSteps}
+            changeSetupStep={changeSetupStep}
+            continueSetup={continueSetup}
+            previousStep={previousStep}
+            wizardHeading={wizardHeading}
+            setPreview={setPreview}
+            navigate={navigate}
           />
-        )
-      ) : ownerReady ? (
-        <Workspace
-          key={setup.owner!.email}
-          session={{
-            user: { name: setup.owner!.name, email: setup.owner!.email },
-            role: "owner",
-          }}
-          openSettings={() => navigate(settingsPath("appearance"))}
-          recheckAccess={refresh}
-          settings={
-            destination.section
-              ? {
-                  busy,
-                  leave: navigate,
-                  content: (
-                    <SettingsPage
-                      section={destination.section}
-                      setup={setup}
-                      info={info}
-                      busy={busy}
-                      action={action}
-                      navigate={navigate}
-                      message={message}
-                      error={displayedError}
-                      setPreview={setPreview}
-                      setError={setError}
-                    />
-                  ),
-                }
-              : undefined
-          }
-        />
-      ) : (
-        <SetupWizard
-          setup={setup}
-          info={info}
-          busy={busy}
-          action={action}
-          step={step}
-          visibleSteps={visibleSteps}
-          changeSetupStep={changeSetupStep}
-          continueSetup={continueSetup}
-          previousStep={previousStep}
-          wizardHeading={wizardHeading}
-          setPreview={setPreview}
-          navigate={navigate}
-        />
-      )}
+        )}
+      </Suspense>
     </BrandLayout>
   );
 }

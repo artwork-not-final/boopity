@@ -1,10 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createRuntime } from "../../platform/node/runtime";
-import { createNodeApp } from "../../platform/node/app";
-import {
-  StripePayments,
-  stripeApiVersion,
-} from "../../platform/payments/stripe";
+import { createRuntime } from "../../server/runtime/runtime";
+import { createNodeApp } from "../../server/runtime/app";
+import { StripePayments, stripeApiVersion } from "../../server/payments/stripe";
 import { alice, origin, paymentFixture } from "../support/payment-fixture";
 
 const fixtures: ReturnType<typeof paymentFixture>[] = [];

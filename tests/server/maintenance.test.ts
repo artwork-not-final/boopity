@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
-import { cleanupExpiredRecords } from "../../worker/maintenance";
+import { cleanupExpiredRecords } from "../../server/core/maintenance";
 import { testDatabase } from "../support/database";
-import type { Bindings } from "../../worker/env";
+import type { Bindings } from "../../server/core/env";
 
 it("removes only bounded expired auth state and old diagnostics", async () => {
   const database = testDatabase(),

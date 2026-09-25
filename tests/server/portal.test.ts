@@ -2,14 +2,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createRuntime, loadConfig } from "../../platform/node/runtime";
-import { createNodeApp } from "../../platform/node/app";
+import { createRuntime, loadConfig } from "../../server/runtime/runtime";
+import { createNodeApp } from "../../server/runtime/app";
 import {
   readPolicy,
   bookingWindow,
   unambiguousTime,
-} from "../../platform/business/booking-rules";
-import { expireRequests } from "../../platform/business/bookings";
+} from "../../server/business/booking-rules";
+import { expireRequests } from "../../server/business/bookings";
 import type { BookingPolicy } from "../../src/shared/portal";
 
 const origin = "http://localhost:3000",

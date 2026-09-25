@@ -7,14 +7,14 @@ import {
   createRuntime,
   ingressRequest,
   loadConfig,
-} from "../../platform/node/runtime";
-import { createNodeApp } from "../../platform/node/app";
-import { PaymentService } from "../../platform/payments/service";
-import type { PaymentActor } from "../../platform/payments/ledger";
+} from "../../server/runtime/runtime";
+import { createNodeApp } from "../../server/runtime/app";
+import { PaymentService } from "../../server/payments/service";
+import type { PaymentActor } from "../../server/payments/ledger";
 import {
   invitationDigest,
   randomInvite,
-} from "../../platform/business/invitations";
+} from "../../server/business/invitations";
 
 globalThis.fetch = async () => {
   throw new Error(

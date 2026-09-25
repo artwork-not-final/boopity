@@ -8,14 +8,11 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev:self-hosted": "vite --config vite.self-hosted.config.ts",
     "dev:server": "tsx watch --env-file-if-exists=.env.self-hosted server/index.ts",
-    "build:self-hosted": "tsc -b && vite build --config vite.self-hosted.config.ts && node scripts/build-notices.mjs browser && esbuild server/index.ts server/manage.ts server/healthcheck.ts --bundle --platform=node --target=node24 --format=esm --packages=external --outdir=dist/server --out-extension:.js=.mjs",
     "manage": "node --env-file-if-exists=.env.self-hosted dist/server/manage.mjs",
     "start": "node --env-file-if-exists=.env.self-hosted dist/server/index.mjs",
-    "verify:self-hosted": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build:self-hosted && npm run test:setup-management",
-    "dev": "npm run dev:self-hosted",
-    "build": "npm run build:self-hosted",
+    "dev": "vite",
+    "build": "tsc -b && vite build && node scripts/build-notices.mjs browser && esbuild server/index.ts server/manage.ts server/healthcheck.ts --bundle --platform=node --target=node24 --format=esm --packages=external --outdir=dist/server --out-extension:.js=.mjs",
     "preview": "npm start",
     "test": "vitest run",
     "typecheck": "tsc -b && tsc -p tsconfig.tests.json",
@@ -32,7 +29,7 @@
     "release:audit": "node scripts/release-audit.mjs",
     "release:source": "node scripts/release-source.mjs",
     "hosting:render": "node scripts/render-blueprint.mjs",
-    "verify": "npm run verify:self-hosted"
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build && npm run test:setup-management"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.2",

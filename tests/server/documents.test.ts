@@ -4,8 +4,8 @@ import {
   cleanupIncompleteUploads,
   documentsApi,
   matchesFileType,
-} from "../../worker/documents";
-import type { AppEnv, Bindings } from "../../worker/env";
+} from "../../server/experimental/documents";
+import type { AppEnv, Bindings } from "../../server/core/env";
 import { testApp, testDatabase } from "../support/database";
 
 describe("private documents", () => {

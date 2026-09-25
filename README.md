@@ -63,6 +63,7 @@ providers are extension points, not shipped integrations.
 - [Setup access](GUIDED-INSTALLATION.md) and [email setup](EMAIL-SETUP.md)
 - [Backups, upgrades and recovery](OPERATIONS.md)
 - [Contributing](CONTRIBUTING.md), [security](SECURITY.md) and [support](SUPPORT.md)
+- [Architecture and folder ownership](ARCHITECTURE.md)
 - [Release checks](RELEASING.md) and [source provenance](SOURCE-REVIEW.md)
 
 ## License

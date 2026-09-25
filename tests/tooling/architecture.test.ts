@@ -38,18 +38,17 @@ const featureDependencies: Record<string, string[]> = {
 
 function boundaryError(from: string, target: string): string | null {
   const backend = /^(server|platform|worker|db)\//.test(target);
+  const serverPackage =
+    /^(node:|hono(?:\/|$)|drizzle-orm(?:\/|$)|stripe$|nodemailer$|sharp$|better-auth$|@hono\/)/.test(
+      target,
+    );
   if (
     from.startsWith("src/shared/") &&
-    (backend || target.startsWith("src/client/"))
+    (backend || serverPackage || target.startsWith("src/client/"))
   )
     return "Shared contracts cannot depend on a runtime or UI";
   if (!from.startsWith("src/client/")) return null;
-  if (
-    backend ||
-    /^(node:|hono(?:\/|$)|drizzle-orm(?:\/|$)|stripe$|nodemailer$|sharp$|better-auth$|@hono\/)/.test(
-      target,
-    )
-  )
+  if (backend || serverPackage)
     return "Browser code cannot import server implementation";
   if (
     /^src\/client\/(components|hooks|lib)\//.test(from) &&
@@ -121,6 +120,7 @@ describe("architecture boundaries", () => {
       ],
       ["src/client/hooks/usePage.ts", "server/runtime/app.ts"],
       ["src/shared/contracts.ts", "src/client/app/App.tsx"],
+      ["src/shared/contracts.ts", "node:crypto"],
       [
         "src/client/features/clients/Clients.tsx",
         "src/client/features/payments/PaymentAttempt.tsx",
@@ -196,5 +196,61 @@ describe("architecture boundaries", () => {
       },
       aliases: { ui: "@/client/components/ui", utils: "@/client/lib/utils" },
     });
+  });
+
+  it("keeps retained prototypes outside production server entry graphs and contracts", async () => {
+    const files = sourceFiles("server");
+    const active = files.filter(
+      (file) => !file.startsWith("server/experimental/"),
+    );
+    const findings: string[] = [];
+    for (const file of active) {
+      for (const specifier of declaredImports(
+        readFileSync(resolve(root, file), "utf8"),
+      )) {
+        if (!specifier.startsWith(".")) continue;
+        const target = relative(root, resolve(root, dirname(file), specifier));
+        if (target.startsWith("server/experimental/"))
+          findings.push(`${file} → ${target}`);
+      }
+    }
+    expect(findings).toEqual([]);
+    const result = await build({
+      absWorkingDir: root,
+      entryPoints: [
+        "server/index.ts",
+        "server/manage.ts",
+        "server/healthcheck.ts",
+      ],
+      outdir: "dist/architecture-check",
+      bundle: true,
+      write: false,
+      metafile: true,
+      format: "esm",
+      platform: "node",
+      packages: "external",
+      logLevel: "silent",
+    });
+    expect(
+      Object.keys(result.metafile!.inputs).filter(
+        (file) =>
+          file.startsWith("server/experimental/") ||
+          file.startsWith("src/client/"),
+      ),
+    ).toEqual([]);
+  });
+
+  it("uses separate browser, server and build-tool configurations", () => {
+    const read = (file: string) => readFileSync(resolve(root, file), "utf8");
+    const server = JSON.parse(read("tsconfig.server.json"));
+    expect(server.include).toEqual(["server", "src/shared"]);
+    expect(server.compilerOptions.types).toEqual(["node"]);
+    expect(server.compilerOptions.lib).not.toContain("WebWorker");
+    const tooling = JSON.parse(read("tsconfig.node.json"));
+    expect(tooling.include).toContain("vite.config.ts");
+    const vite = read("vite.config.ts");
+    expect(vite).toContain('fileURLToPath(new URL("./src", import.meta.url))');
+    expect(vite).not.toContain(".pathname");
+    expect(vite).not.toContain("VITE_SELF_HOSTED");
   });
 });
