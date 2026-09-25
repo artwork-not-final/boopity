@@ -196,6 +196,22 @@ function installation(
   };
 }
 
+it("focuses the initial setup heading after the lazy wizard loads without stealing focus on refresh", async () => {
+  window.history.replaceState(null, "", "/setup/account");
+  installation(state());
+  await mount(createElement(App));
+  const heading = container.querySelector("#setup-content");
+  expect(heading?.textContent).toBe("Your account");
+  expect(document.activeElement).toBe(heading);
+  const name = input("Your name");
+  name.focus();
+  await act(async () => window.dispatchEvent(new Event("focus")));
+  expect(document.activeElement).toBe(name);
+  expect(
+    requests.every(({ init }) => !init?.method || init.method === "GET"),
+  ).toBe(true);
+});
+
 it("clears a background connection error on recovery without changing the current page", async () => {
   window.history.replaceState(null, "", "/app/rates");
   installation(state(true), true);

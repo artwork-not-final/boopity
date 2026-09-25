@@ -94,12 +94,8 @@ export function App() {
   const { pathname, search } = new URL(location, "http://localhost");
   const step = setupStepFromPath(pathname) ?? fallbackStep;
   const ownerReady = setup?.state === "ready" && setup.actor === "owner";
-  const hasSetup = setup !== null;
   const setupActor = setup?.actor;
   const wizardHeading = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    if (!ownerReady) wizardHeading.current?.focus();
-  }, [step, ownerReady, hasSetup]);
   const destination = ownerDestination(pathname, search);
   function navigate(path: string) {
     navigateLocal(path);

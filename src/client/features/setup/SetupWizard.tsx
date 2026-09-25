@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { useEffect, type RefObject } from "react";
 import type { Branding } from "../../../shared/branding";
 import type { PublicInfo, SetupState } from "../../../shared/api-responses";
 import type { RunInstallationAction } from "../../lib/types/installation-types";
@@ -49,6 +49,11 @@ export function SetupWizard({
   setPreview: (value: Branding | null) => void;
   navigate: (path: string) => void;
 }) {
+  // The parent can render while this lazy page is still loading. Focus only
+  // after the heading mounts, and on step changes—not background refreshes.
+  useEffect(() => {
+    wizardHeading.current?.focus();
+  }, [step, wizardHeading]);
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[230px_minmax(0,1fr)]">
       <SetupNavigation
