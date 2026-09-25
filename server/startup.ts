@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
-import type { NodeConfig } from "../platform/node/config";
-import type { NodeControl } from "../platform/node/control";
+import type { NodeConfig } from "./runtime/config";
+import type { NodeControl } from "./runtime/control";
 import { setupLink } from "../src/shared/setup-link";
 
 type StartupAccess = ReturnType<NodeControl["startupAccess"]>;

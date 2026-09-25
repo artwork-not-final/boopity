@@ -1,4 +1,4 @@
-import { createRuntime, loadConfig } from "../platform/node/runtime";
+import { createRuntime, loadConfig } from "./runtime/runtime";
 import { ownerSchema } from "../src/shared/setup";
 import { setupLink } from "../src/shared/setup-link";
 

@@ -35,7 +35,7 @@ so the Docker build can exclude tests and private local fixtures.
 Verification uses temporary SQLite databases and intercepted email/payment APIs.
 Real provider testing is separate, opt-in work and is not part of verification or CI.
 
-CI also builds the image and runs `tests/runtime-container-local.mjs` with a fresh,
+CI also builds the image and runs `tests/integration/runtime-container-local.mjs` with a fresh,
 offline volume. It checks native image processing, synthetic OTP/Google login and
 management against the production dependencies, without Vite, Vitest or npm in the
 image. Keep that check when changing the Docker dependency-installation strategy.
@@ -45,9 +45,9 @@ Native optional dependencies must remain available. Development installs still
 use the unmodified lockfile and normal peer resolution.
 
 The [route inventory](API-ROUTES.md) lists the mounted Node API and access boundaries.
-Update it alongside route changes; `tests/api-route-surface.test.ts` detects drift.
-Paginated CRM reads live in `platform/business/lists.ts`; the routers in
-`worker/clients.ts`, `worker/pets.ts`, and `worker/services.ts` provide owner
+Update it alongside route changes; `tests/tooling/api-route-surface.test.ts` detects drift.
+Paginated CRM reads live in `server/business/lists.ts`; the routers in
+`server/business/client-routes.ts`, `server/business/pet-routes.ts`, and `server/business/service-routes.ts` provide owner
 mutations and pet detail. Do not reintroduce duplicate list handlers or mount a
 deferred prototype to reuse one of its helpers.
 
@@ -89,23 +89,26 @@ permission to commit private files; run `npm run release:audit` before sharing a
 
 ## Scope and review
 
-Keep workspace features in their own modules. `src/client/services/` owns the
+Start with [the architecture guide](ARCHITECTURE.md) for folder ownership,
+dependency direction and test locations. Architecture checks run with `npm test`.
+
+Keep workspace features in their own modules. `src/client/features/services/` owns the
 service list, editor, availability controls, and service types.
-`src/client/clients/` owns client and pet lists/editors, invitation controls,
+`src/client/features/clients/` owns client and pet lists/editors, invitation controls,
 the read-only household pet page, and their types. Invitation state remains
 client-scoped in the Clients coordinator; detail components keep their existing
 keys and mounting rules.
 
-`SelfHostedApp` coordinates installation/session refresh and top-level navigation.
-`src/client/setup/` owns installer access and the setup wizard; `auth/Login` owns
-email-code and Google sign-in; `src/client/settings/` owns the settings page and
+`App` coordinates installation/session refresh and top-level navigation.
+`src/client/features/setup/` owns installer access and the setup wizard; `auth/Login` owns
+email-code and Google sign-in; `src/client/features/settings/` owns the settings page and
 business/email/Google forms shared with setup. These modules must not import
-`SelfHostedApp`. Keep the installation mutation runner's save → refresh → optional
-continue ordering, and preserve versioned form keys. `InstallationFields` and
-`installation-api` retain the setup/settings field accessibility and JSON/file
-request behavior.
+`App`. Keep the installation mutation runner's save → refresh → optional
+continue ordering, and preserve versioned form keys. The shared `Field` component
+retains field accessibility; `lib/http/installation-api` retains JSON/file request
+behavior.
 
-`src/client/payments/` owns booking payment controls, business-wide activity,
+`src/client/features/payments/` owns booking payment controls, business-wide activity,
 refund/correction controls, and payment settings. Keep draft and retry-key state
 in the coordinators that own it; list/history components receive data and actions.
 Settings retain their own recovery and retry handling. A retry after a failed read
@@ -117,8 +120,9 @@ installation shell.
 The workspace shell supplies only the settings and actions a feature needs,
 such as portal availability, currency, refresh revision, busy state, and its
 mutation runner. Feature components must not import the shell. Reuse
-`WorkspaceFields` and `WorkspacePanel` for existing field/section markup instead
-of copying it into each feature.
+`components/forms` and `components/Panel` for existing field/section markup instead
+of copying it into each feature. Pure navigation helpers belong in
+`lib/navigation`, not page components.
 
 During extractions, preserve component keys, mounted drafts, URL behavior, and
 request ordering. Cover interactions through the workspace as well as testing

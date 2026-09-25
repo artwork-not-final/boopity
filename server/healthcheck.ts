@@ -1,5 +1,5 @@
 import { get } from "node:http";
-import { loadConfig } from "../platform/node/config";
+import { loadConfig } from "./runtime/config";
 
 // Share origin validation with the server; probing must not initialize the database.
 // Native fetch replaces Host; http.get preserves the canonical host on loopback.

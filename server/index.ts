@@ -1,10 +1,6 @@
 import { serve } from "@hono/node-server";
-import { createNodeApp, maintenanceTick } from "../platform/node/app";
-import {
-  createRuntime,
-  ingressRequest,
-  loadConfig,
-} from "../platform/node/runtime";
+import { createNodeApp, maintenanceTick } from "./runtime/app";
+import { createRuntime, ingressRequest, loadConfig } from "./runtime/runtime";
 import { announceStartup, openSetupBrowser } from "./startup";
 
 const config = loadConfig();

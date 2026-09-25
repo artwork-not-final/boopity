@@ -34,7 +34,7 @@ For a disposable, network-isolated same-image container recovery check:
 
 ```sh
 docker build --tag boopity-local-qa .
-BOOPITY_CONTAINER_QA=phase5-disposable node tests/recovery-container-local.mjs boopity-local-qa
+BOOPITY_CONTAINER_QA=phase5-disposable node tests/integration/recovery-container-local.mjs boopity-local-qa
 ```
 
 This uses only newly generated, labelled volumes and removes them afterward. It
@@ -44,7 +44,7 @@ the release-to-release upgrade or hosted checks below.
 For production dependency and authentication checks against the matching source:
 
 ```sh
-BOOPITY_CONTAINER_QA=runtime-disposable node tests/runtime-container-local.mjs boopity-local-qa .
+BOOPITY_CONTAINER_QA=runtime-disposable node tests/integration/runtime-container-local.mjs boopity-local-qa .
 ```
 
 This creates a fresh labelled volume, disables networking, checks native image
@@ -81,7 +81,7 @@ To reproduce, export each source version and build each image from its matching
 export. Pass local image tags and those source directories to the harness:
 
 ```sh
-BOOPITY_CONTAINER_QA=upgrade-disposable node tests/upgrade-container-local.mjs OLD_IMAGE NEW_IMAGE OLD_SOURCE NEW_SOURCE
+BOOPITY_CONTAINER_QA=upgrade-disposable node tests/integration/upgrade-container-local.mjs OLD_IMAGE NEW_IMAGE OLD_SOURCE NEW_SOURCE
 ```
 
 The harness resolves immutable local image IDs, requires different images, bundles
