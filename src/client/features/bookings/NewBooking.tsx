@@ -19,7 +19,8 @@ import { timeZoneLabel } from "../../lib/format/time-zone-label";
 
 import { useBookingAvailability } from "./booking-availability";
 import { BookingAvailabilityNotice } from "./BookingAvailabilityNotice";
-import { bookingTime, dateLabel } from "./booking-calendar";
+import { bookingTime } from "./booking-calendar";
+import { dateLabel } from "../../lib/format/date-label";
 
 import { PagedSelect } from "../../components/forms/PagedSelect";
 

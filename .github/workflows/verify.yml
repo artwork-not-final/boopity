@@ -35,4 +35,4 @@ jobs:
       - name: Check production runtime with offline synthetic authentication
         env:
           BOOPITY_CONTAINER_QA: runtime-disposable
-        run: node tests/runtime-container-local.mjs boopity-ci .
+        run: node tests/integration/runtime-container-local.mjs boopity-ci .

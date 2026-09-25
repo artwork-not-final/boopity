@@ -442,7 +442,7 @@ recovery token first. `npm run manage -- status` reports claim/setup status with
 
 ```sh
 npm run verify
-node tests/self-hosted-smoke.mjs
+node tests/integration/self-hosted-smoke.mjs
 ```
 
 The smoke test requires a running local app on port 3000; use `SELF_HOSTED_SMOKE_URL` for a

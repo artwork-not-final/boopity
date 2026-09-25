@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import type { PaymentRecord } from "../../../shared/payment-records";
-import { dateLabel } from "../bookings/booking-calendar";
+import { dateLabel } from "../../lib/format/date-label";
 import {
   navigateLocal,
   workspaceHref,

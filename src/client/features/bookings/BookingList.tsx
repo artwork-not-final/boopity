@@ -4,9 +4,9 @@ import { Button } from "../../components/ui/button";
 import {
   bookingStatus,
   bookingTime,
-  dateLabel,
   type CalendarBooking,
 } from "./booking-calendar";
+import { dateLabel } from "../../lib/format/date-label";
 import { timeZoneLabel } from "../../lib/format/time-zone-label";
 
 type ListBooking = CalendarBooking & {

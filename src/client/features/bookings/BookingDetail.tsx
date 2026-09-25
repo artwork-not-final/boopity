@@ -8,7 +8,8 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
-import { bookingStatus, bookingTime, dateLabel } from "./booking-calendar";
+import { bookingStatus, bookingTime } from "./booking-calendar";
+import { dateLabel } from "../../lib/format/date-label";
 import { timeZoneLabel } from "../../lib/format/time-zone-label";
 import type { Booking } from "./types";
 

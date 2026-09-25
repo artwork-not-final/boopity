@@ -9,12 +9,12 @@ import {
   bookingsForDay,
   businessToday,
   calendarDays,
-  dateLabel,
   loadCalendarBookings,
   moveCalendar,
   type CalendarBooking,
   type CalendarView,
 } from "./booking-calendar";
+import { dateLabel } from "../../lib/format/date-label";
 
 export function BookingCalendar({
   view,

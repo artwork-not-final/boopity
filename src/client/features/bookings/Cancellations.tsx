@@ -6,7 +6,8 @@ import { SearchBox } from "../../components/forms/SearchBox";
 import { PageControls } from "../../components/navigation/PageControls";
 import { compactPage, VISIBLE_PAGE_SIZE } from "../../lib/compact-page";
 import { usePage } from "../../hooks/usePage";
-import { bookingTime, dateLabel } from "./booking-calendar";
+import { bookingTime } from "./booking-calendar";
+import { dateLabel } from "../../lib/format/date-label";
 import { timeZoneLabel } from "../../lib/format/time-zone-label";
 import { workspaceApi } from "../../lib/http/workspace-api";
 import {

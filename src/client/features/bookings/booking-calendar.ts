@@ -14,13 +14,6 @@ export type CalendarBooking = {
 };
 export type CalendarView = "week" | "month";
 const utcDate = (date: string) => new Date(`${date}T12:00:00Z`);
-export const dateLabel = (
-  date: string,
-  options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" },
-) =>
-  new Intl.DateTimeFormat("en-US", { ...options, timeZone: "UTC" }).format(
-    utcDate(date),
-  );
 export function businessToday(timeZone: string, now = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
