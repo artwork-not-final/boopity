@@ -9,7 +9,8 @@ import { PaymentRecords } from "../src/client/payments/PaymentRecords";
 import type { PaymentView, IntegrationView } from "../src/shared/payments";
 import type { PaymentRecordsView } from "../src/shared/payment-records";
 import { SEARCH_DELAY_MS } from "../src/client/live-search";
-import { Workspace, type Booking } from "../src/client/Workspace";
+import { Workspace } from "../src/client/Workspace";
+import { type Booking } from "../src/client/booking-types";
 import { navigateLocal } from "../src/client/workspace-location";
 
 const page = { offset: 0, limit: 50, hasMore: false };

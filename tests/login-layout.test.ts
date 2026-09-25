@@ -6,6 +6,7 @@ import { Login } from "../src/client/auth/Login";
 import { InvitationWelcome } from "../src/client/InvitationWelcome";
 import { SetupPasswordLogin } from "../src/client/setup/SetupPasswordLogin";
 import { defaultBranding } from "../src/shared/branding";
+import { BrandLayout } from "../src/client/BrandLayout";
 
 const info = {
   branding: { ...defaultBranding, businessName: "Maple Paws" },
@@ -164,14 +165,24 @@ describe("standalone sign-in layout", () => {
     expect(source).toContain(
       "const centeredEntryPage = showingAccountPage || showingSetupEntry;",
     );
-    expect(source).toContain(
-      'centeredEntryPage ? "flex min-h-svh flex-col" : "min-h-screen"',
+    const html = renderToStaticMarkup(
+      createElement(BrandLayout, {
+        active: defaultBranding,
+        siteName: "Boopity",
+        centeredEntryPage: true,
+        skipTarget: "main-content",
+        showSignOut: false,
+        busy: false,
+        onSignOut: vi.fn(),
+        children: "Sign in",
+      }),
     );
-    expect(source).toMatch(
-      /<main\b[^>]*className=\{ centeredEntryPage \? "mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center/,
+    expect(html).toContain('class="flex min-h-svh flex-col"');
+    expect(html).toMatch(
+      /<main\b[^>]*class="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center/,
     );
-    expect(source).toContain(
-      '<footer className={ centeredEntryPage ? "mx-auto flex w-full max-w-7xl justify-center',
+    expect(html).toContain(
+      '<footer class="mx-auto flex w-full max-w-7xl justify-center',
     );
     expect(source).toContain("!inWorkspace && !setup && !showingAccountPage");
     expect(source).toContain(

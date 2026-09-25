@@ -30,7 +30,7 @@ const paymentCopy = () =>
 
 describe("concise self-hosted copy", () => {
   it("explains which booking fields each role can search", () => {
-    const copy = read("Workspace");
+    const copy = read("Bookings");
     expect(copy).toContain("Search by client, pet, or service");
     expect(copy).toContain("Search by pet or service");
     expect(copy).not.toContain('label="Find a booking"');
@@ -59,6 +59,9 @@ describe("concise self-hosted copy", () => {
         .join(" ") +
       paymentCopy() +
       read("Workspace") +
+      read("Bookings") +
+      read("NewBooking") +
+      read("Rules") +
       read("clients/Clients") +
       read("clients/ClientPortalAccess") +
       read("clients/PetCareForm");
@@ -90,6 +93,7 @@ describe("concise self-hosted copy", () => {
   it("keeps access, privacy and cancellation guidance at the relevant controls", () => {
     const workspace =
       read("Workspace") +
+      read("Rules") +
       read("BookingDetail") +
       read("clients/ClientPortalAccess") +
       read("clients/PetCareForm");

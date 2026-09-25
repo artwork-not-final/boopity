@@ -6,7 +6,7 @@ import {
   BookingOverview,
   BookingTimeline,
 } from "../src/client/BookingDetail";
-import type { Booking } from "../src/client/Workspace";
+import type { Booking } from "../src/client/booking-types";
 
 const booking: Booking = {
   id: "visit",

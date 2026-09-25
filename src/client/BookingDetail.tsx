@@ -10,7 +10,7 @@ import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
 import { bookingStatus, bookingTime, dateLabel } from "./booking-calendar";
 import { timeZoneLabel } from "./time-zone-label";
-import type { Booking } from "./Workspace";
+import type { Booking } from "./booking-types";
 
 export function BookingDetailHeader({
   booking: b,
