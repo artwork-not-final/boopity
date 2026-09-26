@@ -4,7 +4,6 @@ import { randomUUID, createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import {
   closeSync,
-  existsSync,
   mkdtempSync,
   openSync,
   readFileSync,
@@ -12,8 +11,8 @@ import {
   statSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
-import { build } from "esbuild";
+import { join } from "node:path";
+import { bundleUpgradeFixture } from "../support/upgrade-fixture-bundle.mjs";
 
 assert.equal(process.env.BOOPITY_CONTAINER_QA, "upgrade-disposable");
 const [oldTag, newTag, oldSource, newSource] = process.argv.slice(2);
@@ -46,32 +45,7 @@ const fixture = readFileSync(
   "utf8",
 );
 async function bundle(source) {
-  // Same test contract, actual runtime code from each supplied source snapshot.
-  // The first source preview predates the server/ folder consolidation. Resolve
-  // that one implementation import against its snapshot, not the candidate.
-  const contents = existsSync(
-    join(resolve(source), "server/runtime/runtime.ts"),
-  )
-    ? fixture
-    : fixture.replace(
-        'from "../../server/runtime/runtime"',
-        'from "../../platform/node/runtime"',
-      );
-  const result = await build({
-    stdin: {
-      contents,
-      loader: "ts",
-      resolveDir: join(resolve(source), "tests", "support"),
-      sourcefile: "upgrade-container-fixture.ts",
-    },
-    bundle: true,
-    platform: "node",
-    target: "node24",
-    format: "esm",
-    packages: "external",
-    write: false,
-  });
-  return result.outputFiles[0].contents;
+  return bundleUpgradeFixture(source, fixture);
 }
 const [oldFixture, newFixture] = await Promise.all([
   bundle(oldSource),
