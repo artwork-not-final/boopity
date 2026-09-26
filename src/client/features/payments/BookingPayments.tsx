@@ -149,6 +149,7 @@ export function BookingPayments({
       <PaymentBalanceSummary
         balances={data.balances}
         activeMode={data.activeMode}
+        onlineAvailable={data.onlineAvailable}
         hasSandboxRecords={
           data.attempts.some((a) => a.mode === "test") ||
           data.history.some((h) => h.mode === "test")

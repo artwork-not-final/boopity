@@ -260,6 +260,34 @@ function deferred() {
   return { promise, resolve };
 }
 
+it.each([true, false])(
+  "hides an unused sandbox balance for a manually paid booking (owner=%s)",
+  async (owner) => {
+    data.onlineAvailable = false;
+    data.balances = data.balances.map((balance) => ({
+      ...balance,
+      receivedCents: balance.mode === "live" ? 3000 : 0,
+      netCents: balance.mode === "live" ? 3000 : 0,
+      outstandingCents: balance.mode === "live" ? 0 : 3000,
+      status: balance.mode === "live" ? "paid" : "unpaid",
+    }));
+    data.attempts[0]!.amountCents = 3000;
+    data.history = [];
+
+    await booking(owner);
+
+    const actual = container.querySelector('[aria-label="Actual payments"]');
+    expect(actual?.textContent).toContain("$0.00");
+    expect(actual?.textContent).toContain("Paid");
+    expect(actual?.textContent).toContain("$30.00");
+    expect(
+      container.querySelector('[aria-label="Sandbox payments"]'),
+    ).toBeNull();
+    expect(mutations()).toEqual([]);
+    expect(errors).toEqual([]);
+  },
+);
+
 it("keeps payment and credit drafts separate and retains a manual-payment key after an uncertain response", async () => {
   await booking();
   await enter("Received amount (USD)", "12.34");
