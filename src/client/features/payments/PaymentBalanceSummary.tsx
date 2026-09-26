@@ -6,14 +6,16 @@ import { Badge } from "../../components/ui/badge";
 export function PaymentBalanceSummary({
   balances,
   activeMode,
+  onlineAvailable,
   hasSandboxRecords,
 }: {
   balances: PaymentBalance[];
   activeMode: PaymentMode;
+  onlineAvailable: boolean;
   hasSandboxRecords: boolean;
 }) {
   const showSandbox =
-    activeMode === "test" ||
+    (activeMode === "test" && onlineAvailable) ||
     hasSandboxRecords ||
     balances.some(
       (b) =>

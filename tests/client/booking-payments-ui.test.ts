@@ -36,6 +36,7 @@ const summary = (
     createElement(PaymentBalanceSummary, {
       balances: [balance, sandbox],
       activeMode: "live",
+      onlineAvailable: false,
       hasSandboxRecords: false,
       ...changes,
     }),
@@ -76,22 +77,42 @@ describe("booking payment summary", () => {
       expect(html).toContain(label);
     expect(html).not.toContain("Sandbox");
   });
-  it("always separates sandbox balances when checkout is in test mode", () => {
-    const html = summary({ activeMode: "test" });
+  it.each(["live", "test"] as const)(
+    "hides an unused sandbox balance when checkout is unavailable in %s mode",
+    (activeMode) => {
+      const html = summary({ activeMode });
+      expect(html).not.toContain("Sandbox");
+      expect(html).toContain("$20.00");
+      expect(html.match(/<section\b/g)).toHaveLength(1);
+    },
+  );
+  it("separates sandbox balances when test checkout is available", () => {
+    const html = summary({ activeMode: "test", onlineAvailable: true });
     expect(html.match(/<section\b/g)).toHaveLength(2);
     expect(html).toContain("Sandbox balance due");
     expect(html).toContain("Sandbox payments do not settle real balances.");
     expect(html).toContain("$20.00");
     expect(html).toContain("$30.00");
   });
-  it("keeps sandbox history visible after switching to live mode", () => {
-    expect(summary({ hasSandboxRecords: true })).toContain(
-      "Sandbox balance due",
-    );
-    expect(
-      summary({ balances: [balance, { ...sandbox, receivedCents: 1000 }] }),
-    ).toContain("Sandbox balance due");
+  it("does not show an unused sandbox balance for available live checkout", () => {
+    expect(summary({ onlineAvailable: true })).not.toContain("Sandbox");
   });
+  it.each(["live", "test"] as const)(
+    "keeps sandbox history visible with checkout unavailable in %s mode",
+    (activeMode) => {
+      expect(summary({ activeMode, hasSandboxRecords: true })).toContain(
+        "Sandbox balance due",
+      );
+    },
+  );
+  it.each(["receivedCents", "refundedCents", "creditCents"] as const)(
+    "keeps sandbox %s visible even if its records are on another page",
+    (field) => {
+      expect(
+        summary({ balances: [balance, { ...sandbox, [field]: 1000 }] }),
+      ).toContain("Sandbox balance due");
+    },
+  );
   it("does not hide overpayments behind a zero balance", () => {
     expect(
       summary({
