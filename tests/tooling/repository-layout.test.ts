@@ -63,17 +63,28 @@ describe("self-hosted repository root", () => {
       "find /usr -xdev -type f -perm /6000 -exec chmod a-s {} +",
     );
     expect(docker).toContain("RUN node scripts/build-notices.mjs runtime");
-    for (const setting of [
-      "read_only: true",
-      "cap_drop: [ALL]",
-      "no-new-privileges:true",
-    ])
-      expect(read("compose.yaml")).toContain(setting);
     expect(runtime).toContain("USER node");
     expect(read(".github/workflows/verify.yml")).toContain(
       "node-version-file: .nvmrc",
     );
   });
+
+  it.each(["compose.yaml", "compose.image.yaml"])(
+    "%s preserves the hardened runtime and writable installation data",
+    (file) => {
+      const compose = read(file);
+      for (const setting of [
+        "read_only: true",
+        "cap_drop: [ALL]",
+        "security_opt: [no-new-privileges:true]",
+        "/tmp:rw,noexec,nosuid,size=64m",
+        "boopity-data:/data",
+        '"127.0.0.1:3000:3000"',
+      ])
+        expect(compose, file).toContain(setting);
+      expect(compose).not.toMatch(/^\s*(?:privileged|cap_add|user):/m);
+    },
+  );
 
   it("keeps retained local installations and archives out of Git and Docker", () => {
     const git = read(".gitignore").split(/\r?\n/);
@@ -101,6 +112,10 @@ describe("self-hosted repository root", () => {
     expect(workflow).toContain("persist-credentials: false");
     expect(workflow).toContain("npm run verify");
     expect(workflow).toContain("docker build --tag boopity-ci .");
+    expect(workflow).toContain("BOOPITY_CONTAINER_QA: compose-disposable");
+    expect(workflow).toContain(
+      "node tests/integration/compose-container-local.mjs boopity-ci .",
+    );
     expect(workflow).not.toMatch(
       /secrets\.|pull_request_target|docker push|git push/,
     );

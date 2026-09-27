@@ -11,7 +11,9 @@ The maintained Dockerfile uses Node 24.21.0 and Debian Trixie, both digest-pinne
 and installs available Debian updates during build. It removes all setuid/setgid
 bits while retaining ordinary non-root shell/tar recovery commands. Compose adds
 a read-only root filesystem, dropped capabilities, no-new-privileges and a bounded
-temporary filesystem. No migration or application dependency version changed in
+temporary filesystem in both supplied Compose files. Other hosting paths must
+verify their own runtime restrictions; the image alone cannot enforce them.
+No migration or application dependency version changed in
 this hardening step.
 
 Both architectures contain 84 application npm manifests, no base-image package

@@ -52,6 +52,17 @@ processing and uses synthetic email/Google responses. It also checks non-root
 execution, read-only application files, absence of package managers/build tools,
 and the shipped management command. It does not test live provider delivery.
 
+CI also exercises the actual prebuilt Compose definition:
+
+```sh
+BOOPITY_CONTAINER_QA=compose-disposable node tests/integration/compose-container-local.mjs boopity-local-qa .
+```
+
+This checks runtime restrictions, synthetic setup/sign-in, compiled startup and
+management, replacement, and stopped backup/new-volume restoration. It disables
+networking and does not publish the service port. It creates and removes only
+its own labelled containers/volumes; never supply a real installation or secrets.
+
 For a release rebuild, use `docker build --pull --no-cache` with the chosen tag and
 source snapshot. Base-image digests and Node are pinned, but Debian security
 updates are intentionally resolved during the build. A cached OS-install layer

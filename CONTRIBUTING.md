@@ -35,10 +35,12 @@ so the Docker build can exclude tests and private local fixtures.
 Verification uses temporary SQLite databases and intercepted email/payment APIs.
 Real provider testing is separate, opt-in work and is not part of verification or CI.
 
-CI also builds the image and runs `tests/integration/runtime-container-local.mjs` with a fresh,
-offline volume. It checks native image processing, synthetic OTP/Google login and
-management against the production dependencies, without Vite, Vitest or npm in the
-image. Keep that check when changing the Docker dependency-installation strategy.
+CI also builds the image and runs `tests/integration/compose-container-local.mjs`
+through the prebuilt Compose definition with fresh, offline volumes. It checks
+runtime restrictions, native image processing, synthetic OTP/Google login,
+management, container replacement and stopped backup/new-volume restoration.
+The runtime fixture uses production dependencies without Vite, Vitest or npm in
+the image. Keep these checks when changing deployment or dependency installation.
 Required runtime peers must be declared dependencies; Docker alone uses
 `--legacy-peer-deps` to avoid auto-installing Better Auth's optional test tooling.
 Native optional dependencies must remain available. Development installs still

@@ -32,7 +32,7 @@ jobs:
       - run: npm audit --audit-level=high
       - name: Build container (no push or deployment)
         run: docker build --tag boopity-ci .
-      - name: Check production runtime with offline synthetic authentication
+      - name: Check prebuilt Compose setup, runtime protections and recovery offline
         env:
-          BOOPITY_CONTAINER_QA: runtime-disposable
-        run: node tests/integration/runtime-container-local.mjs boopity-ci .
+          BOOPITY_CONTAINER_QA: compose-disposable
+        run: node tests/integration/compose-container-local.mjs boopity-ci .
