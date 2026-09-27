@@ -32,12 +32,17 @@ not validation of a newly built release image.
 
 ## Public origin and reverse proxy
 
-Keep the container's default non-root user. Compose drops Linux capabilities,
-disallows privilege escalation and mounts the application read-only; `/data` and
+Keep the container's default non-root user. Both supplied Compose files
+(`compose.yaml` and `compose.image.yaml`) drop Linux capabilities,
+disallow privilege escalation and mount the application read-only; `/data` and
 a small temporary filesystem remain writable. The image contains no setuid/setgid
 programs. Do not add privileged mode, `SYS_ADMIN`, host namespaces or a Docker
 socket mount. Running as root or changing those restrictions invalidates the
 runtime applicability assessment in [CONTAINER-REVIEW.md](CONTAINER-REVIEW.md).
+
+These protections are deployment settings, not properties enforced by the image
+alone. On a host that does not use Compose, configure equivalent restrictions
+where supported and verify the actual runtime before relying on this baseline.
 
 Run the app as a dedicated non-root user. Bind Node to loopback (the default), or
 to a private container network. Set `APP_URL=https://care.example.com` in the

@@ -10,6 +10,11 @@ services:
       BOOPITY_SETUP_PASSWORD: ${BOOPITY_SETUP_PASSWORD:-}
     volumes:
       - boopity-data:/data
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
     restart: unless-stopped
 volumes:
   boopity-data:
