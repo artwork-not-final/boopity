@@ -15,7 +15,7 @@ release. See the [remaining release checks](RELEASING.md).
 - Set your business name, logo and colors, with a “Powered by Boopity” footer.
 
 Built with React, Vite, Hono, Better Auth, Tailwind CSS and shadcn-derived components.
-Cloudflare is not required.
+Bring your own hosting: Boopity runs with Docker or Node on a host you choose.
 
 ## Run locally
 
@@ -48,8 +48,9 @@ docker compose up --build
 Open **Finish setup** in the output, or open `http://localhost:3000/setup` if you
 supplied a private setup password. The Compose file keeps data in a persistent
 volume and binds the app to localhost. For a hosted installation, configure HTTPS
-and follow the [hosting guide](SELF-HOSTING.md). This builds locally; a reviewed
-public image and one-click installer are not available yet.
+and follow [Use your own hosting provider](SELF-HOSTING.md#use-your-own-hosting-provider).
+This builds locally; a reviewed public image is not available yet. Boopity does
+not create hosting accounts or manage deployments for you.
 
 Boopity currently needs one always-running Node process and a persistent local
 disk. It uses SQLite and private file storage; ephemeral disks, multiple replicas

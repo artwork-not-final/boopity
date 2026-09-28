@@ -6,8 +6,7 @@ deployment and enter it on their website. Do not ask them to pick an access meth
 ## Private setup-password configuration
 
 Supply `BOOPITY_SETUP_PASSWORD` privately before startup: 15–128 characters, with
-no shared/default value. The Render template prompts during initial Blueprint
-creation; other hosts can use their private environment settings. For local Node,
+no shared/default value. Use your host's private environment settings. For local Node,
 use the gitignored `.env.self-hosted`; Compose uses its own private environment.
 Never add a real password to an image, public template or `VITE_` variable.
 
@@ -84,8 +83,8 @@ or `docker compose logs boopity` after starting it in the background.
 Leave `BOOPITY_OWNER_EMAIL` and host email variables unset for a normal DIY-email
 installation. The protected wizard selects the owner and saves email settings.
 Only set the optional managed-email shortcut below when an installer deliberately
-supplies a working provider. Host-specific installation buttons remain future
-packaging work, not something this preview claims to have deployed.
+supplies a working email provider. Boopity does not supply hosting-specific
+installation buttons or provision provider accounts.
 
 ## Optional shortcut: your installer already connected email
 
@@ -106,10 +105,10 @@ the full wizard; host-managed email settings must be corrected on the host.
 Never share email codes, setup tokens or credentials in support tickets. If an
 owner already exists, sign in; repeating initial setup cannot replace them.
 
-## Hosting-adapter contract — developers/operators
+## Installer-managed email — developers/operators
 
 - Keep Node/SQLite private persistent storage and same-origin HTTPS. See
-  [OPERATIONS.md](OPERATIONS.md). This adapter does not configure a proxy.
+  [OPERATIONS.md](OPERATIONS.md). This shortcut does not configure a proxy or provision hosting.
 - Supply `BOOPITY_OWNER_EMAIL` through trusted deployment settings before first
   setup. It is stored privately, never selected by an anonymous browser request.
 - Supply the complete host-managed email group in [SELF-HOSTING.md](SELF-HOSTING.md),

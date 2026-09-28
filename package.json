@@ -28,7 +28,6 @@
     "test:setup-management": "node tests/integration/setup-management-local.mjs && node tests/integration/startup-local.mjs",
     "release:audit": "node scripts/release-audit.mjs",
     "release:source": "node scripts/release-source.mjs",
-    "hosting:render": "node scripts/render-blueprint.mjs",
     "verify": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run build && npm run test:setup-management"
   },
   "dependencies": {

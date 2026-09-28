@@ -7,28 +7,25 @@ Maintainers can run the [populated upgrade rehearsal](RELEASING.md#populated-upg
 against paired source snapshots and locally built images. It uses disposable data,
 not a business installation, and does not replace testing recovery on the host you use.
 
-## Deployment matrix
+## Runtime compatibility
+
+Use your own hosting provider. Boopity supports the runtime and storage contract
+below, not provider-specific plans, dashboards or deployment adapters.
 
 | Environment                                                       | Status                                                      | Requirements / limits                                                                       |
 | ----------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | Docker, Debian Trixie, Node 24.21.0, Linux ARM64                  | Local runtime, authentication, upgrade/rollback checks pass | One container, persistent local volume, no replicas; image release review remains open      |
 | Native Node 24.21.0 on macOS ARM64                                | Local verification and compiled startup/recovery pass       | Same-origin build, private local data directory                                             |
-| DigitalOcean Ubuntu 24.04 x64, 1 GiB, Docker + Nginx              | Approved trial: install/TLS/reboot/limited HTTP checks pass | Owner/provider/browser, populated capacity and hosted upgrade/restore gates remain open     |
-| Other Linux VPS with Node 24 or Docker                            | Intended target; not provider-certified                     | Operator-managed TLS, process supervisor and durable local disk                             |
+| Linux server with Node 24 or Docker                               | Intended deployment environment; verify your installation   | Operator-managed TLS, process supervisor and durable local disk                             |
 | Linux x64 container, Node 24.21.0                                 | Local runtime and upgrade/rollback pass under emulation     | Native-host capacity and hosted checks remain; not distribution clearance                   |
-| Container platforms with persistent local volumes                 | Conditional, not provider-certified                         | Always-on, one replica, no overlapping rolling deployments; disk must outlive the container |
-| Workers, Pages, static-only hosts, serverless functions           | Not supported by the Node reference                         | Cannot run a persistent Node process with this SQLite/filesystem model                      |
+| Container platforms with persistent local volumes                 | Conditional on runtime and storage requirements             | Always-on, one replica, no overlapping rolling deployments; disk must outlive the container |
+| Static-only hosts, edge runtimes, serverless functions            | Not supported by the Node reference                         | Cannot run a persistent Node process with this SQLite/filesystem model                      |
 | Shared/NFS disk, multiple replicas, scale-to-zero, Windows native | Not validated/supported                                     | Do not assume SQLite or native image dependency compatibility                               |
 
-No Cloudflare account is required. A free tier is not a promise of durable storage,
-availability, email delivery or zero cost; inspect the chosen host's current terms.
-PostgreSQL/S3 are future adapter targets, not available drivers. Local macOS and
-Linux-container checks alone do not complete the second public-host gate. The
-approved DigitalOcean trial adds partial external-host
-evidence, **not a completed second-host release validation**. The root Dockerfile
-now builds the self-hosted Node application; the retired .NET Dockerfile is not
-part of the maintained source tree. These trial results are historical evidence,
-not validation of a newly built release image.
+Local runtime tests do not certify a hosting service or a live deployment. Verify
+persistence, HTTPS, provider callbacks and off-host recovery for your installation.
+Boopity does not select a plan or manage hosting accounts, billing, DNS or updates.
+PostgreSQL/S3 are future adapter targets, not available drivers.
 
 ## Public origin and reverse proxy
 
@@ -204,7 +201,7 @@ do not certify your host's backup product or recover lost external secrets.
 
 There are no tagged supported production releases yet. The current tested upgrade
 fixture is the pre-payment self-hosted schema (migrations 0001–0004) to the current
-schema. There is **no .NET, SaaS or Cloudflare data import**.
+schema. There is **no data import from retired application versions**.
 
 For each future release: read the notes, retain the old image/configuration, stop
 writers, make and verify a complete backup, then test the new image against an

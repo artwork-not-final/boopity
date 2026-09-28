@@ -15,15 +15,8 @@ import {
   ingressRequest,
 } from "../../server/runtime/runtime";
 import { createNodeApp } from "../../server/runtime/app";
-// @ts-expect-error Standalone dependency-free maintainer tooling.
-import { renderBlueprint } from "../../scripts/render-blueprint.mjs";
 
-const renderEnvironment = {
-  BOOPITY_HOSTING: "render",
-  RENDER: "true",
-  RENDER_EXTERNAL_URL: "https://maple-fixture.onrender.com",
-  RENDER_EXTERNAL_HOSTNAME: "maple-fixture.onrender.com",
-};
+const appUrl = "https://pets.example.test";
 const directories: string[] = [];
 const instances = new Set<ReturnType<typeof createRuntime>>();
 afterEach(() => {
@@ -37,7 +30,7 @@ function fixture(environment: NodeJS.ProcessEnv = {}) {
   const data = mkdtempSync(join(tmpdir(), "boopity-hosting-"));
   directories.push(data);
   const config = loadConfig({
-    ...renderEnvironment,
+    APP_URL: appUrl,
     DATA_DIR: data,
     ASSET_DIR: data,
     ...environment,
@@ -48,43 +41,45 @@ function fixture(environment: NodeJS.ProcessEnv = {}) {
   return { ...instance, config, app, instance };
 }
 
-describe("Render prototype", () => {
-  it("uses the platform's HTTPS address only with an explicit adapter opt-in", () => {
-    expect(loadConfig(renderEnvironment).appUrl).toBe(
-      renderEnvironment.RENDER_EXTERNAL_URL,
-    );
+describe("provider-neutral hosting", () => {
+  it("uses an explicit public origin independently of the host's port and bind address", () => {
     expect(
-      loadConfig({ ...renderEnvironment, BOOPITY_HOSTING: undefined }).appUrl,
-    ).toBe("http://localhost:3000");
-    expect(
-      loadConfig({ ...renderEnvironment, APP_URL: "https://pets.example" })
-        .appUrl,
-    ).toBe("https://pets.example");
-    expect(loadConfig({ APP_URL: "https://pets.example" }).appUrl).toBe(
-      "https://pets.example",
-    );
-    expect(() => loadConfig({ BOOPITY_HOSTING: "unknown" })).toThrow();
+      loadConfig({ APP_URL: `${appUrl}/`, HOST: "0.0.0.0", PORT: "8080" }),
+    ).toMatchObject({ appUrl, host: "0.0.0.0", port: 8080 });
+    expect(loadConfig({}).appUrl).toBe("http://localhost:3000");
+  });
+  it("does not use retired adapter settings or platform metadata to choose an origin", () => {
+    const metadata = {
+      BOOPITY_HOSTING: "render",
+      RENDER: "true",
+      RENDER_EXTERNAL_URL: "https://untrusted.example.test",
+      RENDER_EXTERNAL_HOSTNAME: "untrusted.example.test",
+    };
+    expect(loadConfig(metadata).appUrl).toBe("http://localhost:3000");
+    expect(loadConfig({ ...metadata, APP_URL: appUrl }).appUrl).toBe(appUrl);
+    expect(() => loadConfig({ ...metadata, APP_URL: "" })).toThrow();
   });
   it.each([
-    { RENDER: "false" },
-    { RENDER_EXTERNAL_URL: undefined },
-    { RENDER_EXTERNAL_HOSTNAME: "other.onrender.com" },
-    { RENDER_EXTERNAL_URL: "http://maple-fixture.onrender.com" },
-    { RENDER_EXTERNAL_URL: "https://maple-fixture.onrender.com:3000" },
-    { RENDER_EXTERNAL_URL: "https://maple-fixture.onrender.com/setup" },
-    { RENDER_EXTERNAL_URL: "https://maple-fixture.onrender.com/?secret=value" },
-    { RENDER_EXTERNAL_URL: "https://maple-fixture.onrender.com/#setup" },
-    { RENDER_EXTERNAL_URL: "https://someone@maple-fixture.onrender.com" },
-    {
-      RENDER_EXTERNAL_URL: "https://onrender.com.evil.example",
-      RENDER_EXTERNAL_HOSTNAME: "onrender.com.evil.example",
-    },
-  ])("fails closed on invalid platform metadata %j", (extra) => {
-    expect(() => loadConfig({ ...renderEnvironment, ...extra })).toThrow();
+    "",
+    "not a URL",
+    "http://pets.example.test",
+    "https://pets.example.test/setup",
+    "https://pets.example.test/?secret=value",
+    "https://pets.example.test/#setup",
+    "https://someone@pets.example.test",
+    "ftp://pets.example.test",
+  ])("rejects unsafe or malformed APP_URL %j", (APP_URL) => {
+    expect(() => loadConfig({ APP_URL })).toThrow();
   });
-  it("does not start trusting forwarding headers merely because Render is selected", () => {
-    const config = loadConfig(renderEnvironment);
-    const request = new Request("http://maple-fixture.onrender.com/api/ready", {
+  it("rejects origins containing embedded credentials", () => {
+    const address = new URL(appUrl);
+    address.username = "fixture";
+    address.password = "fixture";
+    expect(() => loadConfig({ APP_URL: address.href })).toThrow();
+  });
+  it("does not trust forwarding headers without an explicitly trusted proxy", () => {
+    const config = loadConfig({ APP_URL: appUrl });
+    const request = new Request("http://pets.example.test/api/ready", {
       headers: {
         "x-forwarded-for": "198.51.100.10",
         "cf-connecting-ip": "198.51.100.11",
@@ -220,46 +215,7 @@ describe("host readiness", () => {
 });
 
 describe("image deployment packaging", () => {
-  it("requires a digest and includes one paid disk-backed instance with no email, credentials or migrations hook", () => {
-    const image = `registry.example/boopity/app@sha256:${"1234567890abcdef".repeat(4)}`;
-    const blueprint = renderBlueprint(image);
-    expect(blueprint.services).toHaveLength(1);
-    const service = blueprint.services[0];
-    expect(service).toMatchObject({
-      runtime: "image",
-      image: { url: image },
-      plan: "0.5c-512mb",
-      numInstances: 1,
-      healthCheckPath: "/api/ready",
-      disk: { mountPath: "/data", sizeGB: 1 },
-    });
-    expect(
-      service.envVars.some(
-        (v: { key: string }) => v.key === "BOOPITY_SETUP_TOKEN",
-      ),
-    ).toBe(false);
-    expect(service.envVars.map((v: { key: string }) => v.key)).toEqual([
-      "BOOPITY_HOSTING",
-      "NODE_ENV",
-      "HOST",
-      "PORT",
-      "DATA_DIR",
-      "BOOPITY_SETUP_PASSWORD",
-    ]);
-    expect(
-      service.envVars.find(
-        (v: { key: string }) => v.key === "BOOPITY_SETUP_PASSWORD",
-      ),
-    ).toEqual({ key: "BOOPITY_SETUP_PASSWORD", sync: false });
-    for (const key of [
-      "repo",
-      "buildCommand",
-      "preDeployCommand",
-      "initialDeployHook",
-      "scaling",
-      "autoDeployTrigger",
-    ])
-      expect(service[key]).toBeUndefined();
+  it("keeps prebuilt Compose portable with private setup configuration and persistent storage", () => {
     const compose = readFileSync(
       new URL("../../compose.image.yaml", import.meta.url),
       "utf8",
@@ -270,16 +226,5 @@ describe("image deployment packaging", () => {
     expect(compose).toContain(
       "BOOPITY_SETUP_PASSWORD: ${BOOPITY_SETUP_PASSWORD:-}",
     );
-  });
-  it.each([
-    undefined,
-    "",
-    "registry.example/boopity:latest",
-    "https://registry.example/a",
-    "local-image",
-    `registry.example/a@sha256:${"0".repeat(64)}`,
-    `registry.example/a@sha256:${"ab".repeat(32)}\n`,
-  ])("rejects absent or unpinned image input %j", (image) => {
-    expect(() => renderBlueprint(image)).toThrow();
   });
 });

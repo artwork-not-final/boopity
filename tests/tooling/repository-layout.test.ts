@@ -116,6 +116,10 @@ describe("self-hosted repository root", () => {
     expect(workflow).toContain(
       "node tests/integration/compose-container-local.mjs boopity-ci .",
     );
+    expect(workflow).toContain("BOOPITY_CONTAINER_QA: hosting-disposable");
+    expect(workflow).toContain(
+      "node tests/integration/hosting-container-local.mjs boopity-ci",
+    );
     expect(workflow).not.toMatch(
       /secrets\.|pull_request_target|docker push|git push/,
     );
