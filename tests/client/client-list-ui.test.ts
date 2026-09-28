@@ -43,7 +43,8 @@ describe("main client list", () => {
       /<form\b|<input\b|Create invitation|Archive client/,
     );
     expect(html).toContain("rounded-none");
-    expect(html).toContain("hover:bg-muted");
+    expect(html).toContain("hover:bg-brand-soft-hover");
+    expect(html).not.toContain("hover:bg-muted");
     expect(html).not.toContain("bg-accent");
   });
   it("routes the pet shortcut directly to the selected client's Pets tab", () => {

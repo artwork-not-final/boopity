@@ -11,13 +11,16 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-soft-hover: var(--brand-soft-hover);
+  --color-brand-ink: var(--brand-ink);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
-  --color-input: var(--border);
+  --color-input: var(--input);
   --color-ring: var(--ring);
   --color-destructive: #a32b3b;
   --font-sans: "Avenir Next", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
@@ -28,17 +31,22 @@
 }
 
 :root {
-  --background: #faf8f5;
-  --foreground: #272329;
+  --background: #f1f3f5;
+  --foreground: #242a32;
   --card: #ffffff;
   --primary: #68407a;
   --primary-foreground: #ffffff;
-  --secondary: #f0edf1;
-  --muted: #f4f1ed;
-  --muted-foreground: #6e646e;
+  --secondary: color-mix(in srgb, var(--primary) 14%, var(--card));
+  --secondary-foreground: var(--brand-ink);
+  --brand-soft: color-mix(in srgb, var(--primary) 5%, var(--card));
+  --brand-soft-hover: color-mix(in srgb, var(--primary) 10%, var(--card));
+  --brand-ink: #68407a;
+  --muted: #e7ebef;
+  --muted-foreground: #535d69;
   --accent: #f5bb62;
   --accent-foreground: #000000;
-  --border: #e4dfe5;
+  --border: #d3d9e0;
+  --input: #8793a1;
   --ring: #68407a;
 }
 

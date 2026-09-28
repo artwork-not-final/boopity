@@ -32,6 +32,7 @@ describe("business Payments page", () => {
       }),
     );
     expect(html).toContain('aria-pressed="true">Actual payments');
+    expect(html.match(/data-variant="tab-line"/g)).toHaveLength(2);
     for (const label of [
       "Search by client or service",
       "Payment settings",
@@ -70,6 +71,8 @@ describe("business Payments page", () => {
     expect(html).not.toContain("<details");
     expect(html).not.toContain("<button");
     expect(html).toContain("sm:grid-cols-");
+    expect(html).toContain("hover:bg-brand-soft-hover");
+    expect(html).not.toContain("hover:bg-muted");
   });
   it("shows signed refunds and distinguishes voids and refund reversals", () => {
     const html = renderToStaticMarkup(

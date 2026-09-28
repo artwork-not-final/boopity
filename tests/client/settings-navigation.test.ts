@@ -66,6 +66,7 @@ describe("post-installation settings", () => {
         }),
       );
       expect(html).toContain('aria-label="Settings categories"');
+      expect(html.match(/data-variant="tab-line"/g)).toHaveLength(4);
       expect(html).toContain('aria-current="page"');
       expect(html).not.toContain("Back to workspace");
       expect(html).not.toContain("<aside");

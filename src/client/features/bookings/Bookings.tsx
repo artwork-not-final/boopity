@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import { SectionTabs } from "../../components/navigation/SectionTabs";
 
 import { Field } from "../../components/forms/Field";
 import { Text } from "../../components/forms/TextFields";
@@ -149,23 +150,18 @@ export function Bookings({
           {owner ? "New booking" : "Request a booking"}
         </Button>
       </div>
-      <nav
-        aria-label="Booking view"
-        className="inline-grid grid-cols-3 gap-1 rounded-xl bg-muted p-1"
-      >
-        {(["week", "month", "list"] as const).map((value) => (
-          <Button
-            key={value}
-            variant="ghost"
-            disabled={busy}
-            aria-pressed={view === value}
-            className={`min-h-11 px-5 hover:text-foreground ${view === value ? "bg-card text-foreground shadow-sm hover:bg-card dark:hover:bg-card" : "text-muted-foreground hover:bg-card/70 dark:hover:bg-card/70"}`}
-            onClick={() => setView(value)}
-          >
-            {value.charAt(0).toUpperCase() + value.slice(1)}
-          </Button>
-        ))}
-      </nav>
+      <SectionTabs
+        label="Booking view"
+        selection="value"
+        items={[
+          ["week", "Week"],
+          ["month", "Month"],
+          ["list", "List"],
+        ]}
+        value={view}
+        onValueChange={setView}
+        disabled={busy}
+      />
       <div className="grid items-end gap-5 rounded-xl border bg-card p-5 sm:grid-cols-2 sm:p-6">
         <SearchBox
           label={

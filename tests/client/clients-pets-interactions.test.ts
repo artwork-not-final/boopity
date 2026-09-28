@@ -338,7 +338,7 @@ describe("client and pet workspace interactions", () => {
     await mount("/app/clients/new");
     await enter("First name", "Taylor");
     await enter("Last name", "Example");
-    await enter("Client email", "taylor@example.test");
+    await enter("Email", "taylor@example.test");
     respond = (request) => {
       if (request.route !== "/owner/clients" || request.method !== "POST")
         return;
@@ -370,9 +370,20 @@ describe("client and pet workspace interactions", () => {
 
   it("retains contact and pet drafts across tabs, portal updates, and resume events", async () => {
     await mount();
+    expect(
+      container.querySelectorAll(
+        '[aria-label="Client sections"] [data-variant="tab-line"]',
+      ),
+    ).toHaveLength(3);
     const contact = field("First name");
     await enter("First name", "Unsaved Alice");
     await click("Pets");
+    expect(window.location.pathname).toBe("/app/clients/alice/pets");
+    expect(
+      container.querySelector(
+        '[aria-label="Client sections"] [aria-current="page"]',
+      )?.textContent,
+    ).toBe("Pets");
     await act(async () => navigateLocal("/app/clients/alice/pets/scout"));
     const notes = field("Private sitter notes");
     await enter("Private sitter notes", "Unsaved care note");
@@ -417,6 +428,15 @@ describe("client and pet workspace interactions", () => {
       method: "PUT",
       body: { phone: "2025550199" },
     });
+    expect(
+      button("Save client").parentElement?.querySelector('[role="status"]')
+        ?.textContent,
+    ).toBe("Saved");
+    await enter("Phone", "2025550111");
+    expect(
+      button("Save client").parentElement?.querySelector('[role="status"]')
+        ?.textContent,
+    ).toBe("");
   });
 
   it("keeps client drafts through archive/reactivate and disables new pets for archived clients", async () => {
@@ -494,10 +514,26 @@ describe("client and pet workspace interactions", () => {
     respond = () => undefined;
     await click("Revoke portal access");
     expect(container.querySelector("textarea[readonly]")).toBeNull();
+    expect(container.textContent).toContain(
+      "Client portal access and invitations revoked.",
+    );
+    await click("Dismiss confirmation");
+    expect(container.textContent).not.toContain(
+      "Client portal access and invitations revoked.",
+    );
+    await click("Create invitation");
+    expect(container.textContent).toContain(
+      "Invitation created. Share this one-time link privately with the client.",
+    );
+    await click("Contact");
+    expect(container.textContent).not.toContain(
+      "Invitation created. Share this one-time link privately with the client.",
+    );
     expect(mutations().map((request) => request.route)).toEqual([
       "/owner/clients/alice/invitation",
       "/owner/clients/alice/revoke",
       "/owner/clients/alice/revoke",
+      "/owner/clients/alice/invitation",
     ]);
   });
 

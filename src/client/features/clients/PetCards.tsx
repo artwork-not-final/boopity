@@ -20,9 +20,9 @@ export function PetCards({
             type="button"
             disabled={busy}
             onClick={() => onSelect(pet.id)}
-            className="group flex h-full w-full items-center gap-4 rounded-xl border bg-card p-5 text-left transition-colors hover:border-primary/40 hover:bg-accent/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50 sm:p-6"
+            className="group flex h-full w-full items-center gap-4 rounded-xl border bg-card p-5 text-left transition-colors hover:border-brand-ink/40 hover:bg-brand-soft-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50 sm:p-6"
           >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
               <PawPrint aria-hidden="true" className="size-5" />
             </span>
             <span className="min-w-0 flex-1">
@@ -38,7 +38,7 @@ export function PetCards({
                   Archived
                 </Badge>
               )}
-              <span className="mt-3 block text-sm font-medium text-primary">
+              <span className="mt-3 block text-sm font-medium text-brand-ink">
                 Care details
               </span>
             </span>

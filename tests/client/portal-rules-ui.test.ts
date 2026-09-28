@@ -101,7 +101,8 @@ describe("portal and rules layout", () => {
       "Turning this off signs clients out.",
       "cancel their invitations.",
       "Changes apply to new bookings.",
-      "waive client notice and cancellation limits",
+      "choose to waive minimum notice",
+      "book outside opening hours",
       "One booking or pending request at a time.",
       "31 days maximum",
       "booking conflicts can’t be overridden.",
@@ -115,5 +116,19 @@ describe("portal and rules layout", () => {
       /<button\b[^>]*disabled=""[^>]*>Save changes<\/button>/,
     );
     expect(render()).not.toMatch(/<button\b[^>]*disabled=""/);
+  });
+  it("explains why clients have no available times until opening hours are saved", () => {
+    const html = renderToStaticMarkup(
+      createElement(Rules, {
+        data: { ...data, policy: { ...data.policy, weekly: [] } },
+        busy: false,
+        run: async () => {},
+      }),
+    );
+    expect(html).toContain("Set your booking hours below.");
+    expect(html).toContain(
+      "Clients won’t see available times until you add hours and save.",
+    );
+    expect(render()).not.toContain("Set your booking hours below.");
   });
 });

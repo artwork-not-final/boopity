@@ -42,13 +42,16 @@ export function PetCareForm({
       className="space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
-        void run(async () => {
-          await api(`/owner/pets/${id}`, "PUT", pet);
-          await api(`/owner/pets/${id}/notes`, "PUT", {
-            notes: pet.sitterNotes ?? "",
-          });
-          close();
-        }, "Pet care details saved.");
+        void run(
+          async () => {
+            await api(`/owner/pets/${id}`, "PUT", pet);
+            await api(`/owner/pets/${id}/notes`, "PUT", {
+              notes: pet.sitterNotes ?? "",
+            });
+            close();
+          },
+          { announcement: "Pet care details saved." },
+        );
       }}
     >
       <div className="flex flex-wrap items-center gap-3">

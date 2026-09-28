@@ -27,13 +27,16 @@ export function NewPetForm({
       className="max-w-2xl space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
-        void run(async () => {
-          await api(`/owner/pets/clients/${clientId}`, "POST", {
-            name,
-            species,
-          });
-          close();
-        }, "Pet added.");
+        void run(
+          async () => {
+            await api(`/owner/pets/clients/${clientId}`, "POST", {
+              name,
+              species,
+            });
+            close();
+          },
+          { announcement: "Pet added." },
+        );
       }}
     >
       <FormSection title="New pet">

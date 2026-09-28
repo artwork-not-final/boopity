@@ -331,6 +331,8 @@ export function businessRoutes(
           startDate: calendarDate,
           endDate: calendarDate.optional(),
           startTime: clockTime.optional(),
+          outsideHours: z.literal("true").optional(),
+          waiveNotice: z.literal("true").optional(),
         })
         .strict(),
       c.req.query(),
@@ -338,6 +340,17 @@ export function businessRoutes(
     const owner = c.get("businessRole") === "owner",
       policy = await readPolicy(c.env.DB),
       now = Date.now();
+    const overrides =
+      input.outsideHours || input.waiveNotice
+        ? {
+            outsideHours: input.outsideHours === "true",
+            waiveNotice: input.waiveNotice === "true",
+          }
+        : undefined;
+    if (!owner && overrides)
+      throw new HTTPException(403, {
+        message: "Only the sitter can make a booking exception.",
+      });
     const zone = (await c.env.DB.prepare(
       "SELECT time_zone AS zone FROM installation WHERE id=1",
     ).first<{ zone: string }>())!.zone;
@@ -361,7 +374,7 @@ export function businessRoutes(
       )
       .all<{ startAt: number; endAt: number; status: string }>();
     // Exact owner previews allow recording the actual time, not just a free slot.
-    // The server infers historical eligibility; callers cannot opt out of future rules.
+    // The server infers historical eligibility; future exceptions still enforce capacity.
     if (
       owner &&
       (input.startTime !== undefined || service.durationMinutes === null)
@@ -369,6 +382,7 @@ export function businessRoutes(
       const window = bookingWindow(
         {
           ...input,
+          overrides,
           requestId: crypto.randomUUID(),
           petIds: ["availability-only"],
           message: "",
@@ -410,6 +424,7 @@ export function businessRoutes(
         const window = bookingWindow(
           {
             ...input,
+            overrides,
             requestId: crypto.randomUUID(),
             petIds: ["availability-only"],
             startTime,

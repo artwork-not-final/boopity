@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   CancellationList,
+  Cancellations,
   CancellationReview,
   CancellationEmpty,
   type Cancellation,
@@ -42,12 +43,26 @@ const renderReview = (changes: Partial<Cancellation> = {}, busy = false) =>
   );
 afterEach(() => vi.unstubAllGlobals());
 describe("cancellation review queue", () => {
+  it("uses shared underline controls for all review filters", () => {
+    const html = renderToStaticMarkup(
+      createElement(Cancellations, {
+        revision: 1,
+        timeZone: "America/New_York",
+        busy: false,
+        run: async () => {},
+      }),
+    );
+    expect(html).toContain('aria-label="Cancellation review status"');
+    expect(html.match(/data-variant="tab-line"/g)).toHaveLength(3);
+    expect(html).toContain('aria-pressed="true">Needs review');
+  });
   it("uses flat keyboard-accessible rows without nested actions or inline forms", () => {
     const html = renderList();
     expect(html).toContain('aria-label="Cancellations"');
     expect(html.match(/<button\b/g)).toHaveLength(1);
     expect(html).toContain("rounded-none");
-    expect(html).toContain("hover:bg-muted");
+    expect(html).toContain("hover:bg-brand-soft-hover");
+    expect(html).not.toContain("hover:bg-muted");
     expect(html).not.toMatch(/<form|<input|<textarea|<details|<summary/);
     expect(html).toContain("Review cancellation:");
     expect(html).toContain("Needs review");

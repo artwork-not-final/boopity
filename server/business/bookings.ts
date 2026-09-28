@@ -229,6 +229,10 @@ export function bookingRoutes() {
   api.post("/", async (c) => {
     const input = parseInput(bookingRequestSchema, await readJson(c.req));
     const isOwner = c.get("businessRole") === "owner";
+    if (!isOwner && input.overrides !== undefined)
+      throw new HTTPException(403, {
+        message: "Only the sitter can make a booking exception.",
+      });
     const clientId = isOwner ? input.clientId : c.get("clientId");
     if (
       !clientId ||
@@ -289,6 +293,9 @@ export function bookingRoutes() {
       requestHoldHours: policy.requestHoldHours,
       timeZone: installation.timeZone,
       version: policy.version,
+      ...(window.overrides.outsideHours || window.overrides.waiveNotice
+        ? { overrides: window.overrides }
+        : {}),
     };
     const rate = {
       baseCents: service.priceCents,
@@ -355,7 +362,7 @@ export function bookingRoutes() {
         "INSERT INTO booking_pets(booking_id,pet_id) SELECT ?1,value FROM json_each(?2) WHERE EXISTS(SELECT 1 FROM bookings WHERE id=?1)",
       ).bind(id, JSON.stringify(input.petIds)),
       c.env.DB.prepare(
-        "INSERT INTO booking_history SELECT ?1,?2,?3,?4,?5,'',?6 WHERE EXISTS(SELECT 1 FROM bookings WHERE id=?2)",
+        "INSERT INTO booking_history SELECT ?1,?2,?3,?4,?5,?7,?6 WHERE EXISTS(SELECT 1 FROM bookings WHERE id=?2)",
       ).bind(
         crypto.randomUUID(),
         id,
@@ -367,6 +374,12 @@ export function bookingRoutes() {
             ? "requested"
             : "confirmed",
         now,
+        [
+          window.overrides.outsideHours ? "Booked outside opening hours." : "",
+          window.overrides.waiveNotice ? "Minimum booking notice waived." : "",
+        ]
+          .filter(Boolean)
+          .join(" "),
       ),
     ]);
     if (!result[0].meta.changes) {

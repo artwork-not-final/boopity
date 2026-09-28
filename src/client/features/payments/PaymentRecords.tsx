@@ -22,6 +22,7 @@ import { statusLabels } from "./payment-format";
 import { PaymentActivityList } from "./PaymentActivityList";
 import { PaymentActivityTotals } from "./PaymentActivityTotals";
 import { Button } from "../../components/ui/button";
+import { SectionTabs } from "../../components/navigation/SectionTabs";
 import { Input } from "../../components/ui/input";
 import { paymentMethodLabel } from "./payment-method-label";
 
@@ -94,24 +95,19 @@ export function PaymentRecords({
         </Button>
       </div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <nav
-          aria-label="Payment environment"
-          className="inline-flex w-fit gap-1 rounded-xl bg-muted p-1"
-        >
-          {(["live", "test"] as const).map((value) => (
-            <Button
-              key={value}
-              variant={mode === value ? "secondary" : "ghost"}
-              aria-pressed={mode === value}
-              onClick={() => {
-                setMode(value);
-                page.reset();
-              }}
-            >
-              {value === "live" ? "Actual payments" : "Sandbox"}
-            </Button>
-          ))}
-        </nav>
+        <SectionTabs
+          label="Payment environment"
+          selection="value"
+          items={[
+            ["live", "Actual payments"],
+            ["test", "Sandbox"],
+          ]}
+          value={mode}
+          onValueChange={(value) => {
+            setMode(value);
+            page.reset();
+          }}
+        />
         <SearchBox
           key={searchKey}
           label="Search by client or service"

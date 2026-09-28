@@ -59,10 +59,11 @@ describe("booking list rows", () => {
     expect(positions.every((position) => position >= 0)).toBe(true);
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
   });
-  it("uses neutral row colors instead of inheriting the brand's accent hover", () => {
+  it("uses a subtle brand hover on white rows instead of the full accent color", () => {
     const button = render().match(/<button\b[^>]*>/)?.[0] ?? "";
     expect(button).toContain("bg-card");
-    expect(button).toContain("hover:bg-muted");
+    expect(button).toContain("hover:bg-brand-soft-hover");
+    expect(button).not.toContain("hover:bg-muted");
     expect(button).toContain("hover:text-foreground");
     expect(button).not.toContain("bg-accent");
     expect(button).not.toContain("text-accent-foreground");

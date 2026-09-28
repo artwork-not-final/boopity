@@ -1,5 +1,9 @@
 import { Button } from "../../components/ui/button";
 import { FormSection } from "../../components/forms/FormSection";
+import {
+  SavedStatus,
+  useSaveFeedback,
+} from "../../components/feedback/ActionFeedback";
 import { workspaceApi as api } from "../../lib/http/workspace-api";
 import type { RunWorkspaceAction } from "../../lib/types/workspace-types";
 import type { Service } from "./types";
@@ -15,26 +19,30 @@ export function ServiceAvailability({
   run: RunWorkspaceAction;
   onChange: (service: Service) => void;
 }) {
+  const saveFeedback = useSaveFeedback(`service-visibility:${service.id}`);
   return (
     <FormSection title="Availability">
-      <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
-        <input
-          type="checkbox"
-          className="size-4 shrink-0 accent-primary"
-          checked={Boolean(service.portalVisible)}
-          disabled={busy}
-          onChange={(e) => {
-            const visible = e.target.checked;
-            void run(async () => {
-              await api(`/owner/services/${service.id}/visibility`, "PUT", {
-                visible,
-              });
-              onChange({ ...service, portalVisible: visible ? 1 : 0 });
-            }, "Client portal visibility saved.");
-          }}
-        />
-        Offer in the client portal
-      </label>
+      <div className="flex flex-wrap items-center gap-x-3">
+        <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
+          <input
+            type="checkbox"
+            className="size-4 shrink-0 accent-primary"
+            checked={Boolean(service.portalVisible)}
+            disabled={busy}
+            onChange={(e) => {
+              const visible = e.target.checked;
+              void run(async () => {
+                await api(`/owner/services/${service.id}/visibility`, "PUT", {
+                  visible,
+                });
+                onChange({ ...service, portalVisible: visible ? 1 : 0 });
+              }, saveFeedback);
+            }}
+          />
+          Offer in the client portal
+        </label>
+        <SavedStatus feedback={saveFeedback} />
+      </div>
       <p className="text-sm leading-6 text-muted-foreground">
         {service.isActive
           ? "Turn this off to keep the service available only to you."

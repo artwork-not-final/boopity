@@ -2,6 +2,10 @@ import { useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Text, Area } from "../../components/forms/TextFields";
 import { FormSection } from "../../components/forms/FormSection";
+import {
+  SavedStatus,
+  useSaveFeedback,
+} from "../../components/feedback/ActionFeedback";
 import { workspaceApi as api } from "../../lib/http/workspace-api";
 import type { RunWorkspaceAction } from "../../lib/types/workspace-types";
 import type { Client, ClientDraft } from "./types";
@@ -32,23 +36,29 @@ export function ClientForm({
   );
   const set = (key: keyof ClientDraft, text: string) =>
     setValue((v) => ({ ...v, [key]: text }));
+  const saveFeedback = useSaveFeedback(`client:${client?.id ?? "new"}`, [
+    value,
+  ]);
   return (
     <form
       aria-label={client ? "Edit client" : "New client"}
       className="space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
-        void run(async () => {
-          const { client: saved } = await api<{ client: Client }>(
-            client ? `/owner/clients/${client.id}` : "/owner/clients",
-            client ? "PUT" : "POST",
-            {
-              ...value,
-              status: value.status === "archived" ? "active" : value.status,
-            },
-          );
-          done(saved.id);
-        });
+        void run(
+          async () => {
+            const { client: saved } = await api<{ client: Client }>(
+              client ? `/owner/clients/${client.id}` : "/owner/clients",
+              client ? "PUT" : "POST",
+              {
+                ...value,
+                status: value.status === "archived" ? "active" : value.status,
+              },
+            );
+            done(saved.id);
+          },
+          client ? saveFeedback : { announcement: "Client added." },
+        );
       }}
     >
       <FormSection title="Contact details">
@@ -68,7 +78,7 @@ export function ClientForm({
             maxLength={100}
           />
           <Text
-            label="Client email"
+            label="Email"
             type="email"
             value={value.email}
             onChange={(v) => set("email", v)}
@@ -115,9 +125,12 @@ export function ClientForm({
         />
       </FormSection>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Button className="min-h-11" disabled={busy}>
-          Save client
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button className="min-h-11" disabled={busy}>
+            Save client
+          </Button>
+          <SavedStatus feedback={saveFeedback} />
+        </div>
         {client && (
           <Button
             type="button"

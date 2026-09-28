@@ -177,6 +177,38 @@ function deferred() {
 }
 
 describe("services workspace interactions", () => {
+  it("updates both pet totals and the pricing period without saving the service", async () => {
+    await mount("/app/rates/new");
+    const totals = () =>
+      [...container.querySelectorAll('[aria-label="Price preview"] > div')].map(
+        (row) => [
+          row.querySelector("dt")?.textContent,
+          row.querySelector("dd")?.textContent,
+        ],
+      );
+    await enter("Price per visit (USD)", "15");
+    await enter("Additional-pet price (USD)", "10");
+    expect(totals()).toEqual([
+      ["1 pet", "$15.00 per visit"],
+      ["2 pets", "$25.00 per visit"],
+    ]);
+    await enter("Additional-pet price (USD)", "0");
+    expect(totals()).toEqual([
+      ["1 pet", "$15.00 per visit"],
+      ["2 pets", "$30.00 per visit"],
+    ]);
+    await act(async () => input("All-day / multi-day care").click());
+    await enter("Price per day (USD)", "45.50");
+    await enter("Additional-pet price (USD)", "12.25");
+    expect(totals()).toEqual([
+      ["1 pet", "$45.50 per day"],
+      ["2 pets", "$57.75 per day"],
+    ]);
+    await enter("Price per day (USD)", "");
+    expect(container.querySelector('[aria-label="Price preview"]')).toBeNull();
+    expect(mutations()).toHaveLength(0);
+  });
+
   it("keeps live search and pagination when returning from an editor", async () => {
     services = Array.from({ length: 12 }, (_, index) => ({
       ...original,
@@ -246,6 +278,15 @@ describe("services workspace interactions", () => {
     ]);
     expect(window.location.pathname).toBe("/app/rates");
     expect(container.textContent).toContain("Service saved.");
+    const status = [...container.querySelectorAll('[role="status"]')].find(
+      (element) => element.textContent === "Service saved.",
+    );
+    expect(status?.classList.contains("sr-only")).toBe(true);
+    expect(
+      container.querySelector('[aria-label="Dismiss confirmation"]'),
+    ).toBeNull();
+    await click("New service");
+    expect(container.textContent).not.toContain("Service saved.");
   });
 
   it("preserves the latest private description when saving edited details and rates", async () => {
@@ -331,7 +372,17 @@ describe("services workspace interactions", () => {
     expect(button("Back to services").disabled).toBe(true);
     await act(async () => pending.resolve(Response.json({ ok: true })));
     expect(input("Offer in the client portal").checked).toBe(false);
+    const savedStatus = container.querySelector('[role="status"]');
+    expect(savedStatus?.textContent).toBe("Saved");
+    expect(
+      savedStatus?.parentElement?.contains(input("Offer in the client portal")),
+    ).toBe(true);
     await click("Archive service");
+    expect(container.textContent).toContain("Service archived.");
+    const mutationCount = mutations().length;
+    await click("Dismiss confirmation");
+    expect(container.textContent).not.toContain("Service archived.");
+    expect(mutations()).toHaveLength(mutationCount);
     await click("Reactivate service");
     expect(input("Service name")).toBe(name);
     expect(name.value).toBe("Unsaved walk");

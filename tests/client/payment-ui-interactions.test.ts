@@ -290,6 +290,11 @@ it.each([true, false])(
 
 it("keeps payment and credit drafts separate and retains a manual-payment key after an uncertain response", async () => {
   await booking();
+  expect(
+    container.querySelectorAll(
+      '[aria-label="Payment actions"] [data-variant="tab-line"]',
+    ),
+  ).toHaveLength(2);
   await enter("Received amount (USD)", "12.34");
   await enter("Private accounting note", "Received elsewhere");
   await choose("Manual payment method", "bank-transfer");
@@ -671,6 +676,11 @@ it("retains payment drafts across booking tabs in the workspace, but not across 
   await enter("Refund amount", "2.00");
   const amount = field("Received amount (USD)"),
     refund = field("Refund amount");
+  expect(
+    container.querySelectorAll(
+      '[aria-label="Booking sections"] [data-variant="tab-line"]',
+    ),
+  ).toHaveLength(3);
   await click("Overview");
   await click("History");
   await act(async () =>

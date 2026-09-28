@@ -1,11 +1,13 @@
+import type { BookingPolicy } from "../../../shared/portal";
+import type { FirstBookingStep } from "../../../shared/first-booking";
+import type { ActionFeedback } from "./action-feedback";
+
 // The workspace shell owns busy state, error reporting, and refresh after a mutation.
 export type RunWorkspaceAction = (
   work: () => Promise<unknown>,
-  message?: string,
+  message?: ActionFeedback,
 ) => Promise<void>;
 
-import type { BookingPolicy } from "../../../shared/portal";
-import type { FirstBookingStep } from "../../../shared/first-booking";
 export type Policy = BookingPolicy & { version: number };
 export type Data = {
   policy: Policy;

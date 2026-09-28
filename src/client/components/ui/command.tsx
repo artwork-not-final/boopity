@@ -83,7 +83,7 @@ export function CommandItem({
   return (
     <Primitive.Item
       className={cn(
-        "flex min-h-11 cursor-default items-center justify-between gap-3 rounded-md px-3 py-2 text-sm leading-5 break-words outline-none data-[selected=true]:bg-muted data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
+        "flex min-h-11 cursor-default items-center justify-between gap-3 rounded-md px-3 py-2 text-sm leading-5 break-words outline-none data-[selected=true]:bg-brand-soft-hover data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
         className,
       )}
       {...props}

@@ -203,6 +203,7 @@ USD, CAD, GBP, EUR, AUD and NZD. Saved bookings retain their original currency a
    optionally choose instant confirmation. An unanswered request reserves its slot until the
    configured hold expires, never later than the visit start. Expiry is processed by the local
    maintenance job and before business requests; expired holds never block new reservations.
+   Without opening hours, no future times are available by default, including for the sitter.
 4. **Invite:** enable the portal, select an active client with a valid email, and generate a
    private invitation link. Share it yourself; this version does **not** send invitation emails.
    Links expire after seven days and work once; replacement invalidates the previous link.
@@ -227,10 +228,15 @@ permanently invalidate their outstanding invitations. Each login belongs to one 
 
 This preview reserves **one concurrent booking per business**, including pending holds and
 all-day stays. It does not yet model multiple staff, boarding capacity or recurring series.
-Timed visits must fit one opening window and one local date. Date-range stays use inclusive
+By default, timed visits must fit one opening window and one local date. Date-range stays use inclusive
 dates, up to 31 days, and block whole days; each date must be open and not blocked. Ambiguous
 or missing DST times and timed visits crossing a clock change are rejected. Rules/rate/timezone
 changes apply to new bookings; existing prices, cancellation terms and pending holds stay saved.
+Sitters can explicitly waive minimum notice or book outside opening hours for an individual
+booking. Applied exceptions appear in its history; unavailable dates, the booking horizon and
+future conflicts still apply. Fully ended visits can be recorded as completed, including past
+overlaps (with a warning), without recording a payment. Clients cannot use these exceptions
+or backdate bookings.
 There is no in-place rescheduling; cancel and create a new request to preserve the history.
 No document uploads/sharing, pet-photo UI/API or background booking emails yet.
 Stored files and migration history are preserved, but the deferred photo/document

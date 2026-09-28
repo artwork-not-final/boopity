@@ -5,6 +5,10 @@ import { Input } from "../../components/ui/input";
 import { Field } from "../../components/forms/Field";
 import { Area } from "../../components/forms/TextFields";
 import { FormSection } from "../../components/forms/FormSection";
+import {
+  SavedStatus,
+  useSaveFeedback,
+} from "../../components/feedback/ActionFeedback";
 
 import { Choice } from "../../components/forms/Choice";
 
@@ -28,6 +32,7 @@ export function Rules({ data, busy, run }: FormProps) {
   const [value, setValue] = useState(data.policy),
     [blocked, setBlocked] = useState(data.policy.blockedDates.join("\n"));
   const hoursId = useId();
+  const saveFeedback = useSaveFeedback("booking-rules", [value, blocked]);
   return (
     <div className="space-y-6">
       <div>
@@ -49,7 +54,7 @@ export function Rules({ data, busy, run }: FormProps) {
                   ...new Set(blocked.split(/\s+/).filter(Boolean)),
                 ],
               }),
-            "Portal and booking rules saved.",
+            saveFeedback,
           );
         }}
       >
@@ -125,8 +130,9 @@ export function Rules({ data, busy, run }: FormProps) {
                 ))}
               </div>
               <p className="text-sm leading-6 text-muted-foreground">
-                You can waive client notice and cancellation limits when
-                managing a booking.
+                When adding a booking, you can choose to waive minimum notice or
+                book outside opening hours. You can also cancel after a client’s
+                cancellation deadline.
               </p>
             </FormSection>
           </div>
@@ -135,6 +141,12 @@ export function Rules({ data, busy, run }: FormProps) {
               One booking or pending request at a time. Every day of a stay must
               be open (31 days maximum).
             </p>
+            {value.weekly.length === 0 && (
+              <p className="rounded-lg border bg-card p-4 text-sm">
+                Set your booking hours below. Clients won’t see available times
+                until you add hours and save.
+              </p>
+            )}
             <div className="divide-y border-y">
               <div
                 aria-hidden="true"
@@ -211,16 +223,16 @@ export function Rules({ data, busy, run }: FormProps) {
               maxLength={4500}
             />
             <p className="text-sm leading-6 text-muted-foreground">
-              Closed hours, unavailable dates and booking conflicts can’t be
-              overridden. Times skipped or repeated when clocks change can’t be
-              booked.
+              Unavailable dates and booking conflicts can’t be overridden. Times
+              skipped or repeated when clocks change can’t be booked.
             </p>
           </FormSection>
         </div>
-        <div className="flex justify-end border-t pt-4">
+        <div className="flex flex-wrap items-center justify-end gap-3 border-t pt-4">
           <Button className="min-h-11 w-full sm:w-auto" disabled={busy}>
             Save changes
           </Button>
+          <SavedStatus feedback={saveFeedback} />
         </div>
       </form>
     </div>

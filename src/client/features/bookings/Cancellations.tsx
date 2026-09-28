@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { SearchBox } from "../../components/forms/SearchBox";
 import { PageControls } from "../../components/navigation/PageControls";
+import { SectionTabs } from "../../components/navigation/SectionTabs";
 import { compactPage, VISIBLE_PAGE_SIZE } from "../../lib/compact-page";
 import { usePage } from "../../hooks/usePage";
 import { bookingTime } from "./booking-calendar";
@@ -93,27 +94,17 @@ export function Cancellations({
         </p>
       </div>
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <nav
-          aria-label="Cancellation review status"
-          className="inline-grid w-fit max-w-full grid-cols-[auto_auto_auto] gap-1 rounded-xl bg-muted p-1"
-        >
-          {filters.map(([value, label]) => (
-            <Button
-              key={value}
-              type="button"
-              variant="ghost"
-              disabled={busy}
-              aria-pressed={status === value}
-              className={`min-h-11 px-3 hover:text-foreground ${status === value ? "bg-card text-foreground shadow-sm hover:bg-card dark:hover:bg-card" : "text-muted-foreground hover:bg-card/70 dark:hover:bg-card/70"}`}
-              onClick={() => {
-                setStatus(value);
-                page.reset();
-              }}
-            >
-              {label}
-            </Button>
-          ))}
-        </nav>
+        <SectionTabs
+          label="Cancellation review status"
+          selection="value"
+          items={filters}
+          value={status}
+          disabled={busy}
+          onValueChange={(value) => {
+            setStatus(value);
+            page.reset();
+          }}
+        />
         <SearchBox
           label="Search by client or service"
           initialValue={page.term}
@@ -197,7 +188,7 @@ export function CancellationList({
             variant="ghost"
             disabled={busy}
             onClick={() => onSelect(item.bookingId)}
-            className="grid h-auto min-h-22 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-3 rounded-none bg-card px-4 py-4 text-left font-normal whitespace-normal text-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset dark:hover:bg-muted sm:grid-cols-[minmax(0,1fr)_minmax(170px,1fr)_auto] sm:gap-x-6 sm:py-5"
+            className="grid h-auto min-h-22 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-3 rounded-none bg-card px-4 py-4 text-left font-normal whitespace-normal text-foreground focus-visible:ring-2 focus-visible:ring-inset sm:grid-cols-[minmax(0,1fr)_minmax(170px,1fr)_auto] sm:gap-x-6 sm:py-5"
           >
             <span className="sr-only">
               {item.resolvedAt !== null
