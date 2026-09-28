@@ -36,3 +36,7 @@ jobs:
         env:
           BOOPITY_CONTAINER_QA: compose-disposable
         run: node tests/integration/compose-container-local.mjs boopity-ci .
+      - name: Check portable HTTPS-origin configuration and setup cookies offline
+        env:
+          BOOPITY_CONTAINER_QA: hosting-disposable
+        run: node tests/integration/hosting-container-local.mjs boopity-ci

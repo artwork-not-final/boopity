@@ -25,38 +25,9 @@ export function loadConfig(
   ) {
     throw new Error("BOOPITY_OPEN_BROWSER must be true or false");
   }
-  if (environment.BOOPITY_HOSTING && environment.BOOPITY_HOSTING !== "render") {
-    throw new Error("Unknown BOOPITY_HOSTING adapter");
-  }
-  let address = environment.APP_URL;
-  if (environment.BOOPITY_HOSTING === "render") {
-    if (environment.RENDER !== "true")
-      throw new Error("The Render adapter requires the Render runtime");
-    if (address === undefined) {
-      const supplied = environment.RENDER_EXTERNAL_URL;
-      if (!supplied)
-        throw new Error("Render has not supplied a public service address");
-      const external = new URL(supplied);
-      if (
-        external.protocol !== "https:" ||
-        external.port ||
-        external.username ||
-        external.password ||
-        external.pathname !== "/" ||
-        external.search ||
-        external.hash ||
-        !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com$/.test(
-          external.hostname,
-        ) ||
-        external.hostname !== environment.RENDER_EXTERNAL_HOSTNAME
-      ) {
-        throw new Error("Render's public service address is invalid");
-      }
-      address = external.origin;
-    }
-  }
-  // Never derive the canonical URL from an incoming Host or forwarding header.
-  const app = new URL(address ?? "http://localhost:3000");
+  // One configuration contract on every host. Never derive the canonical URL
+  // from platform metadata, an incoming Host or a forwarding header.
+  const app = new URL(environment.APP_URL ?? "http://localhost:3000");
   if (
     app.username ||
     app.password ||

@@ -73,6 +73,18 @@ The test-only GitHub workflow uses synthetic records and no provider credentials
 It builds locally on the runner; it does not publish an image or deploy a site.
 Real provider tests and browser harnesses remain opt-in.
 
+The provider-neutral hosting contract has a separate offline container check:
+
+```sh
+BOOPITY_CONTAINER_QA=hosting-disposable node tests/integration/hosting-container-local.mjs boopity-local-qa
+```
+
+It uses explicit `APP_URL` configuration to check the canonical host, secure setup
+cookies, repeated readiness probes and persisted access after container replacement.
+It runs the shipped server on a private container loopback, not a public TLS endpoint.
+It creates and removes only its own labelled resources, makes no external provider
+calls and does not certify a hosting service. CI runs it alongside the Compose check.
+
 ## Populated upgrade rehearsal
 
 The local cleanup candidate passed an offline `linux/arm64` rehearsal from the
@@ -154,9 +166,13 @@ tests does not clear the current image for publication.
 - Rehearse the exact populated release-to-release upgrade and rollback. Retain records,
   uploads, keys, encrypted provider settings and payment history. A same-version
   restore is not an upgrade rehearsal.
-- Validate the exact image on each advertised architecture and hosting target:
+- Validate the exact image on each advertised architecture and a representative
+  deployment using the documented Docker/Node contract:
   persistent disk, HTTPS, cookies, callbacks, webhook retries and off-host recovery.
   Include client booking requests, sitter approval and allowed/late cancellation.
+- Keep installation guidance provider-neutral. Operators choose their own host
+  and must validate their proxy, persistent storage and backup configuration;
+  no named-host certification or account provisioning is part of the release.
 - Have a nontechnical sitter complete setup, DIY email, first bookings and the
   backup/update instructions without developer assistance. Check the current UI
   on mobile and Safari, with keyboard navigation and custom branding.

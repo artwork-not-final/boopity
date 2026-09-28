@@ -3,31 +3,71 @@
 Owner setup, OTP/optional Google login, recovery, branding, sitter CRM and invitation-only client
 bookings, manual payment accounting and optional sitter-owned Stripe Checkout are implemented.
 This is **not yet a production release**: Phase 4 sandbox validation passed, but Phase 5
-public packaging and hosted release gates remain open. The new application is
+public packaging and deployment validation remain open. The new application is
 licensed under [MIT](LICENSE), copyright (c) 2026 Artwork Not Final LLC. Use synthetic data while
-the remaining [release checks](RELEASING.md) are open. Existing .NET and Cloudflare
-preview installations are separate; these instructions do not modify or import them.
+the remaining [release checks](RELEASING.md) are open. Retired application
+installations are separate; these instructions do not modify or import them.
 
 ## Reference requirements
 
-See [OPERATIONS.md](OPERATIONS.md) for the tested-host matrix, reverse-proxy example,
+See [OPERATIONS.md](OPERATIONS.md) for runtime requirements, a reverse-proxy example,
 stopped-volume backup/restore, upgrade boundaries and troubleshooting.
 
 - Node 24.21.0 (see `.nvmrc`), or Docker with Compose v2.
 - One always-running application process, with a persistent local disk/volume.
 - SQLite database, private uploads and generated private keys in `DATA_DIR`.
-- SMTP or optional Resend for email codes; Google is optional. No Cloudflare or Stripe account.
+- SMTP or optional Resend for email codes; Google and Stripe are optional.
 
 Ephemeral/serverless filesystems, multiple replicas, network-mounted SQLite and scale-to-zero
 hosts are not supported by this reference. PostgreSQL, S3 and alternate runtime adapters are
 extension points, not implemented drivers. The runtime is pinned and covered by integration tests.
+
+## Use your own hosting provider
+
+Choose a host you already use or one that meets the requirements above. Boopity
+does not require a particular provider, provision servers or include provider-specific
+deployment templates. You manage the hosting account; Boopity's wizard handles
+your business, email delivery, appearance and sign-in settings.
+
+1. Deploy the repository's `Dockerfile`, or build and run the Node app as shown below.
+   If using a prebuilt image, use a reviewed release image pinned by digest with
+   `compose.image.yaml`; no public image is available yet.
+2. Attach persistent **local** storage before the first start. For Docker, mount it
+   at `/data` and keep the image's non-root user (UID/GID 1000). Never store the
+   database, uploads or installation keys on an ephemeral container filesystem.
+3. Configure the settings below privately, then connect HTTPS and start one instance.
+4. Open your website, enter the setup password and follow the wizard. Email, Google
+   and online payments can be connected afterward.
+
+| Setting                  | Hosted configuration                                                                                                   |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `APP_URL`                | Your exact public HTTPS origin, such as `https://care.example.com`; no path. Host-supplied URLs are not auto-detected. |
+| `BOOPITY_SETUP_PASSWORD` | A private password of 15–128 characters for initial setup. Remove the setting after owner verification.                |
+| `DATA_DIR`               | The persistent storage path; `/data` in the Docker image.                                                              |
+| `HOST` / `PORT`          | The private listening interface and port. The image uses `0.0.0.0:3000`; native Node defaults to `127.0.0.1:3000`.     |
+| `NODE_ENV`               | `production`; already set in the Docker image.                                                                         |
+
+Route public HTTPS traffic through a reverse proxy to the application's private
+port. If the host asks for a health-check path, use `/api/ready` with the configured
+public hostname; see [proxy and security settings](OPERATIONS.md#public-origin-and-reverse-proxy).
+Only set `TRUSTED_PROXY_IPS` after verifying the actual proxy addresses and header
+handling. A hosting-provider name never enables proxy trust.
+
+Keep one always-running instance and disable overlapping rolling deployments.
+Back up the full data directory and installation keys before updates. Hosting,
+HTTPS, backups and account costs remain your responsibility; see [Operations](OPERATIONS.md).
+Compatibility depends on these capabilities, not the provider's name.
+
+If an older deployment automatically supplied its website URL, set `APP_URL`
+explicitly before updating. The same configured URL is used for cookies, setup
+links, Google callbacks and payment webhooks.
 
 ## Start locally
 
 For setup passwords and private initial entry, see [GUIDED-INSTALLATION.md](GUIDED-INSTALLATION.md).
 Email does not need to be configured before opening the wizard; follow the
 [DIY email guide](EMAIL-SETUP.md) inside setup. The commands below install the
-application itself; a hosting-specific install button is not yet provided.
+application itself; no hosting dashboard or provider integration is needed.
 
 Run in the source directory:
 
@@ -40,7 +80,7 @@ npm start
 The wizard opens automatically from an interactive local terminal. If it does not,
 click the **Finish setup** link printed by startup. The canonical origin is checked.
 Startup creates `.boopity/boopity.sqlite`, `.boopity/uploads/`, `.boopity/auth-secret` and
-`.boopity/settings-key`. Do not copy the old Cloudflare `.dev.vars` or import old databases.
+`.boopity/settings-key`. Do not copy credentials or databases from retired installations.
 
 Optional configuration goes in private, gitignored `.env.self-hosted`, following
 `.env.self-hosted.example`. Start/dev-server/management commands load that file; process
@@ -407,7 +447,7 @@ live data and test restoration into a separate installation.
 An existing database missing its original private keys now fails startup instead of generating
 replacements. Restore the complete snapshot and original host-managed authentication secret.
 Local stopped-copy and prior-schema upgrade regression tests are included, but a supported public
-release and second-host validation remain open. Follow the [operations runbook](OPERATIONS.md).
+release and deployment validation remain open. Follow the [operations runbook](OPERATIONS.md).
 Container replacement preserves the volume; volume deletion does not. An older image may not
 understand a newer schema.
 

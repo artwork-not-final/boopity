@@ -2,8 +2,8 @@
 
 ## Start setup
 
-1. Choose a **setup password** in your hosting service's installation form.
-   Use at least 15 characters and save it in your password manager.
+1. Have your **setup password** ready—the one chosen when Boopity was installed.
+   If someone installed Boopity for you, ask them for this password.
 2. Open your website, enter that password and select **Start setup**.
 3. Add your name and email, connect email delivery, and customize your business.
 4. Verify your inbox to establish the owner, then review and finish setup.
@@ -18,9 +18,9 @@ If a code button shows a countdown, wait for it to finish before trying again.
 You can still enter a code you already received while waiting to resend.
 Boopity will not send another code automatically.
 
-The hosted installation template is still a local prototype. Its updated image
-and dashboard journey need release and hosted validation before recommendation
-to sitters.
+Boopity works with your own hosting. Once the app is installed, the wizard takes
+you through your business settings; it does not create or manage your hosting account.
+Need to install it first? Follow the [installation guide](SELF-HOSTING.md#use-your-own-hosting-provider).
 
 ## Come back later
 

@@ -144,7 +144,8 @@ is a restore of the old snapshot plus its matching code, not a reverse migration
 Provider adapters must use the common payment lifecycle. A browser return URL,
 booking cancellation or provider timeout is not evidence that money moved. Keep
 external operations out of ordinary test runs. Do not add a central payment
-account, SaaS limits or a mandatory Cloudflare dependency.
+account, SaaS limits or a mandatory hosting-provider dependency. Deployment stays
+provider-neutral: Docker/Node, explicit `APP_URL` and persistent local storage.
 
 UI changes use Tailwind and the existing shadcn-derived primitives. Verify visible
 keyboard focus, labeled controls, mobile overflow, contrast for custom colors and

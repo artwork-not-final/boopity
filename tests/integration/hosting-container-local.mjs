@@ -1,25 +1,28 @@
-// Local, network-isolated Render-contract simulation. Never contacts Render or
-// a registry, publishes an image, sends mail, or opens a host port.
+// Local, network-isolated hosting-contract simulation. Never contacts a host or
+// registry, publishes an image, sends mail, or opens a host port.
 import assert from "node:assert/strict";
 import { randomUUID, randomBytes } from "node:crypto";
 import { execFileSync } from "node:child_process";
 
-assert.equal(process.env.BOOPITY_CONTAINER_QA, "render-disposable");
+assert.equal(process.env.BOOPITY_CONTAINER_QA, "hosting-disposable");
+assert.equal(process.argv.length, 3, "Supply one locally built image");
 const image = process.argv[2];
 assert(
   image && /^[A-Za-z0-9][A-Za-z0-9:._/-]+$/.test(image),
   "Supply a locally built image",
 );
 const suffix = randomUUID(),
-  volume = `boopity-render-qa-${suffix}`;
-const container = `boopity-render-qa-${suffix}`,
-  label = `org.boopity.render-qa=${suffix}`;
-const token = randomBytes(32).toString("base64");
+  volume = `boopity-hosting-qa-${suffix}`;
+const container = `boopity-hosting-qa-${suffix}`,
+  label = `org.boopity.hosting-qa=${suffix}`;
+const password = randomBytes(32).toString("base64url");
 const docker = (args, input) =>
   execFileSync("docker", args, {
     input,
     stdio: ["pipe", "pipe", "pipe"],
     maxBuffer: 4 * 1024 * 1024,
+    timeout: 60000,
+    env: { PATH: process.env.PATH, HOME: process.env.HOME },
   });
 const inspect = (kind, id) =>
   JSON.parse(docker([kind, "inspect", id]).toString())[0];
@@ -37,6 +40,12 @@ function start(id) {
     label,
     "--network",
     "none",
+    "--read-only",
+    "--cap-drop=ALL",
+    "--security-opt=no-new-privileges:true",
+    "--tmpfs",
+    "/tmp:rw,noexec,nosuid,size=64m",
+    "--pids-limit=128",
     "--memory",
     "512m",
     "--cpus",
@@ -44,22 +53,16 @@ function start(id) {
     "--mount",
     `source=${volume},target=/data`,
     "--env",
-    "BOOPITY_HOSTING=render",
+    "APP_URL=https://pets.example.test",
     "--env",
-    "RENDER=true",
-    "--env",
-    "RENDER_EXTERNAL_URL=https://maple-fixture.onrender.com",
-    "--env",
-    "RENDER_EXTERNAL_HOSTNAME=maple-fixture.onrender.com",
-    "--env",
-    `BOOPITY_SETUP_TOKEN=${token}`,
+    `BOOPITY_SETUP_PASSWORD=${password}`,
     id,
   ]);
   createdContainer = true;
 }
 function removeContainer() {
   assert.equal(
-    inspect("container", container).Config.Labels["org.boopity.render-qa"],
+    inspect("container", container).Config.Labels["org.boopity.hosting-qa"],
     suffix,
   );
   docker(["stop", "--time", "15", container]);
@@ -71,7 +74,7 @@ import assert from "node:assert/strict";
 import { request } from "node:http";
 import { readFileSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
-const origin = process.env.RENDER_EXTERNAL_URL;
+const origin = process.env.APP_URL;
 const fingerprints = () => ["auth-secret", "settings-key"].map(name => createHash("sha256").update(readFileSync("/data/" + name)).digest("hex"));
 function call(path, method = "GET", body, headers = {}) {
   return new Promise((resolve, reject) => {
@@ -104,7 +107,7 @@ function run(source) {
 }
 try {
   const info = inspect("image", image);
-  assert.equal(info.Architecture, "amd64");
+  assert(["arm64", "amd64"].includes(info.Architecture));
   assert.equal(info.Config.User, "node");
   // UUID resources are created only for this test and checked again before removal.
   stage = "create isolated fixture";
@@ -119,8 +122,11 @@ try {
     assert.equal((await call("/api/setup/status")).status, 401);
     const installation = await call("/api/installation");
     assert.equal(JSON.parse(installation.text).ownerClaimed, false);
-    assert(!installation.text.includes(process.env.BOOPITY_SETUP_TOKEN));
-    const unlocked = await call("/api/setup/unlock", "POST", { kind: "setup", token: process.env.BOOPITY_SETUP_TOKEN });
+    assert(!installation.text.includes(process.env.BOOPITY_SETUP_PASSWORD));
+    const entry = await call("/api/setup/entry");
+    assert.equal(JSON.parse(entry.text).mode, "password");
+    assert(!entry.text.includes(process.env.BOOPITY_SETUP_PASSWORD));
+    const unlocked = await call("/api/setup/password/unlock", "POST", { password: process.env.BOOPITY_SETUP_PASSWORD });
     assert.equal(unlocked.status, 200);
     const cookie = unlocked.headers["set-cookie"][0];
     assert(cookie.includes("Secure") && cookie.includes("HttpOnly") && cookie.includes("SameSite=Strict"));
@@ -145,17 +151,18 @@ try {
     assert.equal(JSON.parse(status.text).pending.name, "Maple QA");
     assert.equal(JSON.parse(status.text).pending.email, "owner@example.test");
     assert.equal(JSON.parse(status.text).readiness.email, false);
-    assert.equal((await call("/api/setup/unlock", "POST", { kind: "setup", token: process.env.BOOPITY_SETUP_TOKEN })).status, 401);
+    assert.equal((await call("/api/setup/password/unlock", "POST", { password: "wrong synthetic setup password" })).status, 401);
+    assert.equal((await call("/api/setup/password/unlock", "POST", { password: process.env.BOOPITY_SETUP_PASSWORD })).status, 200);
   `);
   stage = "second compiled health probe";
   docker(["exec", container, "node", "dist/server/healthcheck.mjs"]);
-  assert(!docker(["logs", container]).toString().includes(token));
+  assert(!docker(["logs", container]).toString().includes(password));
   console.log(
-    "Render-contract simulation passed: AMD64/non-root/512 MiB, canonical host, repeated probes, compiled health check, protected DIY entry, same-image container replacement, persisted identity/keys/session, used-code denial. No live host or providers tested.",
+    `Hosting-contract simulation passed: ${info.Architecture}/non-root/512 MiB, explicit HTTPS origin, secure cookies, repeated probes, compiled health check, password setup entry, same-image container replacement, persisted identity/keys/session, password resumption. No live host or providers tested.`,
   );
 } catch (error) {
-  // Do not print child-process errors/arguments; they can contain synthetic codes.
-  console.error(`Render-contract simulation failed during ${stage}.`);
+  // Do not print child-process errors/arguments; they can contain synthetic credentials.
+  console.error(`Hosting-contract simulation failed during ${stage}.`);
   // Only redacted stderr, never the error object (which includes command args).
   const diagnostic = String(
     error.stderr ?? error.code ?? "Assertion failed",
@@ -166,7 +173,7 @@ try {
   if (createdContainer) removeContainer();
   if (createdVolume) {
     assert.equal(
-      inspect("volume", volume).Labels["org.boopity.render-qa"],
+      inspect("volume", volume).Labels["org.boopity.hosting-qa"],
       suffix,
     );
     docker(["volume", "rm", volume]);
