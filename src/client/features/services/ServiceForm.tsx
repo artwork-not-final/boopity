@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EyeOff } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Field } from "../../components/forms/Field";
@@ -37,26 +38,29 @@ export function ServiceForm({
       className="min-w-0 space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
-        void run(async () => {
-          // Keep the private legacy description; this editor changes only service details and rates.
-          const detail = service
-            ? await api<{ service: { description: string } }>(
-                `/owner/services/${service.id}`,
-              )
-            : null;
-          await api(
-            service ? `/owner/services/${service.id}` : "/owner/services",
-            service ? "PUT" : "POST",
-            {
-              name,
-              description: detail?.service.description ?? "",
-              durationMinutes: allDay ? null : Number(duration),
-              price: Number(price),
-              additionalPetPrice: Number(extra),
-            },
-          );
-          close();
-        }, "Service saved.");
+        void run(
+          async () => {
+            // Keep the private legacy description; this editor changes only service details and rates.
+            const detail = service
+              ? await api<{ service: { description: string } }>(
+                  `/owner/services/${service.id}`,
+                )
+              : null;
+            await api(
+              service ? `/owner/services/${service.id}` : "/owner/services",
+              service ? "PUT" : "POST",
+              {
+                name,
+                description: detail?.service.description ?? "",
+                durationMinutes: allDay ? null : Number(duration),
+                price: Number(price),
+                additionalPetPrice: Number(extra),
+              },
+            );
+            close();
+          },
+          { announcement: "Service saved." },
+        );
       }}
     >
       <FormSection title="Service details">
@@ -132,23 +136,48 @@ export function ServiceForm({
           baseCents > 0 &&
           Number.isFinite(extraCents) &&
           extraCents >= 0 && (
-            <p className="border-t pt-4 text-sm" aria-live="polite">
-              Two pets:{" "}
-              <span className="font-semibold">
-                {money(
-                  baseCents + (extraCents > 0 ? extraCents : baseCents),
-                  currency,
-                )}
-              </span>{" "}
-              per {allDay ? "day" : "visit"}.
-            </p>
+            <dl
+              aria-label="Price preview"
+              aria-live="polite"
+              aria-atomic="true"
+              className="grid gap-3 border-t pt-4 text-sm sm:grid-cols-2"
+            >
+              {[
+                { label: "1 pet", total: baseCents },
+                {
+                  label: "2 pets",
+                  total: baseCents + (extraCents > 0 ? extraCents : baseCents),
+                },
+              ].map(({ label, total }) => (
+                <div
+                  key={label}
+                  className="flex flex-wrap items-baseline gap-x-3 gap-y-1"
+                >
+                  <dt>{label}</dt>
+                  <dd>
+                    <span className="font-semibold tabular-nums">
+                      {money(total, currency)}
+                    </span>{" "}
+                    per {allDay ? "day" : "visit"}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           )}
       </FormSection>
-      <p className="text-sm text-muted-foreground">
-        {service
-          ? "Existing bookings keep their saved prices."
-          : "New services start hidden from clients. You can offer them in the portal after saving."}
-      </p>
+      {service ? (
+        <p className="text-sm text-muted-foreground">
+          Existing bookings keep their saved prices.
+        </p>
+      ) : (
+        <div className="flex items-start gap-3 rounded-xl border bg-card p-4 text-sm leading-6 text-foreground">
+          <EyeOff aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
+          <div>
+            <p className="font-semibold">Clients won’t see this service yet.</p>
+            <p>After saving, you can turn on “Offer in the client portal.”</p>
+          </div>
+        </div>
+      )}
       <div className="flex flex-wrap gap-3">
         <Button className="min-h-11" disabled={busy}>
           Save service

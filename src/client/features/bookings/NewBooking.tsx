@@ -19,6 +19,7 @@ import { timeZoneLabel } from "../../lib/format/time-zone-label";
 
 import { useBookingAvailability } from "./booking-availability";
 import { BookingAvailabilityNotice } from "./BookingAvailabilityNotice";
+import { BookingScheduleOptions } from "./BookingScheduleOptions";
 import { bookingTime } from "./booking-calendar";
 import { dateLabel } from "../../lib/format/date-label";
 
@@ -46,6 +47,8 @@ export function NewBooking({
     [time, setTime] = useState(""),
     [message, setMessage] = useState("");
   const [requestId] = useState(() => crypto.randomUUID());
+  const [outsideHours, setOutsideHours] = useState(false),
+    [waiveNotice, setWaiveNotice] = useState(false);
   const availability = useBookingAvailability({
     owner,
     serviceId,
@@ -55,6 +58,8 @@ export function NewBooking({
     time,
     timeZone: data.regional.timeZone,
     revision: data.revision,
+    outsideHours,
+    waiveNotice,
   });
   const { slots, error: slotError, historical, directTime } = availability;
   const hasSelectedSlot = Boolean(
@@ -80,6 +85,9 @@ export function NewBooking({
         const response = await api<{ booking: Booking }>("/bookings", "POST", {
           requestId,
           ...(owner ? { clientId } : {}),
+          ...(owner && (outsideHours || waiveNotice)
+            ? { overrides: { outsideHours, waiveNotice } }
+            : {}),
           serviceId,
           petIds,
           startDate: date,
@@ -158,6 +166,20 @@ export function NewBooking({
             <p className="text-sm text-muted-foreground">
               {timeZoneLabel(data.regional.timeZone)}
             </p>
+            <BookingScheduleOptions
+              owner={owner}
+              hasHours={data.policy.weekly.length > 0}
+              historical={historical}
+              leadHours={data.policy.leadHours}
+              busy={busy}
+              outsideHours={outsideHours}
+              waiveNotice={waiveNotice}
+              setOutsideHours={(value) => {
+                setOutsideHours(value);
+                setTime("");
+              }}
+              setWaiveNotice={setWaiveNotice}
+            />
             <div className="grid gap-5 sm:grid-cols-2">
               <Text
                 label="Start date"
@@ -184,6 +206,7 @@ export function NewBooking({
                       <Input
                         id={id}
                         type="time"
+                        disabled={busy}
                         className="min-h-11"
                         required
                         value={time}
@@ -193,12 +216,16 @@ export function NewBooking({
                       <Choice
                         id={id}
                         required
-                        disabled={busy || availability.loading}
+                        disabled={
+                          busy || availability.loading || !slots?.length
+                        }
                         value={time}
                         onValueChange={setTime}
                         placeholder={
                           slots
-                            ? "Choose a time"
+                            ? slots.length
+                              ? "Choose a time"
+                              : "No times available"
                             : "Choose a service and date first"
                         }
                         options={(slots ?? []).map((slot) => ({
@@ -225,13 +252,16 @@ export function NewBooking({
               historical={historical}
               overlaps={availability.overlaps}
             />
-            {slots?.length === 0 && (
-              <Hint>
-                {owner
-                  ? "No times available. Try another date or time."
-                  : "No times available. Try another date or contact the sitter."}
-              </Hint>
-            )}
+            {slots?.length === 0 &&
+              (data.policy.weekly.length > 0 || outsideHours) && (
+                <Hint>
+                  {owner
+                    ? availability.overlaps
+                      ? "This time overlaps another booking. Choose another time."
+                      : "No times available. Try another date or time."
+                    : "No times available. Try another date or contact the sitter."}
+                </Hint>
+              )}
             {!historical &&
               service?.durationMinutes === null &&
               Boolean(slots?.length) && (

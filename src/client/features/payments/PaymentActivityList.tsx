@@ -40,7 +40,7 @@ export function PaymentActivityList({
                   navigateLocal(href);
                 }
               }}
-              className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2 bg-card px-4 py-4 text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:grid-cols-[125px_minmax(0,1fr)_auto] sm:gap-x-6 sm:py-5"
+              className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2 bg-card px-4 py-4 text-foreground hover:bg-brand-soft-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:grid-cols-[125px_minmax(0,1fr)_auto] sm:gap-x-6 sm:py-5"
             >
               <span className="sr-only">Open booking payments: </span>
               <time

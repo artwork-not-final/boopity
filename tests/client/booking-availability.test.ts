@@ -57,6 +57,38 @@ describe("past-booking availability selection", () => {
     expect(path).toContain("startDate=2026-09-21");
     expect(path).not.toContain("startTime");
   });
+  it("lets sitters explicitly enter outside-hours future times and waive notice independently", () => {
+    const future = { ...input, date: "2026-09-21" };
+    expect(usesDirectTime({ ...future, outsideHours: true }, now)).toBe(true);
+    expect(availabilityPath({ ...future, outsideHours: true }, now)).toContain(
+      "startTime=13%3A07",
+    );
+    expect(availabilityPath({ ...future, outsideHours: true }, now)).toContain(
+      "outsideHours=true",
+    );
+    expect(
+      availabilityPath({ ...future, outsideHours: true }, now),
+    ).not.toContain("waiveNotice");
+    expect(availabilityPath({ ...future, waiveNotice: true }, now)).toContain(
+      "waiveNotice=true",
+    );
+    expect(
+      availabilityPath({ ...future, waiveNotice: true }, now),
+    ).not.toContain("startTime");
+    expect(
+      availabilityPath({ ...future, outsideHours: true, time: "" }, now),
+    ).toBeNull();
+    const client = {
+      ...future,
+      owner: false,
+      outsideHours: true,
+      waiveNotice: true,
+    };
+    expect(usesDirectTime(client, now)).toBe(false);
+    expect(availabilityPath(client, now)).not.toMatch(
+      /outsideHours|waiveNotice|startTime/,
+    );
+  });
   it("does not send a client-controlled historical bypass flag", () => {
     expect(availabilityPath(input, now)).not.toContain("historical");
     expect(availabilityPath({ ...input, owner: false }, now)).not.toContain(

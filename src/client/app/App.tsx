@@ -1,5 +1,7 @@
 import { useInstallationState } from "./useInstallationState";
 import { BrandLayout } from "./BrandLayout";
+import { ActionConfirmation } from "../components/feedback/ActionFeedback";
+import type { ActionFeedback } from "../lib/types/action-feedback";
 import { useInstallationLifecycle } from "./useInstallationLifecycle";
 import { lazy, Suspense, useEffect, useState, useRef } from "react";
 
@@ -85,7 +87,7 @@ export function App() {
   } = useInstallationState(setFallbackStep);
   const [error, setError] = useState(""),
     [refreshError, setRefreshError] = useState(""),
-    [message, setMessage] = useState(""),
+    [message, setMessage] = useState<ActionFeedback>(""),
     [busy, setBusy] = useState(false);
   const [recovery, setRecovery] = useState(
     () => installerAccess(window.location.pathname) === "recovery",
@@ -241,7 +243,7 @@ export function App() {
   }, [siteName]);
   async function action(
     run: () => Promise<unknown>,
-    success = "Changes saved.",
+    success: ActionFeedback = "",
     afterSave?: () => void,
   ) {
     setBusy(true);
@@ -338,12 +340,12 @@ export function App() {
           </div>
         )}
       {message && !inWorkspace && !showingAccountPage && (
-        <p
-          role="status"
-          className={`mb-5 rounded-xl border bg-card p-4 text-sm${showingSetupEntry ? " w-full max-w-md break-words" : ""}`}
-        >
-          {message}
-        </p>
+        <div className={`mb-5${showingSetupEntry ? " w-full max-w-md" : ""}`}>
+          <ActionConfirmation
+            feedback={message}
+            dismiss={() => setMessage("")}
+          />
+        </div>
       )}
       <Suspense
         fallback={
@@ -393,7 +395,7 @@ export function App() {
             <Login
               standalone
               error={displayedError}
-              message={message}
+              message={typeof message === "string" ? message : undefined}
               suggestedEmail={invitedEmail ?? undefined}
               info={info}
               busy={busy}
@@ -464,6 +466,7 @@ export function App() {
                         action={action}
                         navigate={navigate}
                         message={message}
+                        dismissMessage={() => setMessage("")}
                         error={displayedError}
                         setPreview={setPreview}
                         setError={setError}

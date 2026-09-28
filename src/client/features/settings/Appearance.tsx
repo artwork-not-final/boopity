@@ -6,6 +6,7 @@ import {
   contrastRatio,
   defaultBranding,
   themePresets,
+  themeColors,
   type Branding,
 } from "../../../shared/branding";
 import { saveAppearanceDraft } from "../../lib/navigation/setup-flow";
@@ -13,6 +14,10 @@ import { timeZoneLabel } from "../../lib/format/time-zone-label";
 import { api } from "../../lib/http/installation-api";
 import { Field } from "../../components/forms/Field";
 import { Notice } from "../../components/feedback/Notice";
+import {
+  SavedStatus,
+  useSaveFeedback,
+} from "../../components/feedback/ActionFeedback";
 import type { InstallationFormProps as FormProps } from "../../lib/types/installation-types";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -30,6 +35,12 @@ export function Appearance({
   const [pendingLogo, setPendingLogo] = useState<File | "remove" | null>(null);
   const revision = useRef(state.version);
   const formId = useId();
+  const saveFeedback = useSaveFeedback("appearance-settings", [
+    brand,
+    timeZone,
+    currency,
+    pendingLogo,
+  ]);
   const timeZones = useMemo(
     () =>
       [...new Set([timeZone, "UTC", ...Intl.supportedValuesOf("timeZone")])]
@@ -47,7 +58,7 @@ export function Appearance({
   }
   const valid = brandingSchema.safeParse(brand).success;
   const lowContrast =
-    valid && contrastRatio(brand.primaryColor, "#faf8f5") < 4.5;
+    valid && contrastRatio(brand.primaryColor, themeColors.background) < 4.5;
   return (
     <>
       <form
@@ -86,7 +97,7 @@ export function Appearance({
               setPendingLogo(null);
               preview(null);
             },
-            "Appearance saved.",
+            saveFeedback,
             onContinue,
           );
         }}
@@ -238,15 +249,18 @@ export function Appearance({
                 return;
               }
               if (file)
-                void run(async () => {
-                  if (file.size > 2 * 1024 * 1024)
-                    throw new Error("Logo must be at most 2 MB.");
-                  await api("/api/setup/logo", "POST", file, {
-                    "content-type": file.type,
-                    "x-installation-version": String(state.version),
-                  });
-                  preview(null);
-                }, "Logo saved.");
+                void run(
+                  async () => {
+                    if (file.size > 2 * 1024 * 1024)
+                      throw new Error("Logo must be at most 2 MB.");
+                    await api("/api/setup/logo", "POST", file, {
+                      "content-type": file.type,
+                      "x-installation-version": String(state.version),
+                    });
+                    preview(null);
+                  },
+                  { announcement: "Logo saved." },
+                );
             }}
           />
         </Field>
@@ -280,7 +294,7 @@ export function Appearance({
               void run(
                 () =>
                   api("/api/setup/logo", "DELETE", { version: state.version }),
-                "Logo removed.",
+                { announcement: "Logo removed." },
               );
             }}
           >
@@ -288,9 +302,12 @@ export function Appearance({
           </Button>
         )}
       </div>
-      <Button type="submit" form={formId} disabled={busy || !valid}>
-        {onContinue ? "Save and continue" : "Save changes"}
-      </Button>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" form={formId} disabled={busy || !valid}>
+          {onContinue ? "Save and continue" : "Save changes"}
+        </Button>
+        {!onContinue && <SavedStatus feedback={saveFeedback} />}
+      </div>
     </>
   );
 }

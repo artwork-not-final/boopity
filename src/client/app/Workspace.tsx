@@ -14,6 +14,11 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
+import {
+  ActionConfirmation,
+  ActionFeedbackProvider,
+} from "../components/feedback/ActionFeedback";
+import type { ActionFeedback } from "../lib/types/action-feedback";
 
 import { Clients } from "../features/clients/Clients";
 import { HouseholdPets } from "../features/clients/HouseholdPets";
@@ -30,6 +35,7 @@ import {
 } from "../lib/navigation/workspace-refresh";
 import {
   navigateLocal,
+  LOCATION_CHANGE,
   useWorkspaceLocation,
   workspaceHref,
   workspaceSection,
@@ -85,9 +91,18 @@ export function Workspace({
   const [data, setData] = useState<Data | null>(null),
     [revision, setRevision] = useState(0);
   const [error, setError] = useState(""),
-    [message, setMessage] = useState(""),
+    [message, setMessage] = useState<ActionFeedback>(""),
     [busy, setBusy] = useState(false);
   const content = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const clearConfirmation = () => setMessage("");
+    window.addEventListener(LOCATION_CHANGE, clearConfirmation);
+    window.addEventListener("popstate", clearConfirmation);
+    return () => {
+      window.removeEventListener(LOCATION_CHANGE, clearConfirmation);
+      window.removeEventListener("popstate", clearConfirmation);
+    };
+  }, []);
   const resumeState = useRef({
     busy,
     viewingSettings,
@@ -169,7 +184,7 @@ export function Workspace({
       }),
     [],
   );
-  const run: Run = async (work, success = "Changes saved.") => {
+  const run: Run = async (work, success = "") => {
     resumeState.current.busy = true;
     setBusy(true);
     setError("");
@@ -216,176 +231,181 @@ export function Workspace({
     }
   }
   return (
-    <section
-      className="grid items-start gap-6 md:grid-cols-[190px_minmax(0,1fr)]"
-      aria-label={owner ? "Sitter workspace" : "Client portal"}
+    <ActionFeedbackProvider
+      feedback={message}
+      dismiss={() => setMessage("")}
+      busy={busy}
     >
-      <aside className="min-w-0 md:sticky md:top-6">
-        <div className="flex gap-2 md:hidden">
-          <Choice
-            aria-label="Workspace section"
-            value={currentSection}
-            disabled={navigationBusy}
-            onValueChange={(value) =>
-              selectSection(value as WorkspaceSection | "settings")
-            }
-            options={[
-              ...tabs.map(([value, label]) => ({ value, label })),
-              ...(owner ? [{ value: "settings", label: "Settings" }] : []),
-            ]}
-          />
-        </div>
-        <nav
-          className="hidden flex-col gap-1 md:flex"
-          aria-label="Workspace sections"
-        >
-          {tabs.map(([value, label, Icon]) => (
-            <Button
-              key={value}
-              className="shrink-0 justify-start whitespace-normal text-left md:w-full"
-              variant={currentSection === value ? "secondary" : "ghost"}
-              aria-current={currentSection === value ? "page" : undefined}
-              disabled={navigationBusy}
-              onClick={() => selectSection(value)}
-            >
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </nav>
-        {owner && (
-          <div className="mt-3 hidden space-y-1 border-t pt-3 md:block">
-            <Button
-              className="w-full justify-start"
-              variant={viewingSettings ? "secondary" : "ghost"}
-              aria-current={viewingSettings ? "page" : undefined}
-              disabled={navigationBusy}
-              onClick={() => selectSection("settings")}
-            >
-              <Settings2 aria-hidden="true" />
-              Settings
-            </Button>
-          </div>
-        )}
-        <p className="mt-5 hidden break-words text-xs text-muted-foreground md:block">
-          {session.user.email}
-        </p>
-      </aside>
-      <div
-        ref={content}
-        id="workspace-content"
-        tabIndex={-1}
-        data-skip-target
-        className="min-w-0 space-y-4"
+      <section
+        className="grid items-start gap-6 md:grid-cols-[190px_minmax(0,1fr)]"
+        aria-label={owner ? "Sitter workspace" : "Client portal"}
       >
-        {!viewingSettings && (
-          <h1 className="sr-only">
-            {location.notFound
-              ? "Page not found"
-              : tabs.find(([value]) => value === tab)?.[1]}
-          </h1>
-        )}
-        {error && (
-          <p
-            role="alert"
-            className="rounded-xl border border-destructive bg-card p-4 text-sm text-destructive"
+        <aside className="min-w-0 md:sticky md:top-6">
+          <div className="flex gap-2 md:hidden">
+            <Choice
+              aria-label="Workspace section"
+              value={currentSection}
+              disabled={navigationBusy}
+              onValueChange={(value) =>
+                selectSection(value as WorkspaceSection | "settings")
+              }
+              options={[
+                ...tabs.map(([value, label]) => ({ value, label })),
+                ...(owner ? [{ value: "settings", label: "Settings" }] : []),
+              ]}
+            />
+          </div>
+          <nav
+            className="hidden flex-col gap-1 md:flex"
+            aria-label="Workspace sections"
           >
-            {error}
+            {tabs.map(([value, label, Icon]) => (
+              <Button
+                key={value}
+                className="shrink-0 justify-start whitespace-normal text-left aria-[current=page]:font-semibold md:w-full"
+                variant={currentSection === value ? "secondary" : "ghost"}
+                aria-current={currentSection === value ? "page" : undefined}
+                disabled={navigationBusy}
+                onClick={() => selectSection(value)}
+              >
+                <Icon aria-hidden="true" />
+                {label}
+              </Button>
+            ))}
+          </nav>
+          {owner && (
+            <div className="mt-3 hidden space-y-1 border-t pt-3 md:block">
+              <Button
+                className="w-full justify-start aria-[current=page]:font-semibold"
+                variant={viewingSettings ? "secondary" : "ghost"}
+                aria-current={viewingSettings ? "page" : undefined}
+                disabled={navigationBusy}
+                onClick={() => selectSection("settings")}
+              >
+                <Settings2 aria-hidden="true" />
+                Settings
+              </Button>
+            </div>
+          )}
+          <p className="mt-5 hidden break-words text-xs text-muted-foreground md:block">
+            {session.user.email}
           </p>
-        )}
-        {message && (
-          <p role="status" className="rounded-xl border bg-card p-4 text-sm">
-            {message}
-          </p>
-        )}
-        {viewingSettings ? (
-          settings!.content
-        ) : location.notFound ? (
-          <Panel title="Page not found">
-            <Button onClick={() => selectSection("bookings")}>
-              Back to bookings
-            </Button>
-          </Panel>
-        ) : !data ? (
-          <Panel title="Loading your workspace">
-            <Button
-              variant="outline"
-              onClick={() => void run(async () => {}, "")}
+        </aside>
+        <div
+          ref={content}
+          id="workspace-content"
+          tabIndex={-1}
+          data-skip-target
+          className="min-w-0 space-y-4"
+        >
+          {!viewingSettings && (
+            <h1 className="sr-only">
+              {location.notFound
+                ? "Page not found"
+                : tabs.find(([value]) => value === tab)?.[1]}
+            </h1>
+          )}
+          {error && (
+            <p
+              role="alert"
+              className="rounded-xl border border-destructive bg-card p-4 text-sm text-destructive"
             >
-              Retry
-            </Button>
-          </Panel>
-        ) : (
-          <>
-            {tab === "bookings" && (
-              <Bookings
-                key={session.user.email}
-                data={data}
-                owner={owner}
-                busy={busy}
-                run={run}
-                revision={revision}
-                onError={report}
-                ownerEmail={session.user.email}
-                onFirstBookingStep={(step, clientId) => {
-                  navigateLocal(
-                    workspaceHref(
-                      step === "service"
-                        ? { section: "rates", service: "new" }
-                        : {
-                            section: "clients",
-                            client: step === "client" ? "new" : clientId,
-                            clientTab: step === "pet" ? "pets" : "contact",
-                          },
-                    ),
-                  );
-                }}
-                onPayments={() => navigateLocal(settingsPath("payments"))}
-              />
-            )}
-            {tab === "clients" && (
-              <Clients
-                revision={data.revision}
-                portalEnabled={data.policy.portalEnabled}
-                busy={busy}
-                run={run}
-              />
-            )}
-            {tab === "rates" && (
-              <Services
-                revision={data.revision}
-                currency={data.regional.currency}
-                busy={busy}
-                run={run}
-              />
-            )}
-            {tab === "rules" && (
-              <Rules
-                key={data.policy.version}
-                data={data}
-                busy={busy}
-                run={run}
-              />
-            )}
-            {tab === "followups" && (
-              <Cancellations
-                revision={data.revision}
-                timeZone={data.regional.timeZone}
-                busy={busy}
-                run={run}
-              />
-            )}
-            {tab === "payments" && (
-              <PaymentRecords
-                revision={data.revision}
-                timeZone={data.regional.timeZone}
-                currency={data.regional.currency}
-              />
-            )}
-            {tab === "pets" && <HouseholdPets revision={data.revision} />}
-          </>
-        )}
-      </div>
-    </section>
+              {error}
+            </p>
+          )}
+          <ActionConfirmation
+            feedback={message}
+            dismiss={() => setMessage("")}
+          />
+          {viewingSettings ? (
+            settings!.content
+          ) : location.notFound ? (
+            <Panel title="Page not found">
+              <Button onClick={() => selectSection("bookings")}>
+                Back to bookings
+              </Button>
+            </Panel>
+          ) : !data ? (
+            <Panel title="Loading your workspace">
+              <Button
+                variant="outline"
+                onClick={() => void run(async () => {}, "")}
+              >
+                Retry
+              </Button>
+            </Panel>
+          ) : (
+            <>
+              {tab === "bookings" && (
+                <Bookings
+                  key={session.user.email}
+                  data={data}
+                  owner={owner}
+                  busy={busy}
+                  run={run}
+                  revision={revision}
+                  onError={report}
+                  ownerEmail={session.user.email}
+                  onFirstBookingStep={(step, clientId) => {
+                    navigateLocal(
+                      workspaceHref(
+                        step === "service"
+                          ? { section: "rates", service: "new" }
+                          : {
+                              section: "clients",
+                              client: step === "client" ? "new" : clientId,
+                              clientTab: step === "pet" ? "pets" : "contact",
+                            },
+                      ),
+                    );
+                  }}
+                  onPayments={() => navigateLocal(settingsPath("payments"))}
+                />
+              )}
+              {tab === "clients" && (
+                <Clients
+                  revision={data.revision}
+                  portalEnabled={data.policy.portalEnabled}
+                  busy={busy}
+                  run={run}
+                />
+              )}
+              {tab === "rates" && (
+                <Services
+                  revision={data.revision}
+                  currency={data.regional.currency}
+                  busy={busy}
+                  run={run}
+                />
+              )}
+              {tab === "rules" && (
+                <Rules
+                  key={data.policy.version}
+                  data={data}
+                  busy={busy}
+                  run={run}
+                />
+              )}
+              {tab === "followups" && (
+                <Cancellations
+                  revision={data.revision}
+                  timeZone={data.regional.timeZone}
+                  busy={busy}
+                  run={run}
+                />
+              )}
+              {tab === "payments" && (
+                <PaymentRecords
+                  revision={data.revision}
+                  timeZone={data.regional.timeZone}
+                  currency={data.regional.currency}
+                />
+              )}
+              {tab === "pets" && <HouseholdPets revision={data.revision} />}
+            </>
+          )}
+        </div>
+      </section>
+    </ActionFeedbackProvider>
   );
 }

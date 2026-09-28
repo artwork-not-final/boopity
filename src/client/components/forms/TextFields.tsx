@@ -2,7 +2,7 @@ import { Input } from "../ui/input";
 
 import { Field } from "./Field";
 export const controlClass =
-  "min-h-10 w-full min-w-0 rounded-md border bg-card px-3 py-2 text-sm";
+  "min-h-10 w-full min-w-0 rounded-md border border-input bg-card px-3 py-2 text-sm";
 export function Area({
   label,
   value,

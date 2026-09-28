@@ -12,6 +12,7 @@ import { PaymentBalanceSummary } from "./PaymentBalanceSummary";
 import { BookingPaymentList } from "./BookingPaymentList";
 import { AccountingHistory } from "./AccountingHistory";
 import { Button } from "../../components/ui/button";
+import { SectionTabs } from "../../components/navigation/SectionTabs";
 import { Field } from "../../components/forms/Field";
 import { Amount, Note } from "./PaymentFields";
 import { workspaceApi as api } from "../../lib/http/workspace-api";
@@ -217,29 +218,18 @@ export function BookingPayments({
             aria-label="Manage booking payments"
             className="min-w-0 rounded-xl border bg-card p-5 xl:col-start-2 xl:row-start-1 sm:p-6"
           >
-            <nav
-              aria-label="Payment actions"
-              className="mb-6 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1"
-            >
-              {(
-                [
-                  ["payment", "Record payment"],
-                  ["credit", "Adjust charge"],
-                ] as const
-              ).map(([value, label]) => (
-                <Button
-                  key={value}
-                  type="button"
-                  variant="ghost"
-                  aria-pressed={action === value}
-                  disabled={busy}
-                  className={`min-h-11 px-2 hover:bg-card hover:text-foreground ${action === value ? "bg-card shadow-sm" : "text-muted-foreground"}`}
-                  onClick={() => setAction(value)}
-                >
-                  {label}
-                </Button>
-              ))}
-            </nav>
+            <SectionTabs
+              label="Payment actions"
+              selection="value"
+              className="mb-6"
+              items={[
+                ["payment", "Record payment"],
+                ["credit", "Adjust charge"],
+              ]}
+              value={action}
+              onValueChange={setAction}
+              disabled={busy}
+            />
             <form
               hidden={action !== "payment"}
               className="space-y-5"

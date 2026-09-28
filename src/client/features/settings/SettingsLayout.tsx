@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
-import { Button } from "../../components/ui/button";
+import { SectionTabs } from "../../components/navigation/SectionTabs";
+import { ActionConfirmation } from "../../components/feedback/ActionFeedback";
+import type { ActionFeedback } from "../../lib/types/action-feedback";
 import {
   Card,
   CardContent,
@@ -18,35 +20,27 @@ export function SettingsLayout({
   navigate,
   children,
   message,
+  dismissMessage,
   error,
 }: {
   section: SettingsSection;
   busy: boolean;
   navigate: (path: string) => void;
   children: ReactNode;
-  message?: string;
+  message?: ActionFeedback;
+  dismissMessage?: () => void;
   error?: string;
 }) {
   return (
     <section className="space-y-4" aria-label="Business settings">
       <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-      <nav
-        aria-label="Settings categories"
-        className="flex flex-wrap gap-1 border-b pb-3"
-      >
-        {sections.map(({ id, label }) => (
-          <Button
-            key={id}
-            size="sm"
-            variant={section === id ? "secondary" : "ghost"}
-            aria-current={section === id ? "page" : undefined}
-            disabled={busy}
-            onClick={() => navigate(settingsPath(id))}
-          >
-            {label}
-          </Button>
-        ))}
-      </nav>
+      <SectionTabs
+        label="Settings categories"
+        items={sections.map(({ id, label }) => [id, label] as const)}
+        value={section}
+        disabled={busy}
+        onValueChange={(id) => navigate(settingsPath(id))}
+      />
       {error && (
         <p
           role="alert"
@@ -55,11 +49,7 @@ export function SettingsLayout({
           {error}
         </p>
       )}
-      {message && (
-        <p role="status" className="rounded-xl border bg-card p-4 text-sm">
-          {message}
-        </p>
-      )}
+      <ActionConfirmation feedback={message ?? ""} dismiss={dismissMessage} />
       {section === "payments" ? (
         children
       ) : (

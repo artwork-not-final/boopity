@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { businessToday } from "./booking-calendar";
 import { workspaceApi } from "../../lib/http/workspace-api";
 
@@ -16,6 +16,8 @@ export type ScheduleInput = {
   time: string;
   timeZone: string;
   revision: number;
+  outsideHours?: boolean;
+  waiveNotice?: boolean;
 };
 export function usesDirectTime(input: ScheduleInput, now: number) {
   return Boolean(
@@ -23,7 +25,8 @@ export function usesDirectTime(input: ScheduleInput, now: number) {
     input.serviceId &&
     input.durationMinutes !== null &&
     input.date &&
-    input.date <= businessToday(input.timeZone, new Date(now)),
+    (input.outsideHours ||
+      input.date <= businessToday(input.timeZone, new Date(now))),
   );
 }
 export function availabilityPath(input: ScheduleInput, now: number) {
@@ -39,6 +42,8 @@ export function availabilityPath(input: ScheduleInput, now: number) {
     startDate: input.date,
     ...(input.durationMinutes === null ? { endDate: input.endDate } : {}),
     ...(usesDirectTime(input, now) ? { startTime: input.time } : {}),
+    ...(input.owner && input.outsideHours ? { outsideHours: "true" } : {}),
+    ...(input.owner && input.waiveNotice ? { waiveNotice: "true" } : {}),
   })}`;
 }
 
@@ -56,9 +61,13 @@ export function useBookingAvailability(input: ScheduleInput) {
     };
   }, []);
   const path = availabilityPath(input, now);
-  const key = `${path}:${input.revision}:${input.timeZone}:${now}`;
+  // A -> B -> A must start a fresh check, not revive the first A's free slots.
+  const key = useMemo(
+    () => ({ path, revision: input.revision, timeZone: input.timeZone, now }),
+    [path, input.revision, input.timeZone, now],
+  );
   const [state, setState] = useState<{
-    key: string;
+    key: typeof key;
     data?: BookingAvailability;
     error?: string;
   } | null>(null);

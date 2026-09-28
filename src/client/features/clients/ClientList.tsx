@@ -44,7 +44,7 @@ export function ClientList({
               variant="ghost"
               disabled={busy}
               onClick={() => onSelect(client.id)}
-              className="grid h-auto min-h-22 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-4 rounded-none px-4 py-4 text-left font-normal whitespace-normal text-foreground hover:bg-muted hover:text-foreground focus-visible:ring-inset dark:hover:bg-muted sm:gap-6 sm:py-5"
+              className="grid h-auto min-h-22 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-4 rounded-none px-4 py-4 text-left font-normal whitespace-normal text-foreground focus-visible:ring-inset sm:gap-6 sm:py-5"
             >
               <span className="sr-only">Open client: </span>
               <span className="min-w-0">
@@ -73,7 +73,7 @@ export function ClientList({
               variant="outline"
               disabled={busy}
               onClick={() => onSelect(client.id, "pets")}
-              className="mx-4 mb-4 min-h-11 min-w-28 justify-self-start bg-card shadow-none hover:bg-muted hover:text-foreground dark:hover:bg-muted sm:ml-2 sm:mb-0"
+              className="mx-4 mb-4 min-h-11 min-w-28 justify-self-start bg-card shadow-none sm:ml-2 sm:mb-0"
             >
               <PawPrint className="size-4" aria-hidden="true" />
               <span className="sr-only">Pets for {name}: </span>

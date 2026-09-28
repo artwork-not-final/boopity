@@ -56,6 +56,13 @@ export const bookingRequestSchema = z
     startDate: calendarDate,
     startTime: clockTime.optional(),
     endDate: calendarDate.optional(),
+    overrides: z
+      .object({
+        outsideHours: z.boolean().optional(),
+        waiveNotice: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
     message: z.string().trim().max(2000).default(""),
   })
   .strict();

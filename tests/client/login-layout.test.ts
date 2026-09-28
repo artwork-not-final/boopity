@@ -186,7 +186,7 @@ describe("standalone sign-in layout", () => {
     );
     expect(source).toContain("!inWorkspace && !setup && !showingAccountPage");
     expect(source).toContain(
-      "<Login standalone error={displayedError} message={message}",
+      '<Login standalone error={displayedError} message={typeof message === "string" ? message : undefined}',
     );
   });
 });

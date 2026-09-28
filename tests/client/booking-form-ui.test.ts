@@ -68,5 +68,18 @@ describe("booking form layout", () => {
     expect(html).toContain("Sitter approval required.");
     expect(html).toContain("Send booking request");
     expect(html).not.toContain("Confirmed immediately.");
+    expect(html).not.toContain("Book outside opening hours");
+    expect(html).not.toContain("Waive minimum booking notice");
+    expect(html).not.toContain("Set your booking hours");
+    expect(html).toContain("Your sitter hasn’t added booking hours yet");
+  });
+  it("makes sitter exceptions opt-in and explains an empty calendar", () => {
+    const html = render(true);
+    expect(html).toContain("Set your booking hours");
+    expect(html).toContain("Book outside opening hours");
+    expect(html).toContain("Waive minimum booking notice (24 hours)");
+    const inputs = html.match(/<input\b[^>]*type="checkbox"[^>]*>/g) ?? [];
+    expect(inputs).toHaveLength(2);
+    for (const input of inputs) expect(input).not.toContain('checked=""');
   });
 });

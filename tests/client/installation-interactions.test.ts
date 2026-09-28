@@ -24,6 +24,7 @@ import type {
 import { defaultBranding } from "../../src/shared/branding";
 import { emptyProviders } from "../../src/shared/setup";
 import { saveAndRefresh } from "../../src/client/lib/navigation/setup-flow";
+import type { ActionFeedback } from "../../src/client/lib/types/action-feedback";
 
 // Keep the actual installation coordinator/forms; workspace data is outside
 // this boundary. No requests may reach a server or an email/payment provider.
@@ -120,7 +121,7 @@ function info(ready = false): PublicInfo {
 function action(refresh = async () => {}) {
   return async (
     work: () => Promise<unknown>,
-    _message?: string,
+    _message?: ActionFeedback,
     after?: () => void,
   ) => {
     try {
@@ -210,6 +211,92 @@ it("focuses the initial setup heading after the lazy wizard loads without steali
   expect(
     requests.every(({ init }) => !init?.method || init.method === "GET"),
   ).toBe(true);
+});
+
+it.each([
+  { step: "account", next: "email", endpoint: "/api/setup/identity" },
+  { step: "email", next: "business", endpoint: "/api/setup/providers" },
+  { step: "business", next: "verify", endpoint: "/api/setup/appearance" },
+  { step: "google", next: "review", endpoint: "/api/setup/providers" },
+])(
+  "advances from $step without a redundant saved banner",
+  async ({ step, next, endpoint }) => {
+    window.history.replaceState(null, "", `/setup/${step}`);
+    installation(state());
+    const healthy = respond;
+    respond = (url, init) =>
+      url === endpoint ? Response.json({ ok: true }) : healthy(url, init);
+    await mount(createElement(App));
+    await submit();
+    expect(requests.filter(({ url }) => url === endpoint)).toHaveLength(1);
+    expect(window.location.pathname).toBe(`/setup/${next}`);
+    expect(document.activeElement).toBe(
+      container.querySelector("#setup-content"),
+    );
+    expect(container.querySelector('[role="status"]')).toBeNull();
+    expect(container.querySelector('[role="alert"]')).toBeNull();
+  },
+);
+
+it("keeps the email-code delivery notice without carrying verification feedback into the next step", async () => {
+  window.history.replaceState(null, "", "/setup/verify");
+  installation(state());
+  const healthy = respond;
+  respond = (url, init) =>
+    [
+      "/api/auth/email-otp/send-verification-otp",
+      "/api/auth/sign-in/email-otp",
+      "/api/setup/owner",
+    ].includes(url)
+      ? Response.json({ ok: true })
+      : healthy(url, init);
+  await mount(createElement(App));
+  await click("Send sign-in code");
+  expect(container.querySelector('[role="status"]')?.textContent).toContain(
+    "Check your inbox for a code.",
+  );
+  await enter("Six-digit code", "123456");
+  await submit();
+  expect(window.location.pathname).toBe("/setup/google");
+  expect(container.querySelector('[role="status"]')).toBeNull();
+});
+
+it("keeps settings confirmation beside Save through a refreshed form, but not subsequent edits or errors", async () => {
+  window.history.replaceState(null, "", "/app/settings/email");
+  const current = state(true);
+  installation(current, true);
+  const healthy = respond;
+  respond = (url, init) => {
+    if (url !== "/api/setup/providers") return healthy(url, init);
+    current.providers.version += 1;
+    return Response.json({ ok: true });
+  };
+  await mount(createElement(App));
+  await submit();
+  expect(window.location.pathname).toBe("/app/settings/email");
+  expect(container.querySelector('[role="status"]')?.textContent).toBe("Saved");
+  expect(
+    button("Save changes").parentElement?.querySelector('[role="status"]')
+      ?.textContent,
+  ).toBe("Saved");
+  expect(
+    container.querySelector('[aria-label="Dismiss confirmation"]'),
+  ).toBeNull();
+  await enter("Sender email", "new-sender@example.test");
+  expect(container.querySelector('[role="status"]')?.textContent).toBe("");
+  respond = (url, init) =>
+    url === "/api/setup/providers"
+      ? Response.json({ error: "Save unavailable" }, { status: 503 })
+      : healthy(url, init);
+  await submit();
+  expect(container.querySelector('[role="status"]')?.textContent).toBe("");
+  expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+    "Save unavailable",
+  );
+  await enter("Sender email", "another-sender@example.test");
+  expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+    "Save unavailable",
+  );
 });
 
 it("clears a background connection error on recovery without changing the current page", async () => {

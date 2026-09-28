@@ -1109,6 +1109,288 @@ describe("bookings, races and policy snapshots", () => {
   });
 });
 
+describe("explicit sitter scheduling exceptions", () => {
+  const both = { outsideHours: true, waiveNotice: true };
+  const preview = (date: string, query = "") =>
+    `/api/business/availability?serviceId=visit&startDate=${date}${query}`;
+
+  it("uses the same opening hours and notice for both roles by default", async () => {
+    const f = fixture(),
+      owner = f.browser();
+    await configure(f, owner);
+    const a = await client(f, owner),
+      date = futureDate();
+    const ownerSlots = (await ok(owner.req(preview(date)))).slots;
+    expect(ownerSlots).toEqual((await ok(a.req(preview(date)))).slots);
+    expect(ownerSlots[0]).toEqual({ startTime: "08:00" });
+    expect(ownerSlots.at(-1)).toEqual({ startTime: "19:30" });
+    const policy = await readPolicy(f.db);
+    await ok(
+      owner.req("/api/business/owner/policy", "PUT", {
+        ...policy,
+        leadHours: 720,
+      }),
+    );
+    expect((await ok(owner.req(preview(date)))).slots).toEqual([]);
+    expect((await ok(a.req(preview(date)))).slots).toEqual([]);
+    const denied = await ok(
+      owner.req("/api/business/bookings", "POST", request({ clientId: "a" })),
+      409,
+    );
+    expect(denied.error).toContain("notice");
+    expect(
+      (await ok(owner.req(preview(date, "&waiveNotice=true")))).slots,
+    ).toEqual(ownerSlots);
+  });
+
+  it("requires hours or an explicit exception, including all-day stays", async () => {
+    const f = fixture(),
+      owner = f.browser();
+    await configure(f, owner, { weekly: [] });
+    const a = await client(f, owner),
+      input = request({ clientId: "a" });
+    expect((await ok(owner.req(preview(input.startDate)))).slots).toEqual([]);
+    expect((await ok(a.req(preview(input.startDate)))).slots).toEqual([]);
+    const denied = await ok(
+      owner.req("/api/business/bookings", "POST", input),
+      409,
+    );
+    expect(denied.error).toContain("Set your booking hours");
+    const stay = request({
+      clientId: "a",
+      serviceId: "stay",
+      startTime: undefined,
+      endDate: input.startDate,
+    });
+    await ok(owner.req("/api/business/bookings", "POST", stay), 409);
+    const { booking } = await ok(
+      owner.req("/api/business/bookings", "POST", {
+        ...stay,
+        overrides: { outsideHours: true },
+      }),
+      201,
+    );
+    expect(booking.status).toBe("active");
+    expect((await readPolicy(f.db)).weekly).toEqual([]);
+  });
+
+  it("keeps the two exceptions independent and records only applied exceptions once", async () => {
+    const f = fixture(),
+      owner = f.browser();
+    await configure(f, owner, { leadHours: 720 });
+    const input = request({ clientId: "a", startTime: "03:07" });
+    for (const [overrides, message] of [
+      [{ outsideHours: true }, "notice"],
+      [{ waiveNotice: true }, "opening"],
+    ] as const) {
+      const denied = await ok(
+        owner.req("/api/business/bookings", "POST", { ...input, overrides }),
+        409,
+      );
+      expect(denied.error).toContain(message);
+    }
+    expect(
+      await ok(
+        owner.req(
+          preview(
+            input.startDate,
+            "&startTime=03:07&outsideHours=true&waiveNotice=true",
+          ),
+        ),
+      ),
+    ).toMatchObject({
+      slots: [{ startTime: "03:07" }],
+      historical: false,
+      overlaps: false,
+    });
+    const { booking } = await ok(
+      owner.req("/api/business/bookings", "POST", {
+        ...input,
+        overrides: both,
+      }),
+      201,
+    );
+    expect(
+      await ok(
+        owner.req("/api/business/bookings", "POST", {
+          ...input,
+          overrides: both,
+        }),
+      ),
+    ).toMatchObject({
+      replay: true,
+      booking: { id: booking.id },
+    });
+    await ok(
+      owner.req("/api/business/bookings", "POST", {
+        ...input,
+        overrides: { outsideHours: true },
+      }),
+      409,
+    );
+    const { history } = await ok(
+      owner.req(`/api/business/bookings/${booking.id}`),
+    );
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({
+      event: "confirmed",
+      actorRole: "owner",
+      reason: "Booked outside opening hours. Minimum booking notice waived.",
+    });
+    const row = await f.db
+      .prepare("SELECT policy_snapshot FROM bookings WHERE id=?1")
+      .bind(booking.id)
+      .first<{ policy_snapshot: string }>();
+    expect(JSON.parse(row!.policy_snapshot).overrides).toEqual(both);
+  });
+
+  it("rejects client-forged exceptions in both availability and booking requests", async () => {
+    const f = fixture(),
+      owner = f.browser();
+    await configure(f, owner);
+    const a = await client(f, owner),
+      date = futureDate();
+    for (const overrides of [
+      both,
+      { outsideHours: true },
+      { waiveNotice: true },
+      {},
+      { outsideHours: false },
+    ])
+      await ok(
+        a.req("/api/business/bookings", "POST", request({ overrides })),
+        403,
+      );
+    for (const query of [
+      "&outsideHours=true",
+      "&waiveNotice=true",
+      "&outsideHours=true&waiveNotice=true",
+    ])
+      await ok(a.req(preview(date, query)), 403);
+    await ok(
+      owner.req(
+        "/api/business/bookings",
+        "POST",
+        request({ clientId: "a", overrides: { conflicts: true } }),
+      ),
+      400,
+    );
+    await ok(owner.req(preview(date, "&outsideHours=false")), 400);
+  });
+
+  it("atomically blocks overlapping future exceptions and returns no conflicting slot", async () => {
+    const f = fixture(),
+      owner = f.browser();
+    await configure(f, owner, { leadHours: 720, weekly: [] });
+    const input = { clientId: "a", startTime: "03:07", overrides: both };
+    const responses = await Promise.all([
+      owner.req("/api/business/bookings", "POST", request(input)),
+      owner.req("/api/business/bookings", "POST", request(input)),
+    ]);
+    expect(responses.map((r) => r.status).sort()).toEqual([201, 409]);
+    expect(
+      await ok(
+        owner.req(
+          preview(
+            futureDate(),
+            "&startTime=03:07&outsideHours=true&waiveNotice=true",
+          ),
+        ),
+      ),
+    ).toMatchObject({
+      slots: [],
+      historical: false,
+      overlaps: true,
+    });
+    expect(
+      (await f.db
+        .prepare("SELECT COUNT(*) AS total FROM bookings")
+        .first<{ total: number }>())!.total,
+    ).toBe(1);
+  });
+
+  it("never waives unavailable dates, advance limits or household eligibility", async () => {
+    const f = fixture(),
+      owner = f.browser();
+    await configure(f, owner, { blockedDates: [futureDate()] });
+    const input = request({ clientId: "a", overrides: both });
+    const blocked = await ok(
+      owner.req("/api/business/bookings", "POST", input),
+      409,
+    );
+    expect(blocked.error).toContain("unavailable");
+    await ok(
+      owner.req(
+        preview(
+          input.startDate,
+          "&startTime=03:07&outsideHours=true&waiveNotice=true",
+        ),
+      ),
+      409,
+    );
+    await ok(
+      owner.req("/api/business/bookings", "POST", {
+        ...input,
+        serviceId: "stay",
+        startTime: undefined,
+        endDate: input.startDate,
+      }),
+      409,
+    );
+    const policy = await readPolicy(f.db);
+    await ok(
+      owner.req("/api/business/owner/policy", "PUT", {
+        ...policy,
+        blockedDates: [],
+        horizonDays: 1,
+      }),
+    );
+    const distant = await ok(
+      owner.req("/api/business/bookings", "POST", input),
+      409,
+    );
+    expect(distant.error).toContain("calendar days");
+    await ok(
+      owner.req("/api/business/owner/policy", "PUT", {
+        ...(await readPolicy(f.db)),
+        horizonDays: 90,
+      }),
+    );
+    await ok(
+      owner.req("/api/business/bookings", "POST", {
+        ...input,
+        petIds: ["pet-b"],
+      }),
+      409,
+    );
+  });
+
+  it("does not label ordinary or historical bookings as exceptions unnecessarily", async () => {
+    const f = fixture(),
+      owner = f.browser();
+    await configure(f, owner);
+    for (const patch of [{}, { startDate: "2025-09-01", startTime: "03:07" }]) {
+      const { booking } = await ok(
+        owner.req(
+          "/api/business/bookings",
+          "POST",
+          request({ clientId: "a", overrides: both, ...patch }),
+        ),
+        201,
+      );
+      const detail = await ok(
+        owner.req(`/api/business/bookings/${booking.id}`),
+      );
+      expect(detail.history[0].reason).toBe("");
+      const row = await f.db
+        .prepare("SELECT policy_snapshot FROM bookings WHERE id=?1")
+        .bind(booking.id)
+        .first<{ policy_snapshot: string }>();
+      expect(JSON.parse(row!.policy_snapshot)).not.toHaveProperty("overrides");
+    }
+  });
+});
+
 describe("sitter-recorded past bookings", () => {
   const past = { clientId: "a", startDate: "2025-09-01", startTime: "03:07" };
   const previewPath =
@@ -1422,6 +1704,78 @@ describe("business-local calendar rules", () => {
         Date.UTC(2027, 0, 1),
       ),
     ).toThrow("occurs twice");
+  });
+  it("keeps exact notice boundaries for sitters and never overrides times already in progress or clock changes", () => {
+    const input = request({ startDate: "2026-09-15", startTime: "10:00" });
+    const start = unambiguousTime(
+      input.startDate,
+      input.startTime,
+      "America/New_York",
+    );
+    expect(
+      bookingWindow(
+        input,
+        service,
+        policy,
+        "America/New_York",
+        false,
+        start - 24 * 3_600_000,
+      ).overrides.waiveNotice,
+    ).toBe(false);
+    expect(() =>
+      bookingWindow(
+        input,
+        service,
+        policy,
+        "America/New_York",
+        false,
+        start - 24 * 3_600_000 + 1,
+      ),
+    ).toThrow("notice");
+    const explicit = {
+      ...input,
+      overrides: { outsideHours: true, waiveNotice: true },
+    };
+    expect(
+      bookingWindow(
+        explicit,
+        service,
+        policy,
+        "America/New_York",
+        false,
+        start - 24 * 3_600_000 + 1,
+      ).overrides,
+    ).toEqual({ outsideHours: false, waiveNotice: true });
+    expect(() =>
+      bookingWindow(
+        explicit,
+        service,
+        policy,
+        "America/New_York",
+        false,
+        start,
+      ),
+    ).toThrow("already ended");
+    expect(() =>
+      bookingWindow(
+        { ...explicit, startDate: "2026-11-01", startTime: "01:30" },
+        service,
+        policy,
+        "America/New_York",
+        false,
+        Date.UTC(2026, 9, 31),
+      ),
+    ).toThrow("occurs twice");
+    expect(() =>
+      bookingWindow(
+        explicit,
+        service,
+        policy,
+        "America/New_York",
+        true,
+        start - 24 * 3_600_000,
+      ),
+    ).toThrow("Only the sitter");
   });
   it("uses exact notice cutoffs, blocked dates/opening hours and calendar-day horizons", () => {
     const input = request({ startDate: "2026-09-15", startTime: "10:00" }),

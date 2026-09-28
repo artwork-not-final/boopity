@@ -188,7 +188,7 @@ export function FirstBookingChecklist({
                 {progress[step.id] ? (
                   <div className="flex min-h-12 items-center gap-3 rounded-lg bg-muted/50 px-3 py-2 text-sm">
                     <Check
-                      className="size-5 shrink-0 text-primary"
+                      className="size-5 shrink-0 text-brand-ink"
                       aria-hidden="true"
                     />
                     <span>

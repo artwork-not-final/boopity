@@ -173,7 +173,8 @@ export function CalendarGrid({
             className="grid gap-3 py-4 sm:grid-cols-[120px_minmax(0,1fr)]"
           >
             <h4
-              className={`text-sm font-medium ${date === today ? "text-primary" : ""}`}
+              className="text-sm font-medium"
+              aria-current={date === today ? "date" : undefined}
             >
               {dateLabel(date, {
                 weekday: "short",
@@ -181,7 +182,9 @@ export function CalendarGrid({
                 day: "numeric",
               })}
               {date === today && (
-                <span className="ml-2 sm:ml-0 sm:mt-1 sm:block">Today</span>
+                <span className="ml-2 inline-flex rounded-md bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground sm:ml-0 sm:mt-2 sm:flex sm:w-fit">
+                  Today
+                </span>
               )}
             </h4>
             <div className="space-y-3">
@@ -224,11 +227,20 @@ export function CalendarGrid({
                   type="button"
                   disabled={busy}
                   aria-pressed={date === selectedDay}
+                  aria-current={date === today ? "date" : undefined}
                   aria-label={`${dateLabel(date, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}, ${items.length} ${items.length === 1 ? "booking" : "bookings"}`}
                   onClick={() => onDay(date)}
-                  className={`flex min-h-11 w-full flex-col items-center justify-center rounded-md text-sm focus-visible:outline-2 focus-visible:outline-ring ${date === selectedDay ? "bg-primary text-primary-foreground" : date === today ? "bg-secondary text-primary" : "hover:bg-accent"}`}
+                  className={`flex min-h-11 w-full flex-col items-center justify-center rounded-md text-sm focus-visible:outline-2 focus-visible:outline-ring ${date === selectedDay ? "bg-secondary font-semibold text-secondary-foreground ring-1 ring-inset ring-brand-ink" : date === today ? "bg-secondary font-semibold text-secondary-foreground" : "hover:bg-brand-soft-hover"}`}
                 >
-                  <span>{Number(date.slice(-2))}</span>
+                  <span
+                    className={
+                      date === today
+                        ? "underline decoration-2 underline-offset-4"
+                        : undefined
+                    }
+                  >
+                    {Number(date.slice(-2))}
+                  </span>
                   {items.length > 0 && (
                     <span className="text-xs lg:hidden">
                       {items.length} <span className="sr-only">bookings</span>
@@ -242,7 +254,8 @@ export function CalendarGrid({
                       type="button"
                       disabled={busy}
                       onClick={() => onSelect(b.id)}
-                      className={`block w-full truncate rounded px-1 py-1 text-left text-xs focus-visible:outline-2 focus-visible:outline-ring ${b.status === "requested" ? "bg-secondary text-primary" : "bg-muted"}`}
+                      aria-label={`${bookingTime(b.startTime)} · ${b.serviceName} · ${bookingStatus(b.status)}`}
+                      className="block w-full truncate rounded border-l-2 border-brand-ink bg-brand-soft px-2 py-1 text-left text-xs text-foreground hover:bg-brand-soft-hover focus-visible:outline-2 focus-visible:outline-ring"
                       title={`${bookingTime(b.startTime)} · ${b.serviceName} · ${bookingStatus(b.status)}`}
                     >
                       {bookingTime(b.startTime)} · {b.serviceName}
@@ -253,7 +266,7 @@ export function CalendarGrid({
                       type="button"
                       disabled={busy}
                       onClick={() => onDay(date)}
-                      className="min-h-8 w-full text-left text-xs font-medium text-primary"
+                      className="min-h-8 w-full text-left text-xs font-medium text-brand-ink"
                     >
                       +{items.length - 2} more
                     </button>
@@ -307,22 +320,31 @@ function CalendarEvent({
       type="button"
       disabled={busy}
       onClick={() => onSelect(b.id)}
-      className="flex w-full flex-wrap items-center justify-between gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-accent/40 focus-visible:outline-2 focus-visible:outline-ring"
+      className="grid w-full grid-cols-1 items-start gap-3 rounded-lg border border-l-[3px] border-l-brand-ink bg-brand-soft p-4 text-left transition-colors hover:bg-brand-soft-hover focus-visible:outline-2 focus-visible:outline-ring sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
     >
       <span className="min-w-0 flex-1">
-        <span className="block text-sm text-muted-foreground">
+        <span className="block text-sm font-medium text-foreground">
           {bookingTime(b.startTime)}
           {b.endTime ? ` – ${bookingTime(b.endTime)}` : ""}
         </span>
         <span className="mt-1 block break-words font-semibold">
           {b.serviceName}
         </span>
-        <span className="mt-1 block break-words text-sm text-muted-foreground">
+        <span className="mt-1 block break-words text-sm text-foreground">
           {owner && b.clientName ? `${b.clientName} · ` : ""}
           {b.pets.map((p) => p.name).join(", ")}
         </span>
       </span>
-      <Badge variant={b.status === "requested" ? "secondary" : "outline"}>
+      <Badge
+        variant="outline"
+        className={
+          b.status === "active"
+            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+            : b.status === "requested"
+              ? "border-amber-200 bg-amber-50 text-amber-800"
+              : "bg-card text-muted-foreground"
+        }
+      >
         {bookingStatus(b.status)}
       </Badge>
     </button>

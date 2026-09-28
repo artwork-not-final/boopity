@@ -119,6 +119,15 @@ POST /api/business/bookings/:id/transition
 PUT /api/business/bookings/:id/notes
 ```
 
+Future bookings follow the saved opening hours and minimum notice for both roles.
+Only owners may send `overrides: { outsideHours: true, waiveNotice: true }` when
+creating a booking; either flag may be used independently. Availability previews
+accept the matching optional `outsideHours=true` and `waiveNotice=true` query
+parameters. Clients cannot use these exceptions. Applied exceptions are saved in
+the policy snapshot and booking history without changing the business rules.
+Unavailable dates, the advance-booking limit and future booking conflicts still
+apply. Owners can record fully ended visits separately as completed past bookings.
+
 ### Payment routes
 
 ```text

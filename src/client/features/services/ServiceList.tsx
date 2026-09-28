@@ -24,7 +24,7 @@ export function ServiceList({
             variant="ghost"
             disabled={busy}
             onClick={() => onSelect(service)}
-            className="flex h-auto min-h-20 w-full min-w-0 items-center gap-4 rounded-none bg-card px-4 py-4 text-left font-normal whitespace-normal text-foreground hover:bg-muted hover:text-foreground focus-visible:ring-inset dark:hover:bg-muted"
+            className="flex h-auto min-h-20 w-full min-w-0 items-center gap-4 rounded-none bg-card px-4 py-4 text-left font-normal whitespace-normal text-foreground focus-visible:ring-inset"
           >
             <span className="sr-only">Edit service: </span>
             <span className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">

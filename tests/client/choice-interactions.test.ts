@@ -194,6 +194,33 @@ it("supports arrows, Escape and Enter in a standard select, skipping disabled op
 });
 
 it.each([false, true])(
+  "keeps dropdown highlights inside the sitter's branded theme (searchable=%s)",
+  async (searchable) => {
+    container.setAttribute("data-boopity-theme", "");
+    container.style.setProperty("--brand-soft-hover", "#e9eff2");
+    await mount({ searchable });
+    await key(trigger(), searchable ? "ArrowDown" : "Enter");
+    const popup = document.querySelector('[data-slot="choice-popup"]')!;
+    expect(popup.closest("[data-boopity-theme]")).toBe(container);
+    const items = Array.from(popup.querySelectorAll('[role="option"]'));
+    expect(items).toHaveLength(3);
+    for (const item of items) {
+      expect(item.classList).toContain(
+        searchable
+          ? "data-[selected=true]:bg-brand-soft-hover"
+          : "data-[highlighted]:bg-brand-soft-hover",
+      );
+      expect(item.className).not.toContain(":bg-muted");
+    }
+    await key(
+      searchable ? search() : (document.activeElement as HTMLElement),
+      "Escape",
+    );
+    expect(changed).not.toHaveBeenCalled();
+  },
+);
+
+it.each([false, true])(
   "keeps one identified native control, raw submitted values and autofill inside forms (searchable=%s)",
   async (searchable) => {
     function Form() {

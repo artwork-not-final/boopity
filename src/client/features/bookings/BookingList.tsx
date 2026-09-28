@@ -53,7 +53,7 @@ export function BookingList({
               variant="ghost"
               disabled={busy}
               onClick={() => onSelect(booking.id)}
-              className="grid h-auto min-h-22 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-3 rounded-none bg-card px-4 py-4 text-left font-normal whitespace-normal text-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset dark:hover:bg-muted sm:grid-cols-[150px_minmax(0,1fr)_auto] sm:gap-x-6 sm:py-5"
+              className="grid h-auto min-h-22 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-3 rounded-none bg-card px-4 py-4 text-left font-normal whitespace-normal text-foreground focus-visible:ring-2 focus-visible:ring-inset sm:grid-cols-[150px_minmax(0,1fr)_auto] sm:gap-x-6 sm:py-5"
             >
               <span className="sr-only">Open booking: </span>
               <span className="col-span-2 flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 text-sm sm:col-span-1 sm:col-start-1 sm:row-start-1 sm:block">
@@ -79,7 +79,7 @@ export function BookingList({
                     </>
                   )}
                 </span>
-                <span className="text-muted-foreground sm:mt-1 sm:block">
+                <span className="text-foreground sm:mt-1 sm:block">
                   {bookingTime(booking.startTime)}
                   {booking.endTime ? ` – ${bookingTime(booking.endTime)}` : ""}
                 </span>
@@ -93,7 +93,7 @@ export function BookingList({
                 <span className="block break-words text-base font-semibold">
                   {pets || booking.serviceName}
                   {owner && booking.clientName && (
-                    <span className="font-normal text-muted-foreground">
+                    <span className="font-normal text-foreground">
                       {" "}
                       · {booking.clientName}
                     </span>

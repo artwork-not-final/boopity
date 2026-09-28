@@ -12,6 +12,7 @@ import {
 } from "../../lib/navigation/workspace-location";
 import { compactPage, VISIBLE_PAGE_SIZE } from "../../lib/compact-page";
 import { PageControls } from "../../components/navigation/PageControls";
+import { SectionTabs } from "../../components/navigation/SectionTabs";
 import { SearchBox } from "../../components/forms/SearchBox";
 import { usePage } from "../../hooks/usePage";
 import type { RunWorkspaceAction } from "../../lib/types/workspace-types";
@@ -215,29 +216,17 @@ export function Clients({
           <h2 className="text-2xl font-semibold tracking-tight">New client</h2>
         )}
         {current && (
-          <nav
-            aria-label="Client sections"
-            className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1 sm:inline-grid sm:min-w-96"
-          >
-            {(
-              [
-                ["contact", "Contact"],
-                ["pets", "Pets"],
-                ["portal", "Portal access"],
-              ] as const
-            ).map(([value, label]) => (
-              <Button
-                key={value}
-                className={`min-h-11 px-2 ${section === value ? "bg-card shadow-sm" : "text-muted-foreground"}`}
-                variant="ghost"
-                aria-current={section === value ? "page" : undefined}
-                disabled={busy}
-                onClick={() => setSection(value)}
-              >
-                {label}
-              </Button>
-            ))}
-          </nav>
+          <SectionTabs
+            label="Client sections"
+            items={[
+              ["contact", "Contact"],
+              ["pets", "Pets"],
+              ["portal", "Portal access"],
+            ]}
+            value={section}
+            onValueChange={setSection}
+            disabled={busy}
+          />
         )}
         {(selected === "new" || current) && (
           <div hidden={section !== "contact"}>

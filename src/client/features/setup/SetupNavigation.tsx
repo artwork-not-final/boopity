@@ -49,7 +49,7 @@ export function SetupNavigation({
             aria-current={active.id === item.id ? "step" : undefined}
             disabled={busy}
             onClick={() => onSelect(item.id)}
-            className={`flex items-center gap-3 rounded-xl px-3 py-3 text-left text-sm ${active.id === item.id ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
+            className={`flex items-center gap-3 rounded-xl px-3 py-3 text-left text-sm ${active.id === item.id ? "bg-primary text-primary-foreground" : "hover:bg-brand-soft-hover"}`}
           >
             <span
               className="flex size-6 shrink-0 items-center justify-center rounded-full border text-xs"

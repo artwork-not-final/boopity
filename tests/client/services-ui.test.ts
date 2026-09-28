@@ -25,13 +25,17 @@ function list(services = [service], busy = false, currency = "USD") {
     }),
   );
 }
-function form(selected: typeof service | null = service, busy = false) {
+function form(
+  selected: typeof service | null = service,
+  busy = false,
+  currency = "USD",
+) {
   return renderToStaticMarkup(
     createElement(ServiceForm, {
       ...actions,
       service: selected,
       busy,
-      currency: "USD",
+      currency,
     }),
   );
 }
@@ -55,7 +59,8 @@ describe("service list", () => {
     expect(html).toContain("Edit service:");
     expect(html).not.toMatch(/<input\b|<form\b|Archive service/);
     expect(html).toContain("rounded-none");
-    expect(html).toContain("hover:bg-muted");
+    expect(html).toContain("hover:bg-brand-soft-hover");
+    expect(html).not.toContain("hover:bg-muted");
     expect(html).not.toContain("bg-accent");
     expect(list([service], true)).toContain('disabled=""');
   });
@@ -130,22 +135,41 @@ describe("service editor", () => {
       "Set the additional-pet price to 0 to charge each pet the full rate.",
     );
     expect(html).toContain("$60.00");
-    expect(html).toContain("per visit.");
+    expect(html).toContain("per visit");
     expect(form()).toContain("$40.00");
   });
   it("shows daily pricing and hides the visit length for all-day services", () => {
     const html = form({ ...service, durationMinutes: null });
     expect(html).toContain("Price per day (USD)");
-    expect(html).toContain("per day.");
+    expect(html).toContain("per day");
     expect(html).not.toContain("Visit length (minutes)");
   });
   it("starts a new service with timed defaults and explains initial portal visibility", () => {
     const html = form(null);
     expect(html).toContain('aria-label="New service"');
     expect(html).toContain("Visit length (minutes)");
-    expect(html).toContain("New services start hidden from clients.");
+    expect(html).toContain("Clients won’t see this service yet.");
+    expect(html).toContain(
+      "After saving, you can turn on “Offer in the client portal.”",
+    );
+    expect(html).toContain("bg-card p-4 text-sm leading-6 text-foreground");
+    expect(html.indexOf("Clients won’t see this service yet.")).toBeLessThan(
+      html.indexOf("Save service"),
+    );
+    expect(html).not.toContain('role="alert"');
+    expect(form()).not.toContain("Clients won’t see this service yet.");
     expect(html).not.toContain("Existing bookings keep their saved prices.");
     expect(html).not.toContain("Archive service");
+  });
+  it("previews one- and two-pet totals together using the business currency", () => {
+    const html = form({ ...service, priceCents: 1500 }, false, "EUR");
+    expect(html).toContain('aria-label="Price preview"');
+    expect(html).toContain('aria-live="polite" aria-atomic="true"');
+    expect(html).toContain("<dt>1 pet</dt>");
+    expect(html).toContain("<dt>2 pets</dt>");
+    expect(html).toContain("€15.00");
+    expect(html).toContain("€25.00");
+    expect(html).toContain("sm:grid-cols-2");
   });
   it("disables save and cancel during a save", () => {
     expect(

@@ -55,7 +55,7 @@ export function PetChooser({
         {rows.map((p) => (
           <label
             key={p.id}
-            className={`flex min-h-14 min-w-0 cursor-pointer items-center gap-3 rounded-lg border p-4 text-sm ${selected.some((pet) => pet.id === p.id) ? "border-primary bg-secondary/40" : "bg-card"}`}
+            className={`flex min-h-14 min-w-0 cursor-pointer items-center gap-3 rounded-lg border p-4 text-sm ${selected.some((pet) => pet.id === p.id) ? "border-brand-ink bg-brand-soft" : "bg-card"}`}
           >
             <input
               type="checkbox"

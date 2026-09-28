@@ -57,3 +57,15 @@ Follow [the local installation instructions](SELF-HOSTING.md#start-locally).
 The initial private link opens the wizard; choose a setup password in Your account
 to return later. Installer links, legacy codes and managed-email installations
 are covered in the [installer guide](INSTALLER-ACCESS.md), not the normal setup screen.
+
+## Before clients book
+
+Add your services, clients and their pets. In **Portal & rules**, set your booking
+hours and save. Clients won’t see available times until you do this. Offer the
+services you want clients to book in the portal, then invite them to sign in.
+
+When you add a booking, the same hours and minimum notice apply. For a one-off
+exception, select **Book outside opening hours** or **Waive minimum booking notice**.
+These options do not change your usual hours or let you double-book or use an
+unavailable date. To record work already done, choose a past date and time; it
+will be saved as completed, with payment tracked separately.

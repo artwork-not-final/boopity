@@ -5,12 +5,17 @@ import { providersPayload } from "./providers-payload";
 import { api } from "../../lib/http/installation-api";
 import { Field } from "../../components/forms/Field";
 import { Notice } from "../../components/feedback/Notice";
+import {
+  SavedStatus,
+  useSaveFeedback,
+} from "../../components/feedback/ActionFeedback";
 import type { InstallationFormProps as FormProps } from "../../lib/types/installation-types";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 
 export function EmailSettings({ state, busy, run, onContinue }: FormProps) {
   const [email, setEmail] = useState(state.providers.email);
+  const saveFeedback = useSaveFeedback("email-settings", [email]);
   const managed = state.providers.managed.email;
   const field = <K extends keyof typeof email>(
     key: K,
@@ -45,7 +50,7 @@ export function EmailSettings({ state, busy, run, onContinue }: FormProps) {
                 "PUT",
                 providersPayload(state, email),
               ),
-            "Email settings saved.",
+            saveFeedback,
             onContinue,
           );
         }}
@@ -154,9 +159,12 @@ export function EmailSettings({ state, busy, run, onContinue }: FormProps) {
           )}
         </fieldset>
         {!managed && (
-          <Button disabled={busy}>
-            {onContinue ? "Save and continue" : "Save changes"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button disabled={busy}>
+              {onContinue ? "Save and continue" : "Save changes"}
+            </Button>
+            {!onContinue && <SavedStatus feedback={saveFeedback} />}
+          </div>
         )}
       </form>
       {managed && onContinue && (

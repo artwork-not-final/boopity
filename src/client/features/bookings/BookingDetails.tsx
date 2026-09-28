@@ -1,6 +1,8 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import { SectionTabs } from "../../components/navigation/SectionTabs";
+import { useSaveFeedback } from "../../components/feedback/ActionFeedback";
 
 import { workspaceApi as api } from "../../lib/http/workspace-api";
 
@@ -38,6 +40,7 @@ export function BookingDetails({
   const [reason, setReason] = useState("");
   const [notes, setNotes] = useState("");
   const [update, setUpdate] = useState("");
+  const saveFeedback = useSaveFeedback(`booking-notes:${id}`, [notes, update]);
   const notesLoaded = useRef(false);
   const section = useWorkspaceLocation().bookingTab;
   const setSection = (bookingTab: "overview" | "payments" | "history") =>
@@ -117,37 +120,20 @@ export function BookingDetails({
             zone={zone}
             currency={b.price?.currency ?? data.regional.currency}
           />
-          <nav
-            aria-label="Booking sections"
-            className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1 sm:inline-grid sm:min-w-96"
-          >
-            {(
-              [
-                ["overview", "Overview"],
-                ["payments", "Payments"],
-                ["history", "History"],
-              ] as const
-            ).map(([value, label]) => (
-              <Button
-                key={value}
-                className={
-                  "min-h-11 px-3 " +
-                  (section === value
-                    ? "bg-card shadow-sm"
-                    : "text-muted-foreground")
-                }
-                variant="ghost"
-                disabled={busy}
-                aria-current={section === value ? "page" : undefined}
-                onClick={() => {
-                  setSection(value);
-                  if (value === "payments") setPaymentsOpened(true);
-                }}
-              >
-                {label}
-              </Button>
-            ))}
-          </nav>
+          <SectionTabs
+            label="Booking sections"
+            items={[
+              ["overview", "Overview"],
+              ["payments", "Payments"],
+              ["history", "History"],
+            ]}
+            value={section}
+            disabled={busy}
+            onValueChange={(value) => {
+              setSection(value);
+              if (value === "payments") setPaymentsOpened(true);
+            }}
+          />
           <div hidden={section !== "overview"}>
             <BookingOverview
               booking={b}
@@ -173,7 +159,7 @@ export function BookingDetails({
                         clientUpdate: update,
                       },
                     ),
-                  "Visit notes saved.",
+                  saveFeedback,
                 )
               }
             />

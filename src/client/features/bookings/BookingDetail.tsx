@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
+import { SavedStatus } from "../../components/feedback/ActionFeedback";
 import { bookingStatus, bookingTime } from "./booking-calendar";
 import { dateLabel } from "../../lib/format/date-label";
 import { timeZoneLabel } from "../../lib/format/time-zone-label";
@@ -241,10 +242,11 @@ export function BookingOverview({
                   onChange={setUpdate}
                 />
               </div>
-              <div className="flex justify-end">
+              <div className="flex flex-wrap items-center justify-end gap-3">
                 <Button className="min-h-11 w-full sm:w-auto" disabled={busy}>
                   Save visit notes
                 </Button>
+                <SavedStatus feedback={{ saved: `booking-notes:${b.id}` }} />
               </div>
             </DetailSection>
           </form>

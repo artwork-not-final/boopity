@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { CalendarGrid } from "../../src/client/features/bookings/BookingCalendar";
+import { Bookings } from "../../src/client/features/bookings/Bookings";
 import {
   addCalendarDays,
   bookingStatus,
@@ -25,6 +26,39 @@ const booking: CalendarBooking = {
   startTime: "09:00",
   endTime: "09:30",
 };
+it.each([true, false])("uses underline view controls for owner=%s", (owner) => {
+  const html = renderToStaticMarkup(
+    createElement(Bookings, {
+      data: {
+        policy: {
+          version: 1,
+          portalEnabled: true,
+          approvalMode: "request",
+          leadHours: 24,
+          horizonDays: 90,
+          cancelHours: 24,
+          requestHoldHours: 24,
+          weekly: [],
+          blockedDates: [],
+        },
+        regional: { timeZone: "America/New_York", currency: "USD" },
+        revision: 1,
+      },
+      owner,
+      busy: false,
+      run: async () => {},
+      revision: 1,
+      onError: async () => {},
+      ownerEmail: "owner@example.test",
+      onFirstBookingStep: () => {},
+      onPayments: () => {},
+    }),
+  );
+  expect(html).toContain('aria-label="Booking view"');
+  expect(html.match(/data-variant="tab-line"/g)).toHaveLength(3);
+  expect(html).toContain('aria-pressed="true">Week');
+  expect(html).not.toContain('data-variant="tab"');
+});
 describe("booking calendar dates", () => {
   it("uses the business date rather than the browser or UTC date", () => {
     const instant = new Date("2026-09-12T02:00:00Z");
@@ -192,6 +226,26 @@ describe("calendar presentation", () => {
     expect(html).toContain('aria-label="Selected day bookings"');
     expect(html).toContain('aria-pressed="true"');
     expect(html).not.toContain("<details");
+  });
+  it("gives visits a tinted surface and accent edge, with readable times and text statuses", () => {
+    const html = render("week");
+    expect(html).toContain("bg-brand-soft");
+    expect(html).toContain("border-l-brand-ink");
+    expect(html).toContain("grid-cols-1");
+    expect(html).toContain("sm:grid-cols-[minmax(0,1fr)_auto]");
+    expect(html).toContain("hover:bg-brand-soft-hover");
+    expect(html).toContain('text-sm font-medium text-foreground">9:00 AM');
+    expect(html).toContain('text-emerald-800">Confirmed');
+    expect(html.match(/<button\b[^>]*>/)?.[0]).not.toContain("hover:bg-accent");
+  });
+  it("marks today with an accessible date state in both calendar views", () => {
+    for (const view of ["week", "month"] as const) {
+      const html = render(view);
+      expect(html.match(/aria-current="date"/g)).toHaveLength(1);
+      expect(html).toContain("bg-secondary");
+      expect(html).toContain("text-secondary-foreground");
+    }
+    expect(render("week")).toMatch(/<span[^>]*bg-secondary[^>]*>Today<\/span>/);
   });
   it("does not display client identities in the client-facing calendar", () => {
     expect(render("week", false)).not.toContain("Alex River");

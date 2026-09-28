@@ -3,6 +3,10 @@ import { providersPayload } from "./providers-payload";
 import { api } from "../../lib/http/installation-api";
 import { Field } from "../../components/forms/Field";
 import { Notice } from "../../components/feedback/Notice";
+import {
+  SavedStatus,
+  useSaveFeedback,
+} from "../../components/feedback/ActionFeedback";
 import type { InstallationFormProps as FormProps } from "../../lib/types/installation-types";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -10,6 +14,7 @@ import { Input } from "../../components/ui/input";
 export function GoogleSettings({ state, busy, run, onContinue }: FormProps) {
   const [google, setGoogle] = useState(state.providers.google),
     managed = state.providers.managed.google;
+  const saveFeedback = useSaveFeedback("google-settings", [google]);
   return (
     <>
       {(google.enabled || managed) && (
@@ -48,7 +53,7 @@ export function GoogleSettings({ state, busy, run, onContinue }: FormProps) {
                 "PUT",
                 providersPayload(state, state.providers.email, google),
               ),
-            "Google settings saved.",
+            saveFeedback,
             onContinue,
           );
         }}
@@ -98,13 +103,16 @@ export function GoogleSettings({ state, busy, run, onContinue }: FormProps) {
           )}
         </fieldset>
         {!managed && (
-          <Button disabled={busy}>
-            {onContinue
-              ? google.enabled
-                ? "Save and continue"
-                : "Continue without Google"
-              : "Save changes"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button disabled={busy}>
+              {onContinue
+                ? google.enabled
+                  ? "Save and continue"
+                  : "Continue without Google"
+                : "Save changes"}
+            </Button>
+            {!onContinue && <SavedStatus feedback={saveFeedback} />}
+          </div>
         )}
       </form>
       {managed && onContinue && (

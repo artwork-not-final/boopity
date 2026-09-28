@@ -68,6 +68,11 @@ export function bookingWindow(
   client: boolean,
   now = Date.now(),
 ) {
+  if (client && input.overrides !== undefined)
+    throw new HTTPException(403, {
+      message: "Only the sitter can make a booking exception.",
+    });
+  const overrides = { outsideHours: false, waiveNotice: false };
   let endDate = input.endDate ?? input.startDate;
   let startTime: string | null = null,
     endTime: string | null = null;
@@ -107,15 +112,19 @@ export function bookingWindow(
       message: "This visit crosses a clock change. Choose another time.",
     });
   const historical = !client && endAt <= now;
-  if (
-    !historical &&
-    (startAt <= now || (client && startAt < now + policy.leadHours * 3_600_000))
-  )
+  if (!historical && startAt <= now)
     throw new HTTPException(409, {
       message: client
         ? `Allow at least ${policy.leadHours} hours of booking notice.`
         : "Choose a future visit or a past visit that has already ended.",
     });
+  if (!historical && startAt < now + policy.leadHours * 3_600_000) {
+    if (!input.overrides?.waiveNotice)
+      throw new HTTPException(409, {
+        message: `Allow at least ${policy.leadHours} hours of booking notice.`,
+      });
+    overrides.waiveNotice = true;
+  }
   if (endDate > addDays(currentDateInZone(zone, now), policy.horizonDays))
     throw new HTTPException(409, {
       message: `Choose dates within the next ${policy.horizonDays} calendar days.`,
@@ -127,14 +136,19 @@ export function bookingWindow(
         message: "The business is unavailable on one of these dates.",
       });
     const slot = policy.weekly.find((slot) => slot.day === dayOfWeek(day));
-    // Owners can schedule before opening a public calendar. Once hours exist, both roles obey them.
     if (
-      (client || policy.weekly.length) &&
-      (!slot || (startTime && (startTime < slot.start || endTime! > slot.end)))
-    )
-      throw new HTTPException(409, {
-        message: "Choose a visit within the business's opening days and hours.",
-      });
+      !slot ||
+      (startTime && (startTime < slot.start || endTime! > slot.end))
+    ) {
+      if (!input.overrides?.outsideHours)
+        throw new HTTPException(409, {
+          message:
+            !client && !policy.weekly.length
+              ? "Set your booking hours in Portal & rules, or choose to book outside opening hours."
+              : "Choose a visit within the business's opening days and hours.",
+        });
+      overrides.outsideHours = true;
+    }
   }
   const petCount = input.petIds.length;
   const perDay =
@@ -148,6 +162,7 @@ export function bookingWindow(
     });
   return {
     historical,
+    overrides,
     startAt,
     endAt,
     startDate: input.startDate,

@@ -49,6 +49,10 @@ export function SetupWizard({
   setPreview: (value: Branding | null) => void;
   navigate: (path: string) => void;
 }) {
+  // Moving to the next step confirms the save. Keep feedback for actions that
+  // stay on the page, such as sending an email code, without a second banner.
+  const runStepAction: RunInstallationAction = (work, success, afterSave) =>
+    action(work, afterSave ? "" : success, afterSave);
   // The parent can render while this lazy page is still loading. Focus only
   // after the heading mounts, and on step changes—not background refreshes.
   useEffect(() => {
@@ -89,7 +93,7 @@ export function SetupWizard({
               key={`${setup.pending.email}:${setup.owner?.email}`}
               state={setup}
               busy={busy}
-              run={action}
+              run={runStepAction}
               onContinue={continueSetup}
             />
           )}
@@ -98,7 +102,7 @@ export function SetupWizard({
               key={setup.providers.version}
               state={setup}
               busy={busy}
-              run={action}
+              run={runStepAction}
               onContinue={continueSetup}
             />
           )}
@@ -107,7 +111,7 @@ export function SetupWizard({
               key={setup.version}
               state={setup}
               busy={busy}
-              run={action}
+              run={runStepAction}
               preview={setPreview}
               onContinue={continueSetup}
             />
@@ -126,7 +130,7 @@ export function SetupWizard({
                 <Button
                   disabled={busy}
                   onClick={() =>
-                    void action(
+                    void runStepAction(
                       () => api("/api/setup/owner", "POST", {}),
                       "Owner account confirmed.",
                       continueSetup,
@@ -141,7 +145,7 @@ export function SetupWizard({
                 info={info}
                 state={setup}
                 busy={busy}
-                run={action}
+                run={runStepAction}
                 after={() => changeSetupStep("google")}
               />
             ))}
@@ -150,7 +154,7 @@ export function SetupWizard({
               key={setup.providers.version}
               state={setup}
               busy={busy}
-              run={action}
+              run={runStepAction}
               onContinue={continueSetup}
             />
           )}
