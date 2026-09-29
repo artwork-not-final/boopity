@@ -34,7 +34,7 @@ describe("shipped Node API surface", () => {
       ),
     ].sort();
     const documentation = readFileSync(
-      new URL("../../API-ROUTES.md", import.meta.url),
+      new URL("../../docs/development/api-routes.md", import.meta.url),
       "utf8",
     );
     const documented = [

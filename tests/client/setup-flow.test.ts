@@ -359,11 +359,11 @@ describe("one sitter-facing setup path", () => {
   });
   it("moves commands to the included installer guide and keeps the sitter guide focused", () => {
     const guide = readFileSync(
-      new URL("../../GUIDED-INSTALLATION.md", import.meta.url),
+      new URL("../../docs/guides/getting-started.md", import.meta.url),
       "utf8",
     );
     const installer = readFileSync(
-      new URL("../../INSTALLER-ACCESS.md", import.meta.url),
+      new URL("../../docs/development/installer-access.md", import.meta.url),
       "utf8",
     );
     const source = [
@@ -387,7 +387,7 @@ describe("one sitter-facing setup path", () => {
       .join("\n");
     expect(guide).toContain("**Help me find my setup password**");
     expect(guide).toContain("**Email me a sign-in code**");
-    expect(guide).toContain("INSTALLER-ACCESS.md");
+    expect(guide).toContain("../development/installer-access.md");
     expect(guide).not.toMatch(/npm run|docker compose|BOOPITY_|\?installer=/);
     expect(installer).toContain("npm run manage -- setup-link");
     expect(installer).toContain("/setup/code");

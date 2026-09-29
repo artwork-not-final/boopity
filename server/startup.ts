@@ -94,7 +94,7 @@ export async function announceStartup(
   }
   if (access.mode === "manual") {
     log(
-      `Installer access: ${config.appUrl}/setup/code\nFor private setup links and recovery, see INSTALLER-ACCESS.md.`,
+      `Installer access: ${config.appUrl}/setup/code\nFor private setup links and recovery, see docs/development/installer-access.md.`,
     );
     return;
   }

@@ -65,8 +65,8 @@ inline ISC notice. The unmodified upstream package license, including its notice
 for Feather-derived icons, is in [licenses/lucide.txt](licenses/lucide.txt).
 The application also imports icons through the installed `lucide-react` package.
 See [Lucide's license](https://lucide.dev/license) and the exact reviewed source
-hashes in [SOURCE-REVIEW.md](SOURCE-REVIEW.md).
+hashes in [source provenance](docs/releases/source-review.md).
 
 Historical dashboard/marketing images, the legacy favicon and imported legal
 copy are excluded from the self-hosted release candidate. They have not been
-cleared for later inclusion. See [RELEASING.md](RELEASING.md).
+cleared for later inclusion. See [the release checklist](docs/releases/releasing.md).

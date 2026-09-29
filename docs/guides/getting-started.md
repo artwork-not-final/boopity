@@ -9,7 +9,7 @@
 4. Verify your inbox to establish the owner, then review and finish setup.
 
 You do not need email working to open the wizard. Follow the
-[email setup guide](EMAIL-SETUP.md) when you reach Email delivery. Google sign-in
+[email setup guide](email-setup.md) when you reach Email delivery. Google sign-in
 and online payments can be configured later.
 
 Use **Save and continue** to save each step and move on. Saving email settings
@@ -20,7 +20,7 @@ Boopity will not send another code automatically.
 
 Boopity works with your own hosting. Once the app is installed, the wizard takes
 you through your business settings; it does not create or manage your hosting account.
-Need to install it first? Follow the [installation guide](SELF-HOSTING.md#use-your-own-hosting-provider).
+Need to install it first? Follow the [installation guide](self-hosting.md#use-your-own-hosting-provider).
 
 ## Come back later
 
@@ -43,7 +43,7 @@ installed Boopity. If you still cannot find it, select **I still can’t find it
 for step-by-step instructions to change it through your hosting account.
 This last-resort reset keeps your saved details; do not delete the app or its storage.
 For local installations or further help, your installer can follow the
-[access and recovery instructions](INSTALLER-ACCESS.md).
+[access and recovery instructions](../development/installer-access.md).
 
 ## After owner verification
 
@@ -53,10 +53,10 @@ Remove the setup-password setting from your hosting dashboard.
 
 ## Installing on your own computer?
 
-Follow [the local installation instructions](SELF-HOSTING.md#start-locally).
+Follow [the local installation instructions](self-hosting.md#start-locally).
 The initial private link opens the wizard; choose a setup password in Your account
 to return later. Installer links, legacy codes and managed-email installations
-are covered in the [installer guide](INSTALLER-ACCESS.md), not the normal setup screen.
+are covered in the [installer guide](../development/installer-access.md), not the normal setup screen.
 
 ## Before clients book
 

@@ -1,9 +1,9 @@
 # Hosting, backups and recovery
 
 Developer-preview runbook. No production support or public deployment is implied.
-Start with [SELF-HOSTING.md](SELF-HOSTING.md) for the wizard and provider settings.
+Start with [the installation guide](self-hosting.md) for the wizard and provider settings.
 
-Maintainers can run the [populated upgrade rehearsal](RELEASING.md#populated-upgrade-rehearsal)
+Maintainers can run the [populated upgrade rehearsal](../releases/releasing.md#populated-upgrade-rehearsal)
 against paired source snapshots and locally built images. It uses disposable data,
 not a business installation, and does not replace testing recovery on the host you use.
 
@@ -35,7 +35,7 @@ disallow privilege escalation and mount the application read-only; `/data` and
 a small temporary filesystem remain writable. The image contains no setuid/setgid
 programs. Do not add privileged mode, `SYS_ADMIN`, host namespaces or a Docker
 socket mount. Running as root or changing those restrictions invalidates the
-runtime applicability assessment in [CONTAINER-REVIEW.md](CONTAINER-REVIEW.md).
+runtime applicability assessment in the [container review](../releases/container-review.md).
 
 These protections are deployment settings, not properties enforced by the image
 alone. On a host that does not use Compose, configure equivalent restrictions
@@ -227,11 +227,11 @@ payment checks. Do not use overlapping rolling replicas with SQLite.
 | Permission denied / missing uploads | Correct volume, non-root ownership, disk space; do not make data world-writable                                           |
 | Payment still processing            | Await signed provider proof/reconcile; returning from Checkout does not prove payment                                     |
 
-Use [server recovery](SELF-HOSTING.md#recover-access) when email is broken. Share
+Use [server recovery](self-hosting.md#recover-access) when email is broken. Share
 only redacted request IDs and synthetic reproductions with maintainers. Never
 dump `.env`, provider keys, the database or one-time links while troubleshooting.
 
-See [Setup access](GUIDED-INSTALLATION.md) for the sitter-facing flow and
-[API routes](API-ROUTES.md) for supported endpoints. Unknown APIs return JSON 404;
+See [Setup access](getting-started.md) for the sitter-facing flow and
+[API routes](../development/api-routes.md) for supported endpoints. Unknown APIs return JSON 404;
 a real setup or provider readiness failure can still return 503. Photo/document
 prototypes and background booking notifications are not enabled by this release.

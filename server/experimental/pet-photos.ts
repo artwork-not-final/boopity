@@ -1,4 +1,4 @@
-// Deferred prototype: not mounted by the Node application. See API-ROUTES.md.
+// Deferred prototype: not mounted by the Node application. See docs/development/api-routes.md.
 import { Hono } from "hono";
 import type { QueryResult } from "../core/contracts";
 import type { AppEnv } from "../core/env";

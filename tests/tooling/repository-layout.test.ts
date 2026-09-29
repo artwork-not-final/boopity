@@ -42,7 +42,11 @@ describe("self-hosted repository root", () => {
   it("pins a matching Node toolchain and separates installation from the runtime", () => {
     const version = read(".nvmrc").trim();
     const docker = read("Dockerfile");
-    for (const guide of ["README.md", "SELF-HOSTING.md", "CONTRIBUTING.md"])
+    for (const guide of [
+      "README.md",
+      "docs/guides/self-hosting.md",
+      "CONTRIBUTING.md",
+    ])
       expect(read(guide), guide).toContain(`Node ${version}`);
     expect(docker).toContain(`FROM node:${version}-trixie-slim@sha256:`);
     expect(docker).toMatch(
