@@ -39,6 +39,11 @@ describe("source-only release snapshots", () => {
     execFileSync("git", ["-C", root, "add", "."]);
     writeFileSync(join(root, "current.ts"), "current");
     writeFileSync(join(root, "new.ts"), "new");
+    mkdirSync(join(root, "docs", "guides"), { recursive: true });
+    writeFileSync(
+      join(root, "docs", "guides", "getting-started.md"),
+      "# Getting started\n",
+    );
     rmSync(join(root, "deleted.ts"));
     mkdirSync(join(root, ".boopity"));
     writeFileSync(
@@ -46,11 +51,17 @@ describe("source-only release snapshots", () => {
       "must not read or export",
     );
     const result = exportSource(root, parent);
-    expect(result.files).toBe(3);
+    expect(result.files).toBe(4);
     expect(readFileSync(join(result.source, "current.ts"), "utf8")).toBe(
       "current",
     );
     expect(readFileSync(join(result.source, "new.ts"), "utf8")).toBe("new");
+    expect(
+      readFileSync(
+        join(result.source, "docs", "guides", "getting-started.md"),
+        "utf8",
+      ),
+    ).toBe("# Getting started\n");
     for (const name of [".git", ".boopity", "deleted.ts"])
       expect(existsSync(join(result.source, name))).toBe(false);
     const manifest = readFileSync(join(result.destination, "manifest.json"));

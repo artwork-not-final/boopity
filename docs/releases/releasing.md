@@ -19,7 +19,7 @@ each candidate; earlier image results do not certify a newly built image.
 The later cleanup adds test type-checking, lint/format gates, API/error recovery,
 feature-level UI modules and keyboard regressions. Use the current verification
 output for its test count; the promotion results above are historical, not the
-current candidate's certification. The [route inventory](API-ROUTES.md) is checked
+current candidate's certification. The [route inventory](../development/api-routes.md) is checked
 against registered Node handlers. Prototype-only tests do not make deferred
 uploads, background notifications or legacy auth runtimes supported features.
 
@@ -144,7 +144,7 @@ runtime notices at `/app/RUNTIME-NOTICES.txt`. The image also carries `licenses/
 including full native notices. Missing package notices fail the build; versioned
 supplements must be reviewed when upgrading dependencies.
 
-Prepare the matching [companion source materials](THIRD-PARTY-SOURCES.md) from the
+Prepare the matching [companion source materials](../../THIRD-PARTY-SOURCES.md) from the
 final image inventories, then verify their manifest:
 
 ```sh
@@ -159,7 +159,7 @@ include neighboring QA reports, credentials, installation data or backups.
 
 ### Remaining release gates
 
-The [container review](CONTAINER-REVIEW.md) records local AMD64/ARM64 checks and
+The [container review](container-review.md) records local AMD64/ARM64 checks and
 open runtime, dependency and binary-distribution findings. Passing architecture
 tests does not clear the current image for publication.
 
@@ -186,10 +186,10 @@ tests does not clear the current image for publication.
   provider exports or backups. The first public source import must not inherit
   the retired mixed repository's history or legacy recovery tags.
 
-Use the approved [MIT license](LICENSE), [security policy](SECURITY.md) and
-[best-effort community support policy](SUPPORT.md). Verify private vulnerability
+Use the approved [MIT license](../../LICENSE), [security policy](../../SECURITY.md) and
+[best-effort community support policy](../../SUPPORT.md). Verify private vulnerability
 reporting at the destination. There is no guaranteed response time or support SLA.
 
 Preserve applied SQL migrations byte-for-byte. Add new migrations for schema
 changes; rollback restores a stopped backup with its matching application version.
-See [Operations](OPERATIONS.md) and [source provenance](SOURCE-REVIEW.md).
+See [Operations](../guides/operations.md) and [source provenance](source-review.md).

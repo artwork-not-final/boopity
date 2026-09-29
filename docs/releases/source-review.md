@@ -7,7 +7,7 @@ certification or independent proof of authorship for every line.
 ## Included source
 
 Boopity-specific TypeScript, SQL, styles, configuration, guides and synthetic tests
-are distributed under the owner-approved [MIT license](LICENSE), copyright (c)
+are distributed under the owner-approved [MIT license](../../LICENSE), copyright (c)
 2026 Artwork Not Final LLC. That project license decision is the basis for their
 inclusion; it does not relicense copied third-party material or dependencies.
 The known copied UI code and icon geometry are separately attributed below.
@@ -29,7 +29,7 @@ shadcn/ui `new-york-v4` registry. They have since received local styling changes
 the table below describes the initially inspected upstream content, not today's
 local files. Additional Select, Popover and Command primitives are shadcn-derived
 adaptations using Radix UI and cmdk. The complete shadcn MIT notice is retained in
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), checked against the
+[THIRD-PARTY-NOTICES.md](../../THIRD-PARTY-NOTICES.md), checked against the
 [upstream license](https://github.com/shadcn-ui/ui/blob/main/LICENSE.md).
 
 Registry source and SHA-256 of each retrieved component's content:
@@ -51,7 +51,7 @@ The only shipped static image is `public/favicon.svg`. Its paw geometry is copie
 from the already-locked `lucide-react@1.42.0` PawPrint icon used in the application's
 React UI. A plain purple background and padding adapt it for a browser tab. Its
 inline ISC notice travels with the SVG; the complete installed Lucide/Feather
-license is also retained in [licenses/lucide.txt](licenses/lucide.txt).
+license is also retained in [licenses/lucide.txt](../../licenses/lucide.txt).
 
 - Upstream package: [lucide-react](https://www.npmjs.com/package/lucide-react/v/1.42.0).
 - Inspected `dist/esm/icons/paw-print.mjs` SHA-256:
@@ -82,7 +82,7 @@ The Dockerfile is source for a local build, not a reviewed binary distribution.
 Redistributing built images or application bundles requires a separate review of
 their exact included dependencies, notices and applicable corresponding-source
 materials. In particular, Sharp/libvips and base-image native components are not
-cleared by this source-only review. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+cleared by this source-only review. See [THIRD-PARTY-NOTICES.md](../../THIRD-PARTY-NOTICES.md).
 
 ## Excluded material and release boundary
 
@@ -97,4 +97,4 @@ tree does not erase history. The initial public import must use clean history.
 
 Recheck the exact release file list and secret scan after any change. Review any new copied
 code/asset and preserve its notices before adding it. Publication remains separate
-from this review; [RELEASING.md](RELEASING.md) lists the operational gates.
+from this review; [the release checklist](releasing.md) lists the operational gates.

@@ -16,7 +16,7 @@ npm run dev:server
 ```
 
 In a second terminal run `npm run dev`, then use `http://localhost:5173`.
-Follow [first-run setup](SELF-HOSTING.md); keep credentials in the ignored
+Follow [first-run setup](docs/guides/self-hosting.md); keep credentials in the ignored
 `.env.self-hosted`, never `VITE_` variables. The provider-free local browser
 harnesses are documented there. Never use real client records in fixtures.
 
@@ -46,7 +46,7 @@ Required runtime peers must be declared dependencies; Docker alone uses
 Native optional dependencies must remain available. Development installs still
 use the unmodified lockfile and normal peer resolution.
 
-The [route inventory](API-ROUTES.md) lists the mounted Node API and access boundaries.
+The [route inventory](docs/development/api-routes.md) lists the mounted Node API and access boundaries.
 Update it alongside route changes; `tests/tooling/api-route-surface.test.ts` detects drift.
 Paginated CRM reads live in `server/business/lists.ts`; the routers in
 `server/business/client-routes.ts`, `server/business/pet-routes.ts`, and `server/business/service-routes.ts` provide owner
@@ -91,7 +91,7 @@ permission to commit private files; run `npm run release:audit` before sharing a
 
 ## Scope and review
 
-Start with [the architecture guide](ARCHITECTURE.md) for folder ownership,
+Start with [the architecture guide](docs/development/architecture.md) for folder ownership,
 dependency direction and test locations. Architecture checks run with `npm test`.
 
 Keep workspace features in their own modules. `src/client/features/services/` owns the

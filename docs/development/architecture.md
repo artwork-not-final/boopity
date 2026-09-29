@@ -5,6 +5,23 @@ client; the Node server serves its static files and API. Clean page URLs use the
 existing client router and server fallback, not SSR. One installation belongs to
 one pet-care business.
 
+## Repository root
+
+Keep package and tool configuration, the browser entry point, Docker/Compose
+files, the example environment file, and project policies at the root. Root
+third-party notices are also inputs to the notice generator and Docker build.
+
+Longer documentation belongs in `docs/guides/` (installation and operation),
+`docs/development/` (architecture and installer/API reference), or
+`docs/releases/` (release checks and source/container reviews). Link new guides
+from the [documentation index](../README.md). Commands and code paths in these
+guides are relative to the repository root unless stated otherwise.
+
+Generated output (`dist/`, `node_modules/`) and private local artifacts
+(`.boopity/`, `.release-candidates/`, and environment files) are ignored. They
+are not source folders, and installation data must not be removed as part of a
+structural cleanup.
+
 ## Client
 
 ```text

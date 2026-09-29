@@ -4,13 +4,13 @@ Owner setup, OTP/optional Google login, recovery, branding, sitter CRM and invit
 bookings, manual payment accounting and optional sitter-owned Stripe Checkout are implemented.
 This is **not yet a production release**: Phase 4 sandbox validation passed, but Phase 5
 public packaging and deployment validation remain open. The new application is
-licensed under [MIT](LICENSE), copyright (c) 2026 Artwork Not Final LLC. Use synthetic data while
-the remaining [release checks](RELEASING.md) are open. Retired application
+licensed under [MIT](../../LICENSE), copyright (c) 2026 Artwork Not Final LLC. Use synthetic data while
+the remaining [release checks](../releases/releasing.md) are open. Retired application
 installations are separate; these instructions do not modify or import them.
 
 ## Reference requirements
 
-See [OPERATIONS.md](OPERATIONS.md) for runtime requirements, a reverse-proxy example,
+See [Operations](operations.md) for runtime requirements, a reverse-proxy example,
 stopped-volume backup/restore, upgrade boundaries and troubleshooting.
 
 - Node 24.21.0 (see `.nvmrc`), or Docker with Compose v2.
@@ -49,13 +49,13 @@ your business, email delivery, appearance and sign-in settings.
 
 Route public HTTPS traffic through a reverse proxy to the application's private
 port. If the host asks for a health-check path, use `/api/ready` with the configured
-public hostname; see [proxy and security settings](OPERATIONS.md#public-origin-and-reverse-proxy).
+public hostname; see [proxy and security settings](operations.md#public-origin-and-reverse-proxy).
 Only set `TRUSTED_PROXY_IPS` after verifying the actual proxy addresses and header
 handling. A hosting-provider name never enables proxy trust.
 
 Keep one always-running instance and disable overlapping rolling deployments.
 Back up the full data directory and installation keys before updates. Hosting,
-HTTPS, backups and account costs remain your responsibility; see [Operations](OPERATIONS.md).
+HTTPS, backups and account costs remain your responsibility; see [Operations](operations.md).
 Compatibility depends on these capabilities, not the provider's name.
 
 If an older deployment automatically supplied its website URL, set `APP_URL`
@@ -64,9 +64,9 @@ links, Google callbacks and payment webhooks.
 
 ## Start locally
 
-For setup passwords and private initial entry, see [GUIDED-INSTALLATION.md](GUIDED-INSTALLATION.md).
+For setup passwords and private initial entry, see [the setup guide](getting-started.md).
 Email does not need to be configured before opening the wizard; follow the
-[DIY email guide](EMAIL-SETUP.md) inside setup. The commands below install the
+[DIY email guide](email-setup.md) inside setup. The commands below install the
 application itself; no hosting dashboard or provider integration is needed.
 
 Run in the source directory:
@@ -101,10 +101,10 @@ Alternatively, set `BOOPITY_SETUP_PASSWORD` privately before startup (15–128 c
 Then opening `/setup` and entering that password replaces the initial private-link
 step. This setting must never be in a public template or client-side variable.
 
-Legacy codes and recovery use separate [installer access](INSTALLER-ACCESS.md) addresses,
+Legacy codes and recovery use separate [installer access](../development/installer-access.md) addresses,
 not choices on the welcome screen. Set `BOOPITY_SETUP_LINK=manual` before startup if runtime logs are not private,
 and issue links only in a private console. `BOOPITY_OPEN_BROWSER=false` disables browser
-opening. See [the setup guide](GUIDED-INSTALLATION.md) for details.
+opening. See [the setup guide](getting-started.md) for details.
 
 For development, run `npm run dev:server` and `npm run dev` separately, then open exactly
 `http://localhost:5173`. The proxy targets `http://localhost:3000` and rewrites only that exact
@@ -160,7 +160,7 @@ value against the same database cannot reactivate them. Setup tokens never creat
    This is not public client registration.
 2. **Email delivery:** save SMTP or optional Resend settings. Blank secret fields retain saved values;
    indicators replace their values. Saving does not send mail. Open **Using Resend** or
-   **Using another provider (SMTP)** for help, or follow [EMAIL-SETUP.md](EMAIL-SETUP.md).
+   **Using another provider (SMTP)** for help, or follow [the email setup guide](email-setup.md).
 3. **Business:** save business name, time zone, currency and colors. Preview presets,
    discard edits or reset colors. PNG/JPEG/WebP logos are limited to 2 MiB and 4,194,304 pixels,
    decoded and re-encoded as metadata-free PNG at most 512px. SVG, malformed and oversized
@@ -240,8 +240,8 @@ or backdate bookings.
 There is no in-place rescheduling; cancel and create a new request to preserve the history.
 No document uploads/sharing, pet-photo UI/API or background booking emails yet.
 Stored files and migration history are preserved, but the deferred photo/document
-routers are not mounted. See the [supported API routes](API-ROUTES.md).
-See the [release status](RELEASING.md) for preview list limits.
+routers are not mounted. See the [supported API routes](../development/api-routes.md).
+See the [release status](../releases/releasing.md) for preview list limits.
 
 ## Payments: start without a provider
 
@@ -372,14 +372,14 @@ Payment records, accounting history and refunds now use 50-row pages; **totals u
 all entries**, not only the displayed rows. The previous 200-attempt/500-entry preview
 display caps no longer apply. One attempt is allocated to one booking in v1.
 Other adapters can implement the provider/capability lifecycle, but Stripe is the only online
-adapter shipped. See [release status](RELEASING.md).
+adapter shipped. See [release status](../releases/releasing.md).
 
 Client, pet, service and booking lists have server-backed search and 50-row pages.
 Search updates as you type across matching records, not just the current page.
 Changing a filter/search starts at page one. Selected booking choices remain
 selected across pages. Lists refresh when you return to the tab unless an editor
 is open. Offset pages are not snapshots, so concurrent edits/inserts can shift later results.
-See [release status](RELEASING.md).
+See [release status](../releases/releasing.md).
 
 ## Configuration and security
 
@@ -453,7 +453,7 @@ live data and test restoration into a separate installation.
 An existing database missing its original private keys now fails startup instead of generating
 replacements. Restore the complete snapshot and original host-managed authentication secret.
 Local stopped-copy and prior-schema upgrade regression tests are included, but a supported public
-release and deployment validation remain open. Follow the [operations runbook](OPERATIONS.md).
+release and deployment validation remain open. Follow the [operations runbook](operations.md).
 Container replacement preserves the volume; volume deletion does not. An older image may not
 understand a newer schema.
 
@@ -508,13 +508,13 @@ email leaves the process. Sign in as `owner@example.test`. Use only the harness'
 addresses and Ctrl-C afterwards to remove its generated data. Never expose this harness publicly.
 
 The container fixture requires an explicit disposable-QA marker and is excluded from images.
-It is not an installation or migration command. See [release status](RELEASING.md),
-[release status](RELEASING.md)
-and the historical [release status](RELEASING.md).
+It is not an installation or migration command. See [release status](../releases/releasing.md),
+[release status](../releases/releasing.md)
+and the historical [release status](../releases/releasing.md).
 
 ## Next phases
 
 Phase 4 payment implementation and controlled sandbox validation are complete. Phase 5 is
 preparing sanitization, host/recovery guides, large-list performance and public
-packaging. See [the release checklist](RELEASING.md). A local build does not authorize
+packaging. See [the release checklist](../releases/releasing.md). A local build does not authorize
 deployment or publication.

@@ -50,4 +50,4 @@ failures. A successful dependency audit or local test is not a penetration test.
 Restore exercises must be network-isolated: copied credentials and pending work
 can still affect the original email/payment account if the clone is started.
 
-See [OPERATIONS.md](OPERATIONS.md) for proxy, backup and recovery boundaries.
+See [Operations](docs/guides/operations.md) for proxy, backup and recovery boundaries.

@@ -25,7 +25,7 @@ not in a public issue.
 
 After the first release, any fixes will target the latest self-hosted release.
 There is no promise to backport fixes to older releases or support every host,
-custom fork or integration. Refer to [OPERATIONS.md](OPERATIONS.md) for the tested
+custom fork or integration. Refer to [Operations](docs/guides/operations.md) for the tested
 deployment requirements; a listed configuration is not an uptime or support
 guarantee. Changes to this policy will be documented explicitly.
 
@@ -38,5 +38,5 @@ telemetry account, central login or central payment service is required.
 
 Current scope: one business, one concurrent booking, invitation-only client
 access, one-off visits/stays, no staff scheduling or recurring series. No migration
-from the old SaaS is supplied. [RELEASING.md](RELEASING.md) lists outstanding gates;
-[OPERATIONS.md](OPERATIONS.md) distinguishes tested from untested host options.
+from the old SaaS is supplied. [The release checklist](docs/releases/releasing.md) lists outstanding gates;
+[Operations](docs/guides/operations.md) distinguishes tested from untested host options.

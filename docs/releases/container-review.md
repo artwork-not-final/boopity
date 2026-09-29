@@ -65,7 +65,7 @@ upgrade/rollback. The 512 MiB / 0.5 CPU AMD64 setup/restart simulation also pass
 These are isolated local tests, not real provider or hosted certification.
 
 Generated browser/runtime notices, complete native license texts and an exact
-source companion are described in [THIRD-PARTY-SOURCES.md](THIRD-PARTY-SOURCES.md).
+source companion are described in [THIRD-PARTY-SOURCES.md](../../THIRD-PARTY-SOURCES.md).
 The companion includes Debian, Node, npm, Sharp/libvips sources, patches and Rust
 crates, with per-file checksums and architecture inventories. Immutable image IDs,
 the exact application source manifest and the final archive checksum travel in
@@ -290,4 +290,4 @@ hardening, High-priority applicability review and source-material preparation ar
 complete; residual scanner matches remain visible. Publish only after separately
 confirming destination, version tags, source-companion availability and
 deployment side effects. Nothing in this review adds a setup task for sitters.
-The remaining hosted and nontechnical-user gates are in [RELEASING.md](RELEASING.md).
+The remaining hosted and nontechnical-user gates are in [the release checklist](releasing.md).

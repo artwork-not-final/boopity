@@ -4,7 +4,7 @@ Self-hosted pet-sitting software. One installation, one business—no Boopity
 subscription or central account.
 
 **Developer preview:** ready for controlled testing, not yet a supported production
-release. See the [remaining release checks](RELEASING.md).
+release. See the [remaining release checks](docs/releases/releasing.md).
 
 ## What it does
 
@@ -35,7 +35,7 @@ The wizard walks you through email delivery and your business settings.
 If you already supplied a setup password in your hosting settings, open `/setup`
 and enter it instead. You will not be asked to choose another password.
 Keep setup links, passwords and provider credentials private. See the
-[setup guide](GUIDED-INSTALLATION.md) for returning later or getting help.
+[setup guide](docs/guides/getting-started.md) for returning later or getting help.
 
 For development with live reload, see [Contributing](CONTRIBUTING.md).
 
@@ -48,7 +48,7 @@ docker compose up --build
 Open **Finish setup** in the output, or open `http://localhost:3000/setup` if you
 supplied a private setup password. The Compose file keeps data in a persistent
 volume and binds the app to localhost. For a hosted installation, configure HTTPS
-and follow [Use your own hosting provider](SELF-HOSTING.md#use-your-own-hosting-provider).
+and follow [Use your own hosting provider](docs/guides/self-hosting.md#use-your-own-hosting-provider).
 This builds locally; a reviewed public image is not available yet. Boopity does
 not create hosting accounts or manage deployments for you.
 
@@ -60,12 +60,14 @@ providers are extension points, not shipped integrations.
 
 ## Guides
 
-- [Installation and configuration](SELF-HOSTING.md)
-- [Setup access](GUIDED-INSTALLATION.md) and [email setup](EMAIL-SETUP.md)
-- [Backups, upgrades and recovery](OPERATIONS.md)
+Browse the [documentation index](docs/README.md), or go straight to:
+
+- [Installation and configuration](docs/guides/self-hosting.md)
+- [Setup access](docs/guides/getting-started.md) and [email setup](docs/guides/email-setup.md)
+- [Backups, upgrades and recovery](docs/guides/operations.md)
 - [Contributing](CONTRIBUTING.md), [security](SECURITY.md) and [support](SUPPORT.md)
-- [Architecture and folder ownership](ARCHITECTURE.md)
-- [Release checks](RELEASING.md) and [source provenance](SOURCE-REVIEW.md)
+- [Architecture and folder ownership](docs/development/architecture.md)
+- [Release checks](docs/releases/releasing.md) and [source provenance](docs/releases/source-review.md)
 
 ## License
 

@@ -31,7 +31,7 @@ These paths select a form only; they are not secrets and grant no access.
 Credentials still go through the existing authenticated, rate-limited endpoints.
 Never put a code/password in a query string. Both code types are one-use and expire
 in 30 minutes. Setup sessions last seven days; recovery sessions last eight hours.
-See [owner recovery](SELF-HOSTING.md#recover-access) for issuing a recovery code,
+See [owner recovery](../guides/self-hosting.md#recover-access) for issuing a recovery code,
 repairing email and handling a lost owner inbox.
 
 ## Missing or expired private link
@@ -108,10 +108,10 @@ owner already exists, sign in; repeating initial setup cannot replace them.
 ## Installer-managed email — developers/operators
 
 - Keep Node/SQLite private persistent storage and same-origin HTTPS. See
-  [OPERATIONS.md](OPERATIONS.md). This shortcut does not configure a proxy or provision hosting.
+  [Operations](../guides/operations.md). This shortcut does not configure a proxy or provision hosting.
 - Supply `BOOPITY_OWNER_EMAIL` through trusted deployment settings before first
   setup. It is stored privately, never selected by an anonymous browser request.
-- Supply the complete host-managed email group in [SELF-HOSTING.md](SELF-HOSTING.md),
+- Supply the complete host-managed email group in [the installation guide](../guides/self-hosting.md),
   including explicit delivery mode and verified sender. SMTP and Resend are
   supported; there is no Boopity mail relay or shared provider account.
 - `GET /api/setup/entry` returns a `mode`: `email`, `waiting`, `token`, `paused`, `resume`,

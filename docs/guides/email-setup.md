@@ -9,7 +9,7 @@ setup. Google and online payments remain optional.
 ## Before you begin
 
 - Open your own installation and unlock setup. See
-  [opening the wizard](GUIDED-INSTALLATION.md).
+  [opening the wizard](getting-started.md).
 - In **Your account**, save your name and an inbox you can check.
 - The **owner email** receives login codes. The **sender email** sends them; it
   can be a different address, but your sending provider must authorize it.
@@ -87,4 +87,4 @@ use normal owner sign-in.
 Keep setup links, codes and credentials out of screenshots, public Issues, chats
 and support tickets. If credentials were exposed, replace them with your provider
 and update the installation. If an existing owner cannot sign in because email
-is broken, use the [recovery instructions](SELF-HOSTING.md), not a new owner claim.
+is broken, use the [recovery instructions](self-hosting.md), not a new owner claim.

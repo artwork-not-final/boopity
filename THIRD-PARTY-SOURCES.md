@@ -71,7 +71,7 @@ needed. Keep all original license and copyright notices.
 For Debian, unpack the matching `.dsc` with `dpkg-source -x`, then use its
 `debian/rules` and declared build dependencies in a matching Debian build
 environment. For Node, use `BUILDING.md` from its source and the supplied official
-Docker Node recipe. For Boopity, follow [RELEASING.md](RELEASING.md) using its
+Docker Node recipe. For Boopity, follow [the release checklist](docs/releases/releasing.md) using its
 matching snapshot. Use a new image tag when replacing any component and retest.
 
 ## Replacing LGPL libraries

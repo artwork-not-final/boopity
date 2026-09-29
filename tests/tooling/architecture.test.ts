@@ -18,7 +18,7 @@ const sourceFiles = (directory: string): string[] =>
   );
 
 // These are deliberate composition points, not a general cross-feature escape
-// hatch. New dependencies must be reviewed here alongside ARCHITECTURE.md.
+// hatch. New dependencies must be reviewed here alongside docs/development/architecture.md.
 const featureDependencies: Record<string, string[]> = {
   bookings: [
     "clients/types",
