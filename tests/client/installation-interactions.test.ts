@@ -2,6 +2,7 @@
 import {
   act,
   createElement,
+  StrictMode,
   useEffect,
   useState,
   type ReactElement,
@@ -173,6 +174,15 @@ async function submit() {
 function body(index: number) {
   return JSON.parse(requests[index].init!.body as string);
 }
+function deferredResponse() {
+  let resolve!: (value: Response) => void;
+  let reject!: (error: Error) => void;
+  const promise = new Promise<Response>((done, fail) => {
+    resolve = done;
+    reject = fail;
+  });
+  return { promise, resolve, reject };
+}
 function installation(
   current: SetupState | null,
   ready = false,
@@ -211,6 +221,183 @@ it("focuses the initial setup heading after the lazy wizard loads without steali
   expect(
     requests.every(({ init }) => !init?.method || init.method === "GET"),
   ).toBe(true);
+});
+
+it.each(["/api/installation", "/api/setup/status"])(
+  "ignores an older refresh delayed at %s without remounting the latest draft",
+  async (endpoint) => {
+    window.history.replaceState(null, "", "/setup/business");
+    let current = state();
+    installation(current);
+    const healthy = respond;
+    respond = (url, init) => {
+      if (url === "/api/installation")
+        return Response.json({
+          ...info(),
+          version: current.version,
+          branding: current.branding,
+        });
+      if (url === "/api/setup/status") return Response.json(current);
+      return healthy(url, init);
+    };
+    // Strict Mode must still complete the initial load and restore navigation.
+    await mount(createElement(StrictMode, null, createElement(App)));
+    expect(input("Business name").value).toBe("Test pet care");
+    const latest = respond;
+    const older = deferredResponse();
+    const oldResponse = await latest(endpoint);
+    respond = (url, init) =>
+      url === endpoint ? older.promise : latest(url, init);
+    await act(async () => window.dispatchEvent(new Event("focus")));
+    current = {
+      ...current,
+      version: 2,
+      branding: { ...current.branding, businessName: "Updated pet care" },
+    };
+    respond = latest;
+    await act(async () => window.dispatchEvent(new Event("online")));
+    expect(input("Business name").value).toBe("Updated pet care");
+    await enter("Business name", "Unsaved business name");
+    await act(async () => older.resolve(oldResponse));
+    expect(container.querySelector("header")?.textContent).toContain(
+      "Updated pet care",
+    );
+    expect(input("Business name").value).toBe("Unsaved business name");
+    expect(container.querySelector('[role="alert"]')).toBeNull();
+    expect(window.location.pathname).toBe("/setup/business");
+  },
+);
+
+it("applies public branding and private settings together after the full refresh succeeds", async () => {
+  window.history.replaceState(null, "", "/setup/business");
+  installation(state());
+  await mount(createElement(App));
+  const healthy = respond;
+  const pending = deferredResponse();
+  const next = {
+    ...state(),
+    version: 2,
+    branding: { ...state().branding, businessName: "Updated pet care" },
+  };
+  respond = (url, init) => {
+    if (url === "/api/installation")
+      return Response.json({ ...info(), version: 2, branding: next.branding });
+    if (url === "/api/setup/status") return pending.promise;
+    return healthy(url, init);
+  };
+  await act(async () => window.dispatchEvent(new Event("focus")));
+  expect(container.querySelector("header")?.textContent).toContain(
+    "Test pet care",
+  );
+  expect(input("Business name").value).toBe("Test pet care");
+  await act(async () => pending.resolve(Response.json(next)));
+  expect(container.querySelector("header")?.textContent).toContain(
+    "Updated pet care",
+  );
+  expect(input("Business name").value).toBe("Updated pet care");
+});
+
+it("ignores a late refresh failure after a newer refresh recovers", async () => {
+  window.history.replaceState(null, "", "/setup/account");
+  installation(state());
+  await mount(createElement(App));
+  const healthy = respond;
+  const older = deferredResponse();
+  respond = (url, init) =>
+    url === "/api/setup/status" ? older.promise : healthy(url, init);
+  await act(async () => window.dispatchEvent(new Event("focus")));
+  respond = healthy;
+  await act(async () => window.dispatchEvent(new Event("online")));
+  await act(async () => older.reject(new TypeError("Old connection failure")));
+  expect(container.querySelector('[role="alert"]')).toBeNull();
+  expect(input("Your name").value).toBe("Test sitter");
+});
+
+it.each([false, true])(
+  "keeps the latest refresh error when an older request finishes (failure=%s)",
+  async (failure) => {
+    window.history.replaceState(null, "", "/setup/account");
+    installation(state());
+    await mount(createElement(App));
+    const healthy = respond;
+    const older = deferredResponse();
+    respond = (url, init) =>
+      url === "/api/setup/status" ? older.promise : healthy(url, init);
+    await act(async () => window.dispatchEvent(new Event("focus")));
+    respond = () =>
+      Response.json({ error: "Latest refresh unavailable" }, { status: 503 });
+    await act(async () => window.dispatchEvent(new Event("online")));
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+      "Latest refresh unavailable",
+    );
+    await act(async () => {
+      if (failure) older.reject(new TypeError("Old connection failure"));
+      else older.resolve(Response.json(state()));
+    });
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+      "Latest refresh unavailable",
+    );
+  },
+);
+
+it.each([false, true])(
+  "waits for a superseding refresh before advancing a saved wizard step (failure=%s)",
+  async (failure) => {
+    window.history.replaceState(null, "", "/setup/account");
+    installation(state());
+    await mount(createElement(App));
+    const healthy = respond;
+    const afterSave = deferredResponse();
+    const latest = deferredResponse();
+    respond = (url, init) => {
+      if (url === "/api/setup/identity") return Response.json({ ok: true });
+      if (url === "/api/setup/status") return afterSave.promise;
+      return healthy(url, init);
+    };
+    await submit();
+    respond = (url, init) =>
+      url === "/api/setup/status" ? latest.promise : healthy(url, init);
+    await act(async () => window.dispatchEvent(new Event("focus")));
+    await act(async () => afterSave.resolve(Response.json(state())));
+    expect(window.location.pathname).toBe("/setup/account");
+    expect(button("Save and continue").disabled).toBe(true);
+    await act(async () => {
+      if (failure) latest.reject(new TypeError("Latest refresh failed"));
+      else latest.resolve(Response.json(state()));
+    });
+    expect(window.location.pathname).toBe(
+      failure ? "/setup/account" : "/setup/email",
+    );
+    if (failure) {
+      expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+        "Latest refresh failed",
+      );
+      expect(button("Save and continue").disabled).toBe(false);
+    }
+  },
+);
+
+it("does not restore owner access from a refresh that finishes after signing out", async () => {
+  window.history.replaceState(null, "", "/app/bookings");
+  installation(state(true), true);
+  await mount(createElement(App));
+  const healthy = respond;
+  const older = deferredResponse();
+  respond = (url, init) =>
+    url === "/api/setup/status" ? older.promise : healthy(url, init);
+  await act(async () => window.dispatchEvent(new Event("focus")));
+  respond = (url, init) => {
+    if (["/api/auth/sign-out", "/api/setup/lock"].includes(url))
+      return Response.json({ ok: true });
+    if (["/api/portal/session", "/api/setup/status"].includes(url))
+      return Response.json({}, { status: 401 });
+    return healthy(url, init);
+  };
+  await click("Sign out");
+  await act(async () => older.resolve(Response.json(state(true))));
+  expect(container.textContent).not.toContain("Test workspace");
+  expect(input("Email")).toBeDefined();
+  expect(window.location.pathname).toBe("/login");
 });
 
 it.each([

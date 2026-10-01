@@ -33,7 +33,7 @@ describe("portal and rules layout", () => {
   it("keeps all three sections visible without accordions or nested forms", () => {
     const html = render();
     expect(html.match(/<form\b/g)).toHaveLength(1);
-    expect(html.match(/<fieldset\b/g)).toHaveLength(3);
+    expect(html.match(/<fieldset\b/g)).toHaveLength(4);
     for (const title of ["Client portal", "Booking rules", "Availability"])
       expect(html).toMatch(new RegExp(`<legend[^>]*>${title}</legend>`));
     expect(html).not.toMatch(/<details\b|<summary\b/);
