@@ -46,6 +46,7 @@ export function Rules({ data, busy, run }: FormProps) {
         className="space-y-6"
         onSubmit={(e) => {
           e.preventDefault();
+          if (busy) return;
           void run(
             () =>
               api("/owner/policy", "PUT", {
@@ -58,7 +59,10 @@ export function Rules({ data, busy, run }: FormProps) {
           );
         }}
       >
-        <div className="grid items-start gap-6 xl:grid-cols-2">
+        <fieldset
+          disabled={busy}
+          className="min-w-0 grid items-start gap-6 xl:grid-cols-2"
+        >
           <div className="min-w-0 space-y-6">
             <FormSection title="Client portal">
               <label className="flex min-h-11 items-center gap-3 text-sm font-medium">
@@ -227,7 +231,7 @@ export function Rules({ data, busy, run }: FormProps) {
               skipped or repeated when clocks change can’t be booked.
             </p>
           </FormSection>
-        </div>
+        </fieldset>
         <div className="flex flex-wrap items-center justify-end gap-3 border-t pt-4">
           <Button className="min-h-11 w-full sm:w-auto" disabled={busy}>
             Save changes

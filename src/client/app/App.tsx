@@ -81,8 +81,7 @@ export function App() {
     invitedEmail,
     entry,
     setupStarted,
-    setSetup,
-    setAccess,
+    clearAccess,
     loadInstallation,
   } = useInstallationState(setFallbackStep);
   const [error, setError] = useState(""),
@@ -129,10 +128,10 @@ export function App() {
       navigateLocal(destination.path, true);
   }, [ownerReady, pathname, search, destination.path]);
   async function refresh() {
-    await loadInstallation();
     // A recovered connection should not leave an old failure above working
-    // pages. Keep action/validation errors until the user addresses them.
-    setRefreshError("");
+    // pages. Superseded requests must not clear a newer connection error.
+    // Keep action/validation errors until the user addresses them.
+    if (await loadInstallation()) setRefreshError("");
   }
   function reportRefreshError(error: unknown) {
     setRefreshError(
@@ -266,8 +265,7 @@ export function App() {
     action(async () => {
       await api("/api/auth/sign-out", "POST", {});
       await api("/api/setup/lock", "POST", {});
-      setSetup(null);
-      setAccess(null);
+      clearAccess();
       navigate("/login");
       setPreview(null);
     }, "Signed out.");
