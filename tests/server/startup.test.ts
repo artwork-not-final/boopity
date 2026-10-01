@@ -43,7 +43,7 @@ function fixture(environment: NodeJS.ProcessEnv = {}, directory?: string) {
 describe("automatic private setup entry", () => {
   it("migrates an already-claimed installation with setup passwords permanently closed", async () => {
     const f = fixture();
-    // Disposable fixture: recreate the schema boundary immediately before 0008.
+    // Recreate the boundary before 0015; its permanent database ID stays 0008.
     f.db.connection.exec(`DROP TRIGGER close_setup_password_on_owner_insert;
       DROP TRIGGER close_setup_password_on_owner_update;
       DROP TABLE setup_password;

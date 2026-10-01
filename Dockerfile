@@ -15,8 +15,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --legacy-peer-deps --ignore-scripts
 COPY --from=build /app/dist/server ./dist/server
 COPY --from=build /app/dist/self-hosted ./dist/self-hosted
-COPY drizzle ./drizzle
-COPY db/self-hosted ./db/self-hosted
+COPY db/migrations ./db/migrations
 COPY LICENSE THIRD-PARTY-NOTICES.md THIRD-PARTY-SOURCES.md ./
 COPY licenses ./licenses
 COPY scripts/build-notices.mjs ./scripts/build-notices.mjs

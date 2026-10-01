@@ -123,8 +123,7 @@ describe("code-quality gates", () => {
       "backups/source.ts",
       "dist/source.ts",
       "package-lock.json",
-      "drizzle/meta/journal.json",
-      "db/self-hosted/example.json",
+      "db/migrations/example.json",
       "licenses/vendor.md",
     ])
       f.write(path, "unformatted or invalid { content");

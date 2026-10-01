@@ -119,14 +119,25 @@ server/
   core/                               Host contracts, installation and HTTP utilities
   db/                                 Database schema and auth adapter
   experimental/                       Retained, unmounted prototypes; not runtime code
-drizzle/, db/self-hosted/              Immutable migration history, applied in order
+db/migrations/                        Immutable SQL migrations, applied in filename order
 ```
 
 Production entry points do not import `experimental`, including for types.
 Keeping a prototype's tests is not permission to mount it. The API route inventory
 remains the contract for the supported application. All persistence paths,
-configuration variable names, SQL and migration ordering stay stable during
+configuration variable names, SQL and migration IDs/order stay stable during
 structural refactors.
+
+All migrations live in `db/migrations/`, numbered from `0000` onward with
+descriptive names. The original base schema (`0000`–`0007`) runs before the
+installation and portal additions (`0008`–`0015`). Add future changes as a new
+numbered SQL file; never edit an applied migration.
+
+`server/runtime/migration-ids.ts` preserves the original database IDs of the
+renamed files. Both new and existing installations use those IDs in
+`boopity_migrations`, so this folder consolidation does not replay SQL or rewrite
+existing history. Keep the compatibility mappings and SQL bytes unchanged.
+Future migrations use their filename as their ID without another mapping.
 
 `vite.config.ts` builds the browser, `tsconfig.app.json` checks it, and
 `tsconfig.server.json` checks the Node server without Vite browser globals.

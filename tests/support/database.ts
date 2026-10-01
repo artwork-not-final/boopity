@@ -7,9 +7,10 @@ import type { SqlDatabase } from "../../server/core/contracts";
 // Exercise production SQL and real rollback semantics without mocking query results.
 export function testDatabase() {
   const sqlite = new DatabaseSync(":memory:");
-  const directory = new URL("../../drizzle/", import.meta.url);
+  // These legacy-router tests intentionally use the original base schema only.
+  const directory = new URL("../../db/migrations/", import.meta.url);
   for (const file of readdirSync(directory)
-    .filter((file) => file.endsWith(".sql"))
+    .filter((file) => /^000[0-7]_.*\.sql$/.test(file))
     .sort())
     sqlite.exec(readFileSync(new URL(file, directory), "utf8"));
   let queryCount = 0;
