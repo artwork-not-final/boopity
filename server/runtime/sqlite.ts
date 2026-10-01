@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { chmodSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { QueryResult, SqlDatabase, SqlStatement } from "../core/contracts";
+import { migrationId } from "./migration-ids";
 
 function value(input: unknown): SQLInputValue {
   if (
@@ -65,9 +66,10 @@ export class LocalDatabase implements SqlDatabase {
         .sort()) {
         const sql = readFileSync(join(directory, name), "utf8");
         const digest = createHash("sha256").update(sql).digest("hex");
+        const id = migrationId(name);
         const previous = this.connection
           .prepare("SELECT digest FROM boopity_migrations WHERE name = ?")
-          .get(name);
+          .get(id);
         if (previous) {
           if (previous.digest !== digest)
             throw new Error(`Applied migration changed: ${name}`);
@@ -76,7 +78,7 @@ export class LocalDatabase implements SqlDatabase {
         this.connection.exec(sql);
         this.connection
           .prepare("INSERT INTO boopity_migrations VALUES (?, ?)")
-          .run(name, digest);
+          .run(id, digest);
       }
       this.connection.exec("COMMIT");
     } catch (error) {

@@ -13,7 +13,7 @@ import {
 } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { createRuntime, loadConfig } from "../../server/runtime/runtime";
 import { LocalDatabase } from "../../server/runtime/sqlite";
 import { defaultBranding } from "../../src/shared/branding";
@@ -160,11 +160,10 @@ describe("offline recovery and upgrades", () => {
       });
     const oldDb = new LocalDatabase(join(data, "boopity.sqlite"));
     try {
-      oldDb.migrate(resolve("drizzle"));
-      for (const file of readdirSync("db/self-hosted").filter((file) =>
-        /^000[1-4]_.*\.sql$/.test(file),
+      for (const file of readdirSync("db/migrations").filter((file) =>
+        /^(000\d|001[01])_.*\.sql$/.test(file),
       )) {
-        cpSync(join("db/self-hosted", file), join(migrations, file));
+        cpSync(join("db/migrations", file), join(migrations, file));
       }
       oldDb.migrate(migrations);
       seedBusiness(oldDb);

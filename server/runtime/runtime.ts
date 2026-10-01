@@ -91,8 +91,7 @@ export function createRuntime(
   );
   const db = new LocalDatabase(join(config.dataDirectory, "boopity.sqlite"));
   try {
-    db.migrate(resolve("drizzle"));
-    db.migrate(resolve("db/self-hosted"));
+    db.migrate(resolve("db/migrations"));
     const env: Bindings = {
       DB: db,
       UPLOADS: new LocalFiles(join(config.dataDirectory, "uploads")),

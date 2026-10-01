@@ -21,7 +21,6 @@ test-results/
 
 # Generated lockfile, immutable migrations, and third-party license texts.
 package-lock.json
-drizzle/
-db/self-hosted/
+db/migrations/
 licenses/
 LICENSE
