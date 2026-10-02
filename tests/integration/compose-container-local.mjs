@@ -208,7 +208,7 @@ function verify(volume) {
   assert.equal(status.ownerClaimed, true);
   assert.equal(status.setup.setup_state, "ready");
 }
-async function startAndStop(volume) {
+async function startAndStop(volume, ownerClaimed = true) {
   const name = `${project}-${containers.length}`;
   // `compose run` does NOT publish service ports without --service-ports.
   compose(volume, [
@@ -247,11 +247,71 @@ async function startAndStop(volume) {
     ["exec", "-i", name, "node", "--input-type=module", "-"],
     runtimeCheck,
   );
+  const handoff = () =>
+    docker(
+      ["exec", "-i", name, "node", "--input-type=module", "-"],
+      readFileSync(join(source, "scripts/install/setup-entry.mjs"), "utf8"),
+    )
+      .toString()
+      .trim();
+  const link = new URL(handoff());
+  assert.equal(link.origin, "http://localhost:3000");
+  if (ownerClaimed) {
+    assert.equal(link.pathname, "/app");
+    assert.equal(link.hash, "");
+  } else {
+    assert.equal(link.pathname, "/setup");
+    assert.match(link.hash, /^#setup=[A-Za-z0-9_-]{43}$/);
+    const browser = `
+      import assert from 'node:assert/strict';
+      const origin = 'http://localhost:3000';
+      const request = (path, body, cookie) => fetch(origin + path, {
+        method: body ? 'POST' : 'GET',
+        headers: { origin, 'content-type': 'application/json', ...(cookie ? { cookie } : {}) },
+        ...(body ? { body: JSON.stringify(body) } : {})
+      });
+      const unlock = async token => {
+        const response = await request('/api/setup/unlock', { token, kind: 'setup' });
+        assert.equal(response.status, 200);
+        return response.headers.getSetCookie().map(value => value.split(';')[0]).join('; ');
+      };
+    `;
+    const cookie = docker(
+      ["exec", "-i", name, "node", "--input-type=module", "-"],
+      browser +
+        `
+      const token = ${JSON.stringify(link.hash.slice(7))};
+      const cookie = await unlock(token);
+      assert.equal((await request('/api/setup/unlock', { token, kind: 'setup' })).status, 401);
+      assert.equal((await request('/api/setup/status')).status, 401);
+      assert.equal((await request('/api/setup/identity', { name: 'Synthetic sitter', email: 'owner@example.test' }, cookie)).status, 200);
+      const saved = await (await request('/api/setup/status', undefined, cookie)).json();
+      assert.equal(saved.setupPasswordSet, false);
+      assert.equal(saved.owner, null);
+      console.log(cookie);
+    `,
+    )
+      .toString()
+      .trim();
+    const replacement = new URL(handoff());
+    assert.notEqual(replacement.hash, link.hash);
+    docker(
+      ["exec", "-i", name, "node", "--input-type=module", "-"],
+      browser +
+        `
+      assert.equal((await request('/api/setup/status', undefined, ${JSON.stringify(cookie)})).status, 401);
+      const current = await unlock(${JSON.stringify(replacement.hash.slice(7))});
+      const saved = await (await request('/api/setup/status', undefined, current)).json();
+      assert.equal(saved.pending.email, 'owner@example.test');
+      assert.equal(saved.owner, null);
+    `,
+    );
+  }
   docker(["stop", "--time", "10", name]);
   assert.equal(inspect("container", name).State.Running, false);
 }
 try {
-  for (const kind of ["setup", "populated", "restored"]) {
+  for (const kind of ["setup", "populated", "restored", "launcher"]) {
     const volume = `${project}-${kind}`;
     assert.equal(
       docker([
@@ -269,7 +329,8 @@ try {
     docker(["volume", "create", "--label", label, volume]);
     volumes.push(volume);
   }
-  const [setup, populated, restored] = volumes;
+  const [setup, populated, restored, launcher] = volumes;
+  await startAndStop(launcher, false);
   contract(setup);
   run(setup, ["node", "--input-type=module", "-"], runtimeCheck);
   console.log(
@@ -336,6 +397,7 @@ try {
         "actual Compose controls",
         "offline setup/authentication",
         "compiled server and management",
+        "installer handoff, passwordless identity and saved-progress resumption",
         "container replacement",
         "keys/encrypted settings/records/uploads persist",
         "stopped read-only backup",
@@ -346,11 +408,11 @@ try {
         "Disposable offline data; no providers, host ports, publishing or deployment",
     }),
   );
-} catch (error) {
-  if (error.stderr) console.error(String(error.stderr).slice(-4000));
-  throw new Error("Disposable Compose validation failed", {
-    cause: new Error(error.message.split("\n")[0]),
-  });
+} catch {
+  // Assertion/command output can include private setup links or cookies.
+  throw new Error(
+    "Disposable Compose validation failed; private output was withheld.",
+  );
 } finally {
   for (const name of containers) {
     const current = inspect("container", name);

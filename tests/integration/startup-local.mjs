@@ -103,6 +103,15 @@ try {
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
+  assert.equal(
+    (
+      await request("/api/setup/identity", {
+        name: "Untrusted visitor",
+        email: "visitor@example.test",
+      })
+    ).status,
+    401,
+  );
   const unlocked = await request("/api/setup/unlock", { token, kind: "setup" });
   assert.equal(unlocked.status, 200);
   assert(
@@ -135,7 +144,10 @@ try {
   assert(resumed.includes("Setup is in progress"));
   const status = await request("/api/setup/status", undefined, cookie);
   assert.equal(status.status, 200);
-  assert.equal((await status.json()).pending.email, "owner@example.test");
+  const savedWithoutPassword = await status.json();
+  assert.equal(savedWithoutPassword.pending.email, "owner@example.test");
+  assert.equal(savedWithoutPassword.setupPasswordSet, false);
+  assert.equal(savedWithoutPassword.owner, null);
   assert.equal(
     (await request("/api/setup/unlock", { token, kind: "setup" })).status,
     401,

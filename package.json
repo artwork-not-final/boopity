@@ -11,6 +11,7 @@
     "dev:server": "tsx watch --env-file-if-exists=.env.self-hosted server/index.ts",
     "manage": "node --env-file-if-exists=.env.self-hosted dist/server/manage.mjs",
     "start": "node --env-file-if-exists=.env.self-hosted dist/server/index.mjs",
+    "setup": "node --env-file-if-exists=.env.self-hosted scripts/install/setup-entry.mjs --open",
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/build-notices.mjs browser && esbuild server/index.ts server/manage.ts server/healthcheck.ts --bundle --platform=node --target=node24 --format=esm --packages=external --outdir=dist/server --out-extension:.js=.mjs",
     "preview": "npm start",

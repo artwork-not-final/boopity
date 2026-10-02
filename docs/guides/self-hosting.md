@@ -31,21 +31,29 @@ your business, email delivery, appearance and sign-in settings.
 
 1. Deploy the repository's `Dockerfile`, or build and run the Node app as shown below.
    If using a prebuilt image, use a reviewed release image pinned by digest with
-   `compose.image.yaml`; no public image is available yet.
+   `compose.image.yaml`. Image digests are listed in the
+   [releases](https://github.com/artwork-not-final/boopity/releases).
 2. Attach persistent **local** storage before the first start. For Docker, mount it
    at `/data` and keep the image's non-root user (UID/GID 1000). Never store the
    database, uploads or installation keys on an ephemeral container filesystem.
 3. Configure the settings below privately, then connect HTTPS and start one instance.
-4. Open your website, enter the setup password and follow the wizard. Email, Google
-   and online payments can be connected afterward.
+4. Open the private **Finish setup** link from startup and follow the wizard.
+   No setup password is required. Give that link only to the intended sitter.
+   Email, Google and online payments can be connected afterward.
 
-| Setting                  | Hosted configuration                                                                                                   |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `APP_URL`                | Your exact public HTTPS origin, such as `https://care.example.com`; no path. Host-supplied URLs are not auto-detected. |
-| `BOOPITY_SETUP_PASSWORD` | A private password of 15–128 characters for initial setup. Remove the setting after owner verification.                |
-| `DATA_DIR`               | The persistent storage path; `/data` in the Docker image.                                                              |
-| `HOST` / `PORT`          | The private listening interface and port. The image uses `0.0.0.0:3000`; native Node defaults to `127.0.0.1:3000`.     |
-| `NODE_ENV`               | `production`; already set in the Docker image.                                                                         |
+| Setting                  | Hosted configuration                                                                                                       |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `APP_URL`                | Your exact public HTTPS origin, such as `https://care.example.com`; no path. Host-supplied URLs are not auto-detected.     |
+| `BOOPITY_SETUP_PASSWORD` | Optional fallback when a private-link handoff is not practical. Use 15–128 characters and remove after owner verification. |
+| `DATA_DIR`               | The persistent storage path; `/data` in the Docker image.                                                                  |
+| `HOST` / `PORT`          | The private listening interface and port. The image uses `0.0.0.0:3000`; native Node defaults to `127.0.0.1:3000`.         |
+| `NODE_ENV`               | `production`; already set in the Docker image.                                                                             |
+
+**There is no database connection string.** Boopity creates `boopity.sqlite` and
+private keys in `DATA_DIR` automatically. Node defaults to `.boopity`; the Docker
+image uses `/data`. The supplied Compose files create a persistent named volume.
+On another host, attach persistent local storage at `/data` before startup. A
+managed PostgreSQL/MySQL database URL is not supported and is not needed.
 
 Route public HTTPS traffic through a reverse proxy to the application's private
 port. If the host asks for a health-check path, use `/api/ready` with the configured
@@ -64,7 +72,7 @@ links, Google callbacks and payment webhooks.
 
 ## Start locally
 
-For setup passwords and private initial entry, see [the setup guide](getting-started.md).
+For private initial entry, see [the setup guide](getting-started.md).
 Email does not need to be configured before opening the wizard; follow the
 [DIY email guide](email-setup.md) inside setup. The commands below install the
 application itself; no hosting dashboard or provider integration is needed.
@@ -89,13 +97,13 @@ environment takes precedence. Never use `VITE_` variables for secrets.
 Open the printed **private setup link** and choose **Start setup**. Do not share it
 or startup logs in chat, screenshots or support tickets. It expires in 30 minutes.
 Before setup starts, a restart prints a replacement; only the newest link works.
-In **Your account**, enter **Your name** and **Your email**. If no setup password
-was supplied during installation, choose one here so you can return before email works.
-An existing setup password is kept; this step does not ask you to change it.
-Your seven-day HttpOnly browser session survives restarts; after expiry or on another
-browser, use the password at `/setup`. Email codes are an alternative once delivery
-is connected. Saved details survive refresh/restart; unsaved edits do not.
-After owner creation the password is deleted; use owner sign-in or server recovery.
+In **Your account**, enter **Your name** and **Your email**—no password is needed.
+Your seven-day HttpOnly browser session survives restarts. After expiry or on another
+browser, resume with an email code once delivery is connected. Before that, keep
+the app running and use `npm run setup` from another terminal with the same
+configuration to open a replacement link. That replaces earlier setup access, not
+your saved details. Unsaved edits do not survive a reload. After owner creation,
+the helper opens ordinary sign-in; it cannot create a second owner.
 
 Alternatively, set `BOOPITY_SETUP_PASSWORD` privately before startup (15–128 characters).
 Then opening `/setup` and entering that password replaces the initial private-link
@@ -116,13 +124,26 @@ Test Google with the built same-origin app on port 3000.
 From the source directory:
 
 ```sh
-docker compose up --build
+sh scripts/start-docker.sh
 ```
 
-If `BOOPITY_SETUP_PASSWORD` was supplied privately to Compose, open your website
-and enter it. Otherwise click **Finish setup** in the output, then choose a password
-in **Your account**. For background startup, view that initial link with
-`docker compose logs boopity`. A container cannot open your computer's browser.
+This macOS/Linux launcher waits for Boopity to start, then opens the private link
+in your computer's browser. On macOS you can instead double-click
+`scripts/Start-Boopity.command` with Docker running. Rerun the launcher to reopen
+setup; saved details stay, but earlier setup links and sessions are replaced.
+Once setup is complete, it opens normal sign-in. It starts an existing container
+without rebuilding or updating it. Follow the [upgrade guide](operations.md)
+before changing an image or recreating a container against existing data.
+
+To use a prebuilt release, set `BOOPITY_IMAGE` to its reviewed image digest and run
+`sh scripts/start-docker.sh --image`. The image's wizard matches that release;
+unreleased UI changes need a new build. The launcher runs on the computer controlling
+Docker; it is not a hosting dashboard or remote deployment service.
+
+Without the launcher (including on Windows), use `docker compose up --build`
+and open **Finish setup** from its output. If a private `BOOPITY_SETUP_PASSWORD`
+was supplied instead, open `/setup` and enter it. These are installer alternatives,
+not extra wizard steps.
 Compose binds only loopback. The image runs as
 non-root `node`; the named `boopity-data` volume holds the installation. The health check
 verifies database-backed HTTP readiness, not completion of owner setup or booking/payment phases.
@@ -156,7 +177,6 @@ value against the same database cannot reactivate them. Setup tokens never creat
 ## Complete the wizard
 
 1. **Your account:** enter your name and email, then select **Save and continue**.
-   Choose and confirm a setup password only if one was not supplied during installation.
    This is not public client registration.
 2. **Email delivery:** save SMTP or optional Resend settings. Blank secret fields retain saved values;
    indicators replace their values. Saving does not send mail. Open **Using Resend** or

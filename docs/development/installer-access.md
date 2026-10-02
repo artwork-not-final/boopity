@@ -1,9 +1,36 @@
 # Installer access and recovery
 
-This is the operator reference. Sitters normally choose a setup password during
-deployment and enter it on their website. Do not ask them to pick an access method.
+This is the operator reference. The normal flow opens a private setup link, then
+asks the sitter for their name and email. There is no required setup password or
+database connection string. Do not ask sitters to pick an access method.
 
-## Private setup-password configuration
+## Open setup from the installer
+
+- **Node:** `npm start` opens the initial link from an interactive local terminal.
+  To reopen setup, keep the app running and use `npm run setup` in another terminal,
+  from the same directory with the same environment and data path.
+- **Docker on macOS/Linux:** run `sh scripts/start-docker.sh`. On macOS,
+  `scripts/Start-Boopity.command` is also double-clickable. Docker must be running.
+  The launcher builds and starts a fresh source installation in the background,
+  waits for readiness, and opens its private link. No Node installation is needed
+  on the host. For a released image, supply `BOOPITY_IMAGE` and add `--image`.
+- **Other hosted installations:** retrieve the private startup link from your
+  host's private console and give it only to the intended sitter. If needed, use
+  the replacement-link commands below. Boopity cannot open a browser on a remote
+  sitter's computer or provision an arbitrary hosting account.
+
+Once an owner exists, the launcher opens `/app` for normal sign-in and does not
+issue a setup credential. Before ownership, rerunning it replaces earlier setup
+links and sessions, without clearing saved settings. These helpers use the existing
+protected management commands; there is no public endpoint to mint setup access.
+
+For an existing Docker container, the launcher starts it without rebuilding,
+pulling an update or recreating it. It is not an upgrade tool. If you removed the
+container but kept its data, follow the [upgrade guide](../guides/operations.md)
+before building or selecting a different image. Windows users can use the manual
+Compose and private-link commands below; the double-click launcher is macOS-only.
+
+## Optional setup-password fallback
 
 Supply `BOOPITY_SETUP_PASSWORD` privately before startup: 15–128 characters, with
 no shared/default value. Use your host's private environment settings. For local Node,
@@ -12,13 +39,13 @@ Never add a real password to an image, public template or `VITE_` variable.
 
 A deliberately changed host value resets setup access and revokes existing setup
 sessions on restart, without deleting saved settings. An unchanged host value does
-not overwrite a previously saved setup password. The Your account step creates a
-password only when none exists; it does not offer password changes. Once the owner is established,
+not overwrite a previously saved setup password. Your account only collects name
+and email; it does not create or change a password. Once the owner is established,
 the password is permanently disabled and its verifiers are removed. Remove the
 hosting setting then. Normal sign-in remains email codes and optional Google.
 
-Older installations without a password need one authorized visit to Your account,
-or a private host setting. Public visitors cannot choose the initial password.
+Public visitors cannot choose the initial password or claim an installation.
+Existing passwords from older releases continue to work until owner verification.
 
 ## Separate installer forms
 
@@ -42,6 +69,13 @@ session instead of replacing it. Continue in the same browser.
 
 If no setup password or email resumption is available and you lost that browser session, request a
 replacement with the same data directory and configuration as the running app:
+
+```sh
+npm run setup
+```
+
+Or run the Docker launcher again. For a private console where automatic opening
+is not useful, the underlying command remains:
 
 ```sh
 npm run manage -- setup-link
@@ -73,12 +107,14 @@ endpoint only when Start setup is selected. Do not rewrite it into a query strin
 Creating another link/code revokes earlier setup sessions, not a saved setup password. It cannot issue setup
 access after an owner exists. The `setup-token` and recovery commands still work.
 
-Automatic browser opening applies only to interactive Node startup on a matching
-HTTP loopback address. SSH, CI, container/public bindings and noninteractive startup
-only print instructions. Set `BOOPITY_OPEN_BROWSER=false` to disable opening. If no
-browser launcher is available, the printed link still works. Docker Compose runs
-in a container: use `docker compose up --build` and click the link in its output,
-or `docker compose logs boopity` after starting it in the background.
+Automatic browser opening applies only in an interactive local terminal on a
+matching HTTP loopback address. The Docker launcher additionally requires a local
+Unix-socket Docker endpoint and the expected loopback port binding. SSH, CI,
+remote Docker contexts and noninteractive runs only print the link. Set
+`BOOPITY_OPEN_BROWSER=false` to disable opening. If no browser launcher is available,
+the printed link still works. Manual Docker startup also works with
+`docker compose up --build`; open its private **Finish setup** link, or use
+`docker compose logs boopity` after starting it in the background.
 
 Leave `BOOPITY_OWNER_EMAIL` and host email variables unset for a normal DIY-email
 installation. The protected wizard selects the owner and saves email settings.

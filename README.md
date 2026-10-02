@@ -29,12 +29,14 @@ npm start
 
 On a fresh installation, Boopity opens a private **Finish setup** link when started
 in an interactive local terminal. If it does not open, use the link in the terminal.
-Select **Start setup**, then add your name, email and a setup password in **Your account**.
+Select **Start setup**, then add your name and email in **Your account**.
 The wizard walks you through email delivery and your business settings.
 
-If you already supplied a setup password in your hosting settings, open `/setup`
-and enter it instead. You will not be asked to choose another password.
-Keep setup links, passwords and provider credentials private. See the
+No database connection string or setup password is needed. Boopity creates its
+SQLite database and private keys in `.boopity`. Keep that folder safe.
+To reopen unfinished setup without your browser session, leave the app running
+and use `npm run setup` in another terminal with the same configuration.
+Keep setup links and provider credentials private. See the
 [setup guide](docs/guides/getting-started.md) for returning later or getting help.
 
 For development with live reload, see [Contributing](CONTRIBUTING.md).
@@ -42,15 +44,22 @@ For development with live reload, see [Contributing](CONTRIBUTING.md).
 ## Run with Docker
 
 ```sh
-docker compose up --build
+sh scripts/start-docker.sh
 ```
 
-Open **Finish setup** in the output, or open `http://localhost:3000/setup` if you
-supplied a private setup password. The Compose file keeps data in a persistent
-volume and binds the app to localhost. For a hosted installation, configure HTTPS
+On macOS, you can also double-click `scripts/Start-Boopity.command` with Docker
+running. The launcher starts Boopity in the background and opens its private setup
+link locally. If a browser cannot be opened, it prints the link instead. Run the
+launcher again to reopen setup, or to open sign-in after setup is complete.
+
+The Compose file creates a persistent data volume, including the SQLite database;
+there is no connection string to enter. It binds the app to localhost. For a hosted installation, configure HTTPS
 and follow [Use your own hosting provider](docs/guides/self-hosting.md#use-your-own-hosting-provider).
-This builds locally; a reviewed public image is not available yet. Boopity does
-not create hosting accounts or manage deployments for you.
+This command builds the checked-out source. To use a published image, set
+`BOOPITY_IMAGE` to the digest from a [release](https://github.com/artwork-not-final/boopity/releases)
+and add `--image`. Published images contain that release's UI, not unreleased source changes.
+Boopity does not create hosting accounts or manage deployments for you. A private
+host-configured setup password remains an optional fallback, not a wizard requirement.
 
 Boopity currently needs one always-running Node process and a persistent local
 disk. It uses SQLite and private file storage; ephemeral disks, multiple replicas
