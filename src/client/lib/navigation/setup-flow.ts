@@ -1,5 +1,4 @@
 import { defaultBranding } from "../../../shared/branding";
-import { setupPasswordSchema } from "../../../shared/setup";
 
 export type SetupEntryMode =
   | "email"
@@ -39,17 +38,6 @@ export function setupAccessView(
   if (mode === "resume") return "email";
   if (mode === "email") return "guided";
   return "hosting";
-}
-
-export function setupPasswordError(
-  password: string,
-  confirmation: string,
-  required: boolean,
-) {
-  if (!required && !password && !confirmation) return null;
-  if (!setupPasswordSchema.safeParse(password).success)
-    return "Use a setup password with 15 to 128 characters.";
-  return password === confirmation ? null : "The passwords don’t match.";
 }
 
 const setupSteps = [
@@ -126,8 +114,6 @@ export function restoredSetupStep(
 ): SetupStep {
   // Ignore a previous installation's navigation on a fresh database.
   if (!state.pending.email && !state.owner) return "identity";
-  // Older installations may already have saved details but no return password.
-  if (!state.owner && state.setupPasswordSet === false) return "identity";
   if (remembered) return remembered;
   if (!state.readiness.email) return "email";
   if (state.branding.businessName === defaultBranding.businessName)

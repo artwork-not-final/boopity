@@ -2,12 +2,14 @@
 
 ## Start setup
 
-1. Have your **setup password** ready—the one chosen when Boopity was installed.
-   If someone installed Boopity for you, ask them for this password.
-2. Open your website, enter that password and select **Start setup**.
+1. Open Boopity from your installer. For a local Docker installation on a Mac,
+   double-click **Start-Boopity** in the `scripts` folder with Docker running.
+   If someone installed Boopity for you, use the private setup link they provide.
+2. Select **Start setup**. You do not need to choose a setup password.
 3. Add your name and email, connect email delivery, and customize your business.
 4. Verify your inbox to establish the owner, then review and finish setup.
 
+The database is created automatically; there is no connection string to enter.
 You do not need email working to open the wizard. Follow the
 [email setup guide](email-setup.md) when you reach Email delivery. Google sign-in
 and online payments can be configured later.
@@ -25,12 +27,20 @@ Need to install it first? Follow the [installation guide](self-hosting.md#use-yo
 ## Come back later
 
 Open your website in the same browser to continue where you left off. Your setup
-session lasts seven days. If it expires or you switch browsers, enter the same
-setup password. It does not expire while the owner is still being set up.
+session lasts seven days. If it expires or you switch browsers, you can sign in
+with a code sent to the email saved during setup once email delivery is connected.
+
+If email is not connected yet, open the local installer again for a fresh private
+link, or ask whoever installed Boopity for one. The new link replaces earlier
+setup links and sessions, but keeps your saved details. It works once and expires
+after 30 minutes; keep it private.
 
 Saved details stay on your server. Unsaved edits are not retained.
 
-## Forgot your setup password?
+## If your installer supplied a setup password
+
+Some hosts use a private setup password instead of a link. Enter it on your
+website to start or resume setup. You will not be asked to choose another one.
 
 If email recovery is ready, select **Email me a sign-in code**. Enter the email
 address saved during setup, select **Send sign-in code**, then check your inbox.
@@ -47,15 +57,15 @@ For local installations or further help, your installer can follow the
 
 ## After owner verification
 
-The setup password stops working once the owner is established. Use normal
-email-code or Google sign-in from then on. Settings stay separate from setup.
-Remove the setup-password setting from your hosting dashboard.
+Use normal email-code or Google sign-in from then on. Initial setup links and
+passwords cannot reopen ownership. Settings stay separate from setup. If your
+installer supplied a setup password, ask them to remove it from the hosting settings.
 
 ## Installing on your own computer?
 
 Follow [the local installation instructions](self-hosting.md#start-locally).
-The initial private link opens the wizard; choose a setup password in Your account
-to return later. Installer links, legacy codes and managed-email installations
+The initial private link opens the wizard without a password. Installer links,
+legacy codes and managed-email installations
 are covered in the [installer guide](../development/installer-access.md), not the normal setup screen.
 
 ## Before clients book

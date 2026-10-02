@@ -10,7 +10,6 @@ import {
   readSetupStep,
   rememberSetupStep,
   restoredSetupStep,
-  setupPasswordError,
   installerAccess,
   setupAccessView,
   type SetupEntryMode,
@@ -51,42 +50,22 @@ describe("returning to unfinished setup", () => {
     expect(html).not.toMatch(/npm|terminal|setup-link|Email me/);
     expect(run).not.toHaveBeenCalled();
   });
-  it("requires a confirmed first password, but offers no password change when one is already set", () => {
-    expect(setupPasswordError("", "", true)).toBeTruthy();
-    expect(setupPasswordError("", "", false)).toBeNull();
-    expect(
-      setupPasswordError("synthetic password", "different password", true),
-    ).toContain("don’t match");
-    expect(
-      setupPasswordError(" ".repeat(15), " ".repeat(15), true),
-    ).toBeTruthy();
-    expect(
-      setupPasswordError("a".repeat(129), "a".repeat(129), true),
-    ).toBeTruthy();
-    expect(
-      setupPasswordError("synthetic password", "synthetic password", true),
-    ).toBeNull();
-    expect(setupPasswordError("synthetic password", "", false)).toBeTruthy();
-    const html = renderToStaticMarkup(
-      createElement(Identity, { state: state(), busy: false, run: vi.fn() }),
-    );
-    expect(html).toContain("Confirm setup password");
-    expect(html.match(/autoComplete="new-password"/g)).toHaveLength(2);
-    expect(html).not.toContain("Change setup password");
-    const existing = renderToStaticMarkup(
-      createElement(Identity, {
-        state: { ...state(), setupPasswordSet: true },
-        busy: false,
-        run: vi.fn(),
-      }),
-    );
-    expect(existing.match(/<input\b/g)).toHaveLength(2);
-    expect(existing).toContain("Your name");
-    expect(existing).toContain("Your email");
-    expect(existing).not.toMatch(
-      /Owner email|Change setup password|Confirm setup password|new-password|<details/,
-    );
-  });
+  it.each([false, true])(
+    "asks only for name and email with setupPasswordSet=%s",
+    (setupPasswordSet) => {
+      const html = renderToStaticMarkup(
+        createElement(Identity, {
+          state: { ...state(), setupPasswordSet },
+          busy: false,
+          run: vi.fn(),
+        }),
+      );
+      expect(html.match(/<input\b/g)).toHaveLength(2);
+      expect(html).toContain("Your name");
+      expect(html).toContain("Your email");
+      expect(html).not.toMatch(/Owner email|password|<details/);
+    },
+  );
   it("remembers only a valid step name, never form values or access credentials", () => {
     const storage = {
       getItem: vi.fn(() => "email"),
@@ -124,7 +103,7 @@ describe("returning to unfinished setup", () => {
     expect(restoredSetupStep(current, null)).toBe("email");
     expect(
       restoredSetupStep({ ...current, setupPasswordSet: false }, "email"),
-    ).toBe("identity");
+    ).toBe("email");
     current.readiness.email = true;
     current.branding = { ...defaultBranding };
     expect(restoredSetupStep(current, null)).toBe("appearance");
@@ -176,7 +155,7 @@ describe("returning to unfinished setup", () => {
     const html = renderToStaticMarkup(
       createElement(Unlock, { ...props, linkToken: null }),
     );
-    expect(html).toContain("Finish your installation");
+    expect(html).toContain("Open Boopity from your installer");
     expect(html).not.toContain("npm run manage");
     expect(html).not.toContain("<details");
     expect(html).not.toContain("Welcome to Boopity");
@@ -277,7 +256,11 @@ describe("one sitter-facing setup path", () => {
     "keeps %s installations closed without a menu of credentials",
     (mode) => {
       const html = render(mode);
-      expect(html).toContain("Finish your installation");
+      expect(html).toContain(
+        mode === "waiting"
+          ? "Finish your installation"
+          : "Open Boopity from your installer",
+      );
       expect(html).toContain("Try again");
       expect(html).not.toMatch(
         /<form|<input|<details|npm|docker|BOOPITY_|host-provided|Other setup options/,
@@ -348,7 +331,11 @@ describe("one sitter-facing setup path", () => {
       const html = renderToStaticMarkup(
         createElement(HostingSetupHelp, { reason, busy: true, check }),
       );
-      expect(html).toContain("hosting dashboard");
+      expect(html).toContain(
+        reason === "email"
+          ? "hosting dashboard"
+          : "Run the Boopity launcher again",
+      );
       expect(html).not.toMatch(/npm|docker|BOOPITY_|<details|<input/);
       expect(html).toContain("disabled");
       expect(check).not.toHaveBeenCalled();

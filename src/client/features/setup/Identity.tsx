@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { setupPasswordError } from "../../lib/navigation/setup-flow";
 import { api } from "../../lib/http/installation-api";
 import { Field } from "../../components/forms/Field";
 import { Notice } from "../../components/feedback/Notice";
@@ -10,9 +9,6 @@ import { Input } from "../../components/ui/input";
 export function Identity({ state, busy, run, onContinue }: FormProps) {
   const [name, setName] = useState(state.pending.name ?? ""),
     [email, setEmail] = useState(state.pending.email ?? "");
-  const [password, setPassword] = useState(""),
-    [confirmation, setConfirmation] = useState("");
-  const needsPassword = !state.setupPasswordSet;
   if (state.owner)
     return (
       <>
@@ -36,35 +32,6 @@ export function Identity({ state, busy, run, onContinue }: FormProps) {
         )}
       </>
     );
-  const passwordFields = (
-    <div className="space-y-5">
-      <Field
-        label="Setup password"
-        hint="Use at least 15 characters. This lets you return before email is connected."
-      >
-        <Input
-          type="password"
-          autoComplete="new-password"
-          minLength={15}
-          maxLength={128}
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </Field>
-      <Field appearance="emphasized" label="Confirm setup password">
-        <Input
-          type="password"
-          autoComplete="new-password"
-          minLength={15}
-          maxLength={128}
-          required
-          value={confirmation}
-          onChange={(e) => setConfirmation(e.target.value)}
-        />
-      </Field>
-    </div>
-  );
   return (
     <form
       className="space-y-5"
@@ -72,17 +39,10 @@ export function Identity({ state, busy, run, onContinue }: FormProps) {
         e.preventDefault();
         void run(
           async () => {
-            if (needsPassword) {
-              const problem = setupPasswordError(password, confirmation, true);
-              if (problem) throw new Error(problem);
-            }
             await api("/api/setup/identity", "POST", {
               name,
               email,
-              ...(needsPassword ? { setupPassword: password } : {}),
             });
-            setPassword("");
-            setConfirmation("");
           },
           "Your details saved.",
           onContinue,
@@ -112,7 +72,6 @@ export function Identity({ state, busy, run, onContinue }: FormProps) {
             autoComplete="email"
           />
         </Field>
-        {needsPassword && passwordFields}
         <Button disabled={busy}>
           {onContinue ? "Save and continue" : "Save changes"}
         </Button>

@@ -22,14 +22,16 @@ export function HostingSetupHelp({
         <CardTitle>
           {reason === "password"
             ? "Reset through your hosting account"
-            : "Finish your installation"}
+            : reason === "email"
+              ? "Finish your installation"
+              : "Open Boopity from your installer"}
         </CardTitle>
         <CardDescription>
           {reason === "password"
             ? "You’ll do this in the account you used to put Boopity online."
             : reason === "email"
               ? "Finish connecting email in your hosting dashboard, then try again."
-              : "Choose a setup password in your hosting dashboard, then restart Boopity."}
+              : "Your installer opens a private link so only you can set up your business."}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -59,10 +61,27 @@ export function HostingSetupHelp({
           </>
         ) : (
           <>
+            {reason === "missing" && (
+              <p className="text-sm leading-6">
+                Run the Boopity launcher again to open setup. Your saved details
+                will stay.
+              </p>
+            )}
             <p className="text-sm leading-6 text-muted-foreground">
-              If someone installed Boopity for you, ask them to help with this
-              step.
+              {reason === "email"
+                ? "If someone installed Boopity for you, ask them to help connect email."
+                : "If someone installed Boopity for you, ask them for your private setup link."}
             </p>
+            {reason === "missing" && (
+              <a
+                href="https://github.com/artwork-not-final/boopity/blob/main/docs/development/installer-access.md"
+                target="_blank"
+                rel="noreferrer"
+                className="block text-sm text-primary underline underline-offset-4"
+              >
+                Installing on your own host?
+              </a>
+            )}
             <Button variant="outline" disabled={busy} onClick={check}>
               Try again
             </Button>

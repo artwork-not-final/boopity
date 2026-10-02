@@ -378,7 +378,7 @@ describe("simple setup welcome", () => {
     expect(linked).toContain("Start setup");
     expect(linked).not.toContain("synthetic-startup-token");
     expect(blank).not.toContain("<form");
-    expect(blank).toContain("hosting dashboard");
+    expect(blank).toContain("Run the Boopity launcher again");
   });
   it("preserves the recovery code and limited-access warning", () => {
     const html = render(true, null);

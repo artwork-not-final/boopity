@@ -919,7 +919,7 @@ it("retains identity after a rejected save and advances only after a successful 
   );
 });
 
-it("requires a matching setup password only when the installation has none", async () => {
+it("saves identity and continues without choosing a setup password", async () => {
   const after = vi.fn();
   await mount(
     createElement(Identity, {
@@ -929,25 +929,18 @@ it("requires a matching setup password only when the installation has none", asy
       onContinue: after,
     }),
   );
-  expect(input("Setup password").required).toBe(true);
-  expect(input("Confirm setup password").required).toBe(true);
-  await enter("Setup password", "synthetic initial password");
-  await enter("Confirm setup password", "synthetic other password");
+  expect(container.querySelectorAll("input")).toHaveLength(2);
+  expect(container.querySelector('input[type="password"]')).toBeNull();
   await submit();
-  expect(String(errors[0])).toContain("don’t match");
-  expect(requests).toHaveLength(0);
-  expect(after).not.toHaveBeenCalled();
-  await enter("Confirm setup password", "synthetic initial password");
-  await submit();
+  expect(errors).toHaveLength(0);
   expect(body(0)).toEqual({
     name: "Test sitter",
     email: "owner@example.test",
-    setupPassword: "synthetic initial password",
   });
   expect(after).toHaveBeenCalledOnce();
 });
 
-it("never sends a hidden password draft if a refresh reports that a password is already set", async () => {
+it("keeps identity editing independent of the installer's password setting", async () => {
   const props = { busy: false, run: action() };
   const root = await mount(
     createElement(Identity, {
@@ -955,7 +948,7 @@ it("never sends a hidden password draft if a refresh reports that a password is 
       state: { ...state(), setupPasswordSet: false },
     }),
   );
-  await enter("Setup password", "synthetic unsaved password");
+  expect(container.querySelector('input[type="password"]')).toBeNull();
   // A newer server state can arrive after another authorized setup session saves.
   await act(async () =>
     root.render(createElement(Identity, { ...props, state: state() })),
