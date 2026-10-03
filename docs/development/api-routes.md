@@ -1,6 +1,6 @@
 # Application route inventory
 
-This is the Node developer preview's application API, not a versioned third-party
+This is Boopity's internal application API, not a versioned third-party
 integration contract. `server/runtime/app.ts` is the entry point. The route-surface
 test compares the registered methods/paths below with the application so this
 inventory must change deliberately when a route is added or removed.

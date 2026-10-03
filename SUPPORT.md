@@ -4,8 +4,9 @@ Boopity is self-hosted open-source software under Artwork Not Final LLC, not a
 managed service. Help and maintenance are provided by maintainers and community
 contributors on a best-effort basis. There is no guaranteed response, fix, release
 schedule, service-level agreement (SLA), on-call service or installation assistance.
-The current developer preview is not a supported production release; do not rely
-on it for an active business yet.
+Use a tagged release and verify your installation, email delivery and backups
+before relying on it for an active business. A local installation is not a public
+website until you configure hosting and HTTPS.
 
 ## Bugs, feature requests and questions
 
@@ -23,7 +24,7 @@ not in a public issue.
 
 ## Maintenance scope
 
-After the first release, any fixes will target the latest self-hosted release.
+Fixes target the latest self-hosted release.
 There is no promise to backport fixes to older releases or support every host,
 custom fork or integration. Refer to [Operations](docs/guides/operations.md) for the tested
 deployment requirements; a listed configuration is not an uptime or support
@@ -38,5 +39,5 @@ telemetry account, central login or central payment service is required.
 
 Current scope: one business, one concurrent booking, invitation-only client
 access, one-off visits/stays, no staff scheduling or recurring series. No migration
-from the old SaaS is supplied. [The release checklist](docs/releases/releasing.md) lists outstanding gates;
+from the old SaaS is supplied. [The release checklist](docs/releases/releasing.md) describes release validation;
 [Operations](docs/guides/operations.md) distinguishes tested from untested host options.

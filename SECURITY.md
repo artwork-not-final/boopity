@@ -4,12 +4,12 @@
 
 This policy covers the self-hosted Boopity project under Artwork Not Final LLC
 at [artwork-not-final/boopity](https://github.com/artwork-not-final/boopity).
-There is no supported production release yet. The current self-hosted application
-is a developer preview. The preserved .NET application and Cloudflare preview are
-separate deployments, not supported self-hosted release channels.
+The maintained release line is Boopity 1.x. The preserved .NET application and
+Cloudflare preview are separate deployments, not supported self-hosted release
+channels. Use tagged releases; unreleased commits are not release artifacts.
 
-Security reports about the current preview are welcome. After the first release,
-any maintenance will target the latest self-hosted release. Older versions, custom
+Security reports are welcome. Maintenance targets the latest self-hosted release.
+Older versions, custom
 forks and legacy deployments have no promised security backports or support window.
 
 ## Reporting a vulnerability

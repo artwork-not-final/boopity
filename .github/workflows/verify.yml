@@ -44,3 +44,7 @@ jobs:
         env:
           BOOPITY_CONTAINER_QA: quick-start-disposable
         run: node tests/integration/quick-start-container-local.mjs boopity-ci .
+      - name: Check real TLS, secure sign-in and proxy persistence offline
+        env:
+          BOOPITY_CONTAINER_QA: https-disposable
+        run: node tests/integration/https-container-local.mjs boopity-ci

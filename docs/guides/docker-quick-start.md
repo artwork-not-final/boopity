@@ -1,7 +1,7 @@
 # Docker Quick Start for Mac
 
-Run Boopity on your own Mac without typing commands. This is a local developer
-preview, not a public website for clients. Docker Desktop must already be installed.
+Run Boopity on your own Mac without typing commands. This is a local installation,
+not a public website for clients. Docker Desktop must already be installed.
 
 ## Start Boopity
 

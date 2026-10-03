@@ -1,11 +1,11 @@
-# Self-hosted installation — developer preview
+# Self-hosted installation
 
 Owner setup, OTP/optional Google login, recovery, branding, sitter CRM and invitation-only client
 bookings, manual payment accounting and optional sitter-owned Stripe Checkout are implemented.
-This is **not yet a production release**: Phase 4 sandbox validation passed, but Phase 5
-public packaging and deployment validation remain open. The new application is
-licensed under [MIT](../../LICENSE), copyright (c) 2026 Artwork Not Final LLC. Use synthetic data while
-the remaining [release checks](../releases/releasing.md) are open. Retired application
+Use a tagged release and validate your host, email delivery and backups before
+inviting clients. Maintenance and community help are [best-effort](../../SUPPORT.md),
+not managed hosting or guaranteed support. The application is licensed under
+[MIT](../../LICENSE), copyright (c) 2026 Artwork Not Final LLC. Retired application
 installations are separate; these instructions do not modify or import them.
 
 ## Reference requirements
@@ -528,13 +528,12 @@ email leaves the process. Sign in as `owner@example.test`. Use only the harness'
 addresses and Ctrl-C afterwards to remove its generated data. Never expose this harness publicly.
 
 The container fixture requires an explicit disposable-QA marker and is excluded from images.
-It is not an installation or migration command. See [release status](../releases/releasing.md),
-[release status](../releases/releasing.md)
-and the historical [release status](../releases/releasing.md).
+It is not an installation or migration command. See the
+[release checklist](../releases/releasing.md).
 
-## Next phases
+## Releases and updates
 
-Phase 4 payment implementation and controlled sandbox validation are complete. Phase 5 is
-preparing sanitization, host/recovery guides, large-list performance and public
-packaging. See [the release checklist](../releases/releasing.md). A local build does not authorize
-deployment or publication.
+Use a tagged release and follow the [backup and update guide](operations.md).
+Maintainers use the [release checklist](../releases/releasing.md) for final image,
+source-material and installer checks. A local build does not publish or deploy
+an installation.
