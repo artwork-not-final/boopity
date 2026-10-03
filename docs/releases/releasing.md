@@ -137,6 +137,53 @@ QA reports, backups and neighboring candidates must never enter the public impor
 
 ## Before a supported production release
 
+### Package the optional Mac Quick Start download
+
+After approving and publishing an application image, package its immutable
+multi-architecture registry digest (not a mutable tag):
+
+```sh
+npm run release:quick-start -- --version VERSION --image ghcr.io/artwork-not-final/boopity@sha256:DIGEST
+```
+
+This maintainer command needs Node and `zip`; sitters do not. It writes a fresh
+private `.release-candidates/quick-start-*` directory containing a small
+`boopity-VERSION-quick-start-macos.zip` and its `.sha256` file. It does not publish,
+pull an image, start Docker or change an installation. The app version/digest
+must be matched against the reviewed release by the maintainer; the offline
+packager validates their syntax, not registry provenance.
+
+The archive is allowlisted to the launcher, private-link helper, fixed Compose
+configuration, instructions, original-code license and `BUNDLE.json` file hashes.
+It contains no application dependencies, business data, keys, `.env`, repository
+history, or Docker build context. The manifest hashes identify the installer
+files separately from the pinned application's image/source release. Preserve
+the release's matching notices and companion source-material assets.
+
+Before attaching the ZIP and checksum to that release:
+
+- Run the packaging/launcher tests and source audit. Verify ZIP contents, hashes,
+  executable permissions, exact image digest and local-only Compose settings.
+- Run `BOOPITY_CONTAINER_QA=quick-start-disposable node tests/integration/quick-start-container-local.mjs IMAGE .`
+  against a locally available image. The harness namespaces its copied bundle and
+  port, and uses only labelled disposable resources and synthetic data, with no
+  provider credentials. The default bridge network is retained to exercise the
+  actual loopback port binding; this is not a network-isolated test.
+  It checks first start, folder moves, restart, no implicit image update, retained
+  keys/details, and safe refusal when only the data volume remains. It does not
+  certify macOS Finder/Gatekeeper behavior or a public hosting installation.
+- Download the actual release asset through a browser on a Mac, extract and
+  double-click it. Check operating-system prompts, first setup, repeat opening,
+  Docker-not-running and port-conflict guidance. An executable ZIP entry alone
+  does not prove the unsigned launcher passes macOS download security checks.
+- Publish only the ZIP and checksum, never the neighboring private candidate
+  directory. Do not replace an existing asset with different bytes; use a new
+  release or clearly versioned installer revision for subsequent fixes.
+
+Windows has no tested double-click bundle yet. Do not advertise this as a native,
+signed or notarized Mac app, or as automatic public hosting. Container upgrades
+and existing manual-installation adoption remain explicit operator workflows.
+
 ### Image notices and companion sources
 
 The build generates browser notices at `/third-party-licenses.txt` and installed

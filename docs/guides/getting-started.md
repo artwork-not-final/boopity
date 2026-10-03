@@ -2,8 +2,10 @@
 
 ## Start setup
 
-1. Open Boopity from your installer. For a local Docker installation on a Mac,
-   double-click **Start-Boopity** in the `scripts` folder with Docker running.
+1. Open Boopity from your installer. With the [Docker Quick Start download](docker-quick-start.md)
+   on a Mac, open Docker Desktop and double-click **Start Boopity.command** at the
+   top of the extracted folder. From a developer source checkout, the older
+   **Start-Boopity.command** in `scripts` builds the source instead.
    If someone installed Boopity for you, use the private setup link they provide.
 2. Select **Start setup**. You do not need to choose a setup password.
 3. Add your name and email, connect email delivery, and customize your business.

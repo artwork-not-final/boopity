@@ -81,14 +81,33 @@ function readableBrandInk(color: string, surfaces: string[]) {
   }
   return themeColors.foreground;
 }
+function readableAccentSurface(color: string) {
+  // Give the chosen accent a visible role without sacrificing ordinary label
+  // contrast. Custom dark accents need more white than the built-in pastels.
+  for (let step = 0; step <= 20; step++) {
+    const surface = mix(color, themeColors.card, 0.35 + (step / 20) * 0.65);
+    if (
+      contrastRatio(themeColors["muted-foreground"], surface) >= 4.5 &&
+      contrastRatio(themeColors.foreground, surface) >= 7
+    ) {
+      // White/near-white accents still need a discernible selected state.
+      return contrastRatio(surface, themeColors.card) < 1.12
+        ? themeColors.muted
+        : surface;
+    }
+  }
+  return themeColors.muted;
+}
 export function brandingVariables(input: Branding): Record<string, string> {
   const brand = brandingSchema.parse(input);
   const tintSource = readableBrandInk(brand.primaryColor, [
     themeColors.background,
   ]);
-  const soft = mix(tintSource, themeColors.card, 0.95);
-  const hover = mix(tintSource, themeColors.card, 0.9);
-  const selected = mix(tintSource, themeColors.card, 0.86);
+  // Primary is for actions/ink; accent is for the quieter selected, hover and
+  // calendar surfaces. Both colors must affect the real UI, not just its preview.
+  const selected = readableAccentSurface(brand.accentColor);
+  const soft = mix(selected, themeColors.card, 0.7);
+  const hover = mix(selected, themeColors.card, 0.35);
   const ink = readableBrandInk(tintSource, [
     themeColors.background,
     themeColors.card,

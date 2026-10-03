@@ -14,6 +14,14 @@ database connection string. Do not ask sitters to pick an access method.
   The launcher builds and starts a fresh source installation in the background,
   waits for readiness, and opens its private link. No Node installation is needed
   on the host. For a released image, supply `BOOPITY_IMAGE` and add `--image`.
+- **Quick Start for Mac download:** the top-level **Start Boopity.command** uses
+  a pinned image and fixed loopback configuration packaged with the release.
+  No environment variables or build tools are required. It uses a separate,
+  stable `boopity-quick-start` Compose project and checks container/volume labels
+  before reopening. A foreign project, occupied port, remote Docker connection,
+  or orphaned data volume stops the launcher without resetting data. Unlike the
+  general launcher, Quick Start refuses remote execution entirely. See the
+  [Quick Start guide](../guides/docker-quick-start.md).
 - **Other hosted installations:** retrieve the private startup link from your
   host's private console and give it only to the intended sitter. If needed, use
   the replacement-link commands below. Boopity cannot open a browser on a remote

@@ -22,7 +22,11 @@ import type {
   PublicInfo,
   SetupState,
 } from "../../src/shared/api-responses";
-import { defaultBranding } from "../../src/shared/branding";
+import {
+  brandingVariables,
+  defaultBranding,
+  themePresets,
+} from "../../src/shared/branding";
 import { emptyProviders } from "../../src/shared/setup";
 import { saveAndRefresh } from "../../src/client/lib/navigation/setup-flow";
 import type { ActionFeedback } from "../../src/client/lib/types/action-feedback";
@@ -1012,6 +1016,84 @@ it.each([
     expect(window.localStorage.length).toBe(0);
   },
 );
+
+it.each(themePresets)(
+  "previews and saves both $name colors together",
+  async ({ name, primaryColor, accentColor }) => {
+    const preview = vi.fn();
+    await mount(
+      createElement(Appearance, {
+        state: state(true),
+        busy: false,
+        run: action(),
+        preview,
+      }),
+    );
+    await click(name);
+    expect(input("Primary color").value).toBe(primaryColor);
+    expect(input("Accent color").value).toBe(accentColor);
+    expect(preview).toHaveBeenLastCalledWith({
+      ...state(true).branding,
+      primaryColor,
+      accentColor,
+    });
+    expect(button(name).getAttribute("aria-pressed")).toBe("true");
+    const swatches = button(name).querySelectorAll('[aria-hidden="true"] span');
+    expect(swatches).toHaveLength(2);
+    expect((swatches[0] as HTMLElement).style.backgroundColor).not.toBe(
+      (swatches[1] as HTMLElement).style.backgroundColor,
+    );
+    respond = () => Response.json({ version: 2 });
+    await submit();
+    expect(errors).toHaveLength(0);
+    expect(requests[0].url).toBe("/api/setup/appearance");
+    expect(body(0)).toMatchObject({ primaryColor, accentColor });
+  },
+);
+
+it("applies the saved accent throughout the layout and restores it after discarding a preview", async () => {
+  const current = state();
+  current.branding = {
+    ...current.branding,
+    primaryColor: "#215b79",
+    accentColor: "#eddbba",
+  };
+  window.history.replaceState(null, "", "/setup/business");
+  installation(current);
+  const response = respond;
+  respond = (url, init) =>
+    url === "/api/installation"
+      ? Response.json({ ...info(), branding: current.branding })
+      : response(url, init);
+  await mount(createElement(App));
+  const theme = () =>
+    container.querySelector<HTMLElement>("[data-boopity-theme]")!;
+  const saved = brandingVariables(current.branding);
+  expect(theme().style.getPropertyValue("--secondary")).toBe(
+    saved["--secondary"],
+  );
+  expect(container.querySelector("header")!.className).toContain(
+    "border-t-accent",
+  );
+  await click("Forest & sage");
+  expect(theme().style.getPropertyValue("--primary")).toBe("#285943");
+  expect(theme().style.getPropertyValue("--accent")).toBe("#c5dec8");
+  expect(theme().style.getPropertyValue("--secondary")).not.toBe(
+    saved["--secondary"],
+  );
+  await click("Discard preview");
+  for (const key of [
+    "--primary",
+    "--accent",
+    "--secondary",
+    "--brand-soft",
+    "--brand-soft-hover",
+  ])
+    expect(theme().style.getPropertyValue(key)).toBe(saved[key]);
+  expect(
+    requests.every(({ init }) => !init?.method || init.method === "GET"),
+  ).toBe(true);
+});
 
 it("retains the appearance draft and advanced version when a queued logo save needs retry", async () => {
   const preview = vi.fn(),
