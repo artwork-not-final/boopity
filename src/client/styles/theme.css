@@ -36,10 +36,10 @@
   --card: #ffffff;
   --primary: #68407a;
   --primary-foreground: #ffffff;
-  --secondary: color-mix(in srgb, var(--primary) 14%, var(--card));
-  --secondary-foreground: var(--brand-ink);
-  --brand-soft: color-mix(in srgb, var(--primary) 5%, var(--card));
-  --brand-soft-hover: color-mix(in srgb, var(--primary) 10%, var(--card));
+  --secondary: #f9d399;
+  --secondary-foreground: #68407a;
+  --brand-soft: #fdf2e0;
+  --brand-soft-hover: #fbe2bd;
   --brand-ink: #68407a;
   --muted: #e7ebef;
   --muted-foreground: #535d69;

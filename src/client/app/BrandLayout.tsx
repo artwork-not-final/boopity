@@ -32,7 +32,7 @@ export function BrandLayout({
       style={brandingVariables(active) as CSSProperties}
     >
       <SkipLink targetId={skipTarget} />
-      <header className="border-b bg-card">
+      <header className="border-t-4 border-b border-t-accent bg-card">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             {active.logoUrl ? (

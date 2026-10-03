@@ -177,6 +177,11 @@ export function Appearance({
                 type="button"
                 variant="outline"
                 size="sm"
+                aria-pressed={
+                  brand.primaryColor.toLowerCase() === theme.primaryColor &&
+                  brand.accentColor.toLowerCase() === theme.accentColor
+                }
+                className="aria-pressed:border-brand-ink aria-pressed:bg-secondary aria-pressed:text-secondary-foreground aria-pressed:hover:bg-secondary"
                 onClick={() =>
                   change({
                     ...brand,
@@ -185,6 +190,16 @@ export function Appearance({
                   })
                 }
               >
+                <span className="flex -space-x-1" aria-hidden="true">
+                  <span
+                    className="size-3.5 rounded-full border border-black/10"
+                    style={{ backgroundColor: theme.primaryColor }}
+                  />
+                  <span
+                    className="size-3.5 rounded-full border border-black/10"
+                    style={{ backgroundColor: theme.accentColor }}
+                  />
+                </span>
                 {theme.name}
               </Button>
             ))}
