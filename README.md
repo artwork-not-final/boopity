@@ -43,6 +43,14 @@ For development with live reload, see [Contributing](CONTRIBUTING.md).
 
 ## Run with Docker
 
+**On a Mac:** use the **Quick Start for Mac** ZIP attached to a release, when
+available. Unzip it, open Docker Desktop, then double-click **Start Boopity.command**
+at the top of the extracted folder. The released image is already selected;
+there are no commands or image hashes to copy. See the
+[Quick Start guide](docs/guides/docker-quick-start.md) for requirements and limits.
+
+**From a source checkout** (developers and other platforms):
+
 ```sh
 sh scripts/start-docker.sh
 ```
