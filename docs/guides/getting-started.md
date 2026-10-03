@@ -2,10 +2,8 @@
 
 ## Start setup
 
-1. Open Boopity from your installer. With the [Docker Quick Start download](docker-quick-start.md)
-   on a Mac, open Docker Desktop and double-click **Start Boopity.command** at the
-   top of the extracted folder. From a developer source checkout, the older
-   **Start-Boopity.command** in `scripts` builds the source instead.
+1. Start Boopity using the [installation instructions](self-hosting.md).
+   If your browser does not open, use the private **Finish setup** link in the terminal.
    If someone installed Boopity for you, use the private setup link they provide.
 2. Select **Start setup**. You do not need to choose a setup password.
 3. Add your name and email, connect email delivery, and customize your business.
@@ -32,8 +30,9 @@ Open your website in the same browser to continue where you left off. Your setup
 session lasts seven days. If it expires or you switch browsers, you can sign in
 with a code sent to the email saved during setup once email delivery is connected.
 
-If email is not connected yet, open the local installer again for a fresh private
-link, or ask whoever installed Boopity for one. The new link replaces earlier
+If email is not connected yet, follow the
+[reopen setup instructions](../development/installer-access.md#open-setup-from-the-installer)
+for a fresh private link, or ask whoever installed Boopity for one. The new link replaces earlier
 setup links and sessions, but keeps your saved details. It works once and expires
 after 30 minutes; keep it private.
 

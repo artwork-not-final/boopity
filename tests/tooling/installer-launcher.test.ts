@@ -295,9 +295,15 @@ describe.skipIf(process.platform === "win32")("Docker host launcher", () => {
     expect(result.stderr).toContain("Nothing was opened");
     expect(result.stdout).not.toContain(output);
   });
-  it("rejects unsupported launcher arguments without calling Docker", () => {
-    const result = run({}, ["--reset"]);
-    expect(result.status).toBe(1);
-    expect(result.calls).toEqual([]);
-  });
+  it.each(["--reset", "--quick-start"])(
+    "rejects unsupported launcher argument %s without calling Docker",
+    (argument) => {
+      const result = run({}, [argument]);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(
+        "Usage: sh scripts/start-docker.sh [--image]",
+      );
+      expect(result.calls).toEqual([]);
+    },
+  );
 });

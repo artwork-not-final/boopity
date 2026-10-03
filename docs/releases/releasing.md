@@ -10,7 +10,7 @@ source, distributing an image and deploying an installation are separate decisio
 The first stable release freezes the existing single-business feature set:
 setup, email-code and optional Google sign-in, branding, clients and pets,
 services, bookings and cancellations, manual payment records, and optional
-sitter-owned Stripe Checkout. It also includes the optional Mac Quick Start bundle.
+sitter-owned Stripe Checkout. Installation uses Docker Compose or Node.
 There are no new database migrations or feature additions in the release pass.
 
 PR #11 passed all 1,027 tests and the Compose, HTTPS-origin contract and Quick Start
@@ -21,7 +21,7 @@ do not reopen completed feature reviews without a regression or changed componen
 
 For 1.0, patch the Hono dependency, verify the final source and images, rehearse
 the populated upgrade from the last preview, assemble matching source materials,
-and finish the actual Mac download and isolated HTTPS reverse-proxy checks. The
+and finish the isolated HTTPS reverse-proxy checks. The
 release's artifact manifests and verification record must identify the exact
 source commit and image digests. Do not claim a check passed merely because it
 appears in this checklist. The 1.0 release uses local TLS validation rather than
@@ -175,52 +175,16 @@ QA reports, backups and neighboring candidates must never enter the public impor
 
 ## Before publishing a release
 
-### Package the optional Mac Quick Start download
+### Installation downloads
 
-After approving and publishing an application image, package its immutable
-multi-architecture registry digest (not a mutable tag):
+Distribute the application source and reviewed Docker image with the installation
+guide. The optional Mac Quick Start ZIP was withdrawn after the downloaded
+unsigned launcher was blocked by Gatekeeper. Do not package or advertise a
+double-click installer, or ask users to weaken their operating-system security.
 
-```sh
-npm run release:quick-start -- --version VERSION --image ghcr.io/artwork-not-final/boopity@sha256:DIGEST
-```
-
-This maintainer command needs Node and `zip`; sitters do not. It writes a fresh
-private `.release-candidates/quick-start-*` directory containing a small
-`boopity-VERSION-quick-start-macos.zip` and its `.sha256` file. It does not publish,
-pull an image, start Docker or change an installation. The app version/digest
-must be matched against the reviewed release by the maintainer; the offline
-packager validates their syntax, not registry provenance.
-
-The archive is allowlisted to the launcher, private-link helper, fixed Compose
-configuration, instructions, original-code license and `BUNDLE.json` file hashes.
-It contains no application dependencies, business data, keys, `.env`, repository
-history, or Docker build context. The manifest hashes identify the installer
-files separately from the pinned application's image/source release. Preserve
-the release's matching notices and companion source-material assets.
-
-Before attaching the ZIP and checksum to that release:
-
-- Run the packaging/launcher tests and source audit. Verify ZIP contents, hashes,
-  executable permissions, exact image digest and local-only Compose settings.
-- Run `BOOPITY_CONTAINER_QA=quick-start-disposable node tests/integration/quick-start-container-local.mjs IMAGE .`
-  against a locally available image. The harness namespaces its copied bundle and
-  port, and uses only labelled disposable resources and synthetic data, with no
-  provider credentials. The default bridge network is retained to exercise the
-  actual loopback port binding; this is not a network-isolated test.
-  It checks first start, folder moves, restart, no implicit image update, retained
-  keys/details, and safe refusal when only the data volume remains. It does not
-  certify macOS Finder/Gatekeeper behavior or a public hosting installation.
-- Download the actual release asset through a browser on a Mac, extract and
-  double-click it. Check operating-system prompts, first setup, repeat opening,
-  Docker-not-running and port-conflict guidance. An executable ZIP entry alone
-  does not prove the unsigned launcher passes macOS download security checks.
-- Publish only the ZIP and checksum, never the neighboring private candidate
-  directory. Do not replace an existing asset with different bytes; use a new
-  release or clearly versioned installer revision for subsequent fixes.
-
-Windows has no tested double-click bundle yet. Do not advertise this as a native,
-signed or notarized Mac app, or as automatic public hosting. Container upgrades
-and existing manual-installation adoption remain explicit operator workflows.
+Previously published source archives remain immutable historical snapshots;
+withdrawing the optional installer does not replace their bytes or image digests.
+Container upgrades remain explicit operator workflows.
 
 ### Image notices and companion sources
 
