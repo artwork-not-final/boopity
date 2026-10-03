@@ -3,8 +3,9 @@
 Self-hosted pet-sitting software. One installation, one business—no Boopity
 subscription or central account.
 
-**Developer preview:** ready for controlled testing, not yet a supported production
-release. See the [remaining release checks](docs/releases/releasing.md).
+**Community-supported:** you manage your installation; help and maintenance are
+best-effort, with no support SLA. Use a tagged [release](https://github.com/artwork-not-final/boopity/releases)
+and follow the [installation and backup guides](docs/README.md).
 
 ## What it does
 

@@ -1,9 +1,33 @@
 # Release checklist
 
-Boopity is a self-hosted developer preview. Passing local tests does not establish
-that an unattended installation is production-ready for nontechnical sitters.
-Publishing source, distributing an image and deploying an installation are
-separate decisions.
+Boopity is self-hosted, community-supported software. This checklist applies to
+each tagged release; it is not a promise of managed hosting or a support SLA.
+Passing local tests alone does not validate a public installation. Publishing
+source, distributing an image and deploying an installation are separate decisions.
+
+## 1.0 release scope
+
+The first stable release freezes the existing single-business feature set:
+setup, email-code and optional Google sign-in, branding, clients and pets,
+services, bookings and cancellations, manual payment records, and optional
+sitter-owned Stripe Checkout. It also includes the optional Mac Quick Start bundle.
+There are no new database migrations or feature additions in the release pass.
+
+PR #11 passed all 1,027 tests and the Compose, HTTPS-origin contract and Quick Start
+container checks. The maintainer completed the local Docker setup and sitter
+walkthrough. Earlier provider checks covered email delivery, Google sign-in,
+client invitations, sandbox Checkout and refunds. Keep these as bounded evidence;
+do not reopen completed feature reviews without a regression or changed component.
+
+For 1.0, patch the Hono dependency, verify the final source and images, rehearse
+the populated upgrade from the last preview, assemble matching source materials,
+and finish the actual Mac download and isolated HTTPS reverse-proxy checks. The
+release's artifact manifests and verification record must identify the exact
+source commit and image digests. Do not claim a check passed merely because it
+appears in this checklist. The 1.0 release uses local TLS validation rather than
+a public test host. This checks real TLS, origin handling and secure cookies,
+not public DNS, certificate renewal or a hosting provider. Operators must validate
+their own public configuration before inviting clients.
 
 ## Verified baseline
 
@@ -85,6 +109,20 @@ It runs the shipped server on a private container loopback, not a public TLS end
 It creates and removes only its own labelled resources, makes no external provider
 calls and does not certify a hosting service. CI runs it alongside the Compose check.
 
+For real TLS and secure sign-in through an isolated local reverse proxy:
+
+```sh
+BOOPITY_CONTAINER_QA=https-disposable node tests/integration/https-container-local.mjs boopity-local-qa
+```
+
+This uses a one-day synthetic certificate, SMTP-over-TLS sink, private volume and
+network-disabled container. It verifies certificate and hostname validation,
+HTTP-to-HTTPS redirection, origin rejection, secure setup/sign-in cookies, an OTP
+owner login, the canonical Google redirect URL, and session persistence after
+container replacement. It changes no system trust store, publishes no ports and
+contacts no provider. This is not a public DNS, certificate-renewal, live Google
+or payment-provider test. CI also runs this check.
+
 ## Populated upgrade rehearsal
 
 The local cleanup candidate passed an offline `linux/arm64` rehearsal from the
@@ -135,7 +173,7 @@ and scan it with a dedicated secret scanner before packaging. Repeat export and
 scanning after any edit. Only the `source` directory is application source; private
 QA reports, backups and neighboring candidates must never enter the public import.
 
-## Before a supported production release
+## Before publishing a release
 
 ### Package the optional Mac Quick Start download
 
@@ -206,9 +244,9 @@ include neighboring QA reports, credentials, installation data or backups.
 
 ### Remaining release gates
 
-The [container review](container-review.md) records local AMD64/ARM64 checks and
-open runtime, dependency and binary-distribution findings. Passing architecture
-tests does not clear the current image for publication.
+The [historical container review](container-review.md) records earlier AMD64/ARM64
+checks and runtime findings. Use a fresh inventory and scan for the exact release
+image; an earlier review does not clear a new image for publication.
 
 - Rehearse the exact populated release-to-release upgrade and rollback. Retain records,
   uploads, keys, encrypted provider settings and payment history. A same-version
@@ -217,12 +255,17 @@ tests does not clear the current image for publication.
   deployment using the documented Docker/Node contract:
   persistent disk, HTTPS, cookies, callbacks, webhook retries and off-host recovery.
   Include client booking requests, sitter approval and allowed/late cancellation.
+  For 1.0, the approved representative check is the isolated local TLS test above;
+  retain the earlier functional/provider evidence separately and do not describe
+  it as a fresh public-host or live-provider validation.
 - Keep installation guidance provider-neutral. Operators choose their own host
   and must validate their proxy, persistent storage and backup configuration;
   no named-host certification or account provisioning is part of the release.
 - Have a nontechnical sitter complete setup, DIY email, first bookings and the
   backup/update instructions without developer assistance. Check the current UI
   on mobile and Safari, with keyboard navigation and custom branding.
+  The 1.0 walkthrough was completed by the maintainer, not an independent sitter;
+  record that limitation rather than claiming independent usability testing.
 - Review the exact distributed image's dependencies, base layers, notices and
   corresponding-source obligations, including Sharp/libvips. A source license
   review does not clear container distribution.

@@ -50,6 +50,19 @@ afterEach(() => {
 });
 
 describe("Quick Start packaging", () => {
+  it.each(["1.0.0", "0.1.0-preview.4"])(
+    "describes release %s without hard-coded preview claims",
+    (release) => {
+      const files = quickStartFiles(source, release, image);
+      const instructions = files.find(
+        (file) => file.path === "Read Me.txt",
+      )!.content;
+      expect(instructions).toContain(`Application: ${release}`);
+      expect(instructions).toContain(`releases/tag/v${release}`);
+      expect(instructions).toContain("maintenance are best-effort");
+      expect(instructions).not.toContain("not a supported production release");
+    },
+  );
   it("ships only pinned configuration, launcher code, instructions and license", () => {
     const files = quickStartFiles(source, version, image);
     expect(files.map((file) => file.path).sort()).toEqual([

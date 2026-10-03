@@ -61,10 +61,13 @@ Hosting: https://github.com/artwork-not-final/boopity/blob/main/docs/guides/self
 
 RELEASE
 
-Application: __VERSION__ (developer preview, not a supported production release)
+Application: __VERSION__
 Image: __IMAGE__
 Source, security notes, licenses and companion source materials:
 https://github.com/artwork-not-final/boopity/releases/tag/v__VERSION__
+
+Read that release's status and known limitations before using it. Support and
+maintenance are best-effort; this is not a managed hosting service.
 
 This download contains only the launcher and its configuration, not the
 application or its dependencies. BUNDLE.json records the included file hashes

@@ -1,7 +1,7 @@
 # Boopity documentation
 
-Boopity is a developer preview for controlled testing, not yet a supported
-production release. Start with the guide for what you need to do.
+Boopity is self-hosted software with best-effort community support. Start with
+the guide for what you need to do, and use a tagged release for your installation.
 
 ## Install and use Boopity
 
