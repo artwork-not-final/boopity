@@ -9,19 +9,10 @@ database connection string. Do not ask sitters to pick an access method.
 - **Node:** `npm start` opens the initial link from an interactive local terminal.
   To reopen setup, keep the app running and use `npm run setup` in another terminal,
   from the same directory with the same environment and data path.
-- **Docker on macOS/Linux:** run `sh scripts/start-docker.sh`. On macOS,
-  `scripts/Start-Boopity.command` is also double-clickable. Docker must be running.
+- **Docker on macOS/Linux:** run `sh scripts/start-docker.sh`. Docker must be running.
   The launcher builds and starts a fresh source installation in the background,
   waits for readiness, and opens its private link. No Node installation is needed
   on the host. For a released image, supply `BOOPITY_IMAGE` and add `--image`.
-- **Quick Start for Mac download:** the top-level **Start Boopity.command** uses
-  a pinned image and fixed loopback configuration packaged with the release.
-  No environment variables or build tools are required. It uses a separate,
-  stable `boopity-quick-start` Compose project and checks container/volume labels
-  before reopening. A foreign project, occupied port, remote Docker connection,
-  or orphaned data volume stops the launcher without resetting data. Unlike the
-  general launcher, Quick Start refuses remote execution entirely. See the
-  [Quick Start guide](../guides/docker-quick-start.md).
 - **Other hosted installations:** retrieve the private startup link from your
   host's private console and give it only to the intended sitter. If needed, use
   the replacement-link commands below. Boopity cannot open a browser on a remote
@@ -36,7 +27,7 @@ For an existing Docker container, the launcher starts it without rebuilding,
 pulling an update or recreating it. It is not an upgrade tool. If you removed the
 container but kept its data, follow the [upgrade guide](../guides/operations.md)
 before building or selecting a different image. Windows users can use the manual
-Compose and private-link commands below; the double-click launcher is macOS-only.
+Compose and private-link commands below.
 
 ## Optional setup-password fallback
 

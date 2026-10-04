@@ -127,9 +127,8 @@ From the source directory:
 sh scripts/start-docker.sh
 ```
 
-This macOS/Linux launcher waits for Boopity to start, then opens the private link
-in your computer's browser. On macOS you can instead double-click
-`scripts/Start-Boopity.command` with Docker running. Rerun the launcher to reopen
+This macOS/Linux command waits for Boopity to start, then opens the private link
+in your computer's browser. Rerun the command to reopen
 setup; saved details stay, but earlier setup links and sessions are replaced.
 Once setup is complete, it opens normal sign-in. It starts an existing container
 without rebuilding or updating it. Follow the [upgrade guide](operations.md)

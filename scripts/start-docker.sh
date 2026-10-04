@@ -4,25 +4,14 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$root"
 file=compose.yaml
-quick_start=false
 case "${1:-}" in
   "") ;;
   --image) file=compose.image.yaml ;;
-  --quick-start) file=compose.image.yaml; quick_start=true ;;
-  *) printf '%s\n' 'Usage: sh scripts/start-docker.sh [--image|--quick-start]' >&2; exit 1 ;;
+  *) printf '%s\n' 'Usage: sh scripts/start-docker.sh [--image]' >&2; exit 1 ;;
 esac
 [ "$#" -le 1 ] || exit 1
-if [ "$quick_start" = true ]; then
-  # Only the generated download contains this configuration and helper.
-  . "$root/scripts/install/quick-start-checks.sh"
-  quick_start_runtime
-fi
 compose() {
-  if [ "$quick_start" = true ]; then
-    docker compose --env-file /dev/null --project-name "$quick_project" --project-directory "$root" -f "$file" "$@"
-  else
-    docker compose --project-directory "$root" -f "$file" "$@"
-  fi
+  docker compose --project-directory "$root" -f "$file" "$@"
 }
 if ! docker compose version >/dev/null 2>&1; then
   printf '%s\n' 'Start Docker first, then run this launcher again.' >&2
@@ -33,7 +22,6 @@ if ! existing=$(compose ps --all --quiet boopity); then
   printf '%s\n' 'Could not reach your Boopity container. Check that Docker is running and your Compose settings are valid.' >&2
   exit 1
 fi
-if [ "$quick_start" = true ]; then quick_start_preflight; fi
 start_container() {
   if [ -n "$existing" ]; then
     # Opening the app is not an update operation. Preserve its current image/config.
@@ -45,12 +33,8 @@ start_container() {
   fi
 }
 if ! start_container; then
-  if [ "$quick_start" = true ]; then
-    printf '%s\n' 'Boopity could not start. Check Docker and your internet connection, then open Start Boopity again. If the port is in use, close the other app first. Do not delete any data volumes.' >&2
-  fi
   exit 1
 fi
-if [ "$quick_start" = true ]; then quick_start_binding; fi
 printf '%s\n' 'Opening Boopity. If setup is unfinished, this replaces earlier setup links and sessions. Saved details stay.'
 if ! entry=$(compose exec -T boopity node --input-type=module - < "$root/scripts/install/setup-entry.mjs" 2>/dev/null); then
   printf '%s\n' 'Boopity could not prepare its setup link. Check your Docker app and try again. Do not delete its data volume.' >&2
@@ -62,15 +46,8 @@ if [ "$(printf '%s\n' "$entry" | wc -l | tr -d ' ')" != 1 ] ||
   printf '%s\n' 'Boopity returned an unexpected setup link. Nothing was opened.' >&2
   exit 1
 fi
-if [ "$quick_start" = true ]; then
-  case "$entry" in
-    "http://localhost:$quick_port/app"|"http://localhost:$quick_port/setup#setup="*) ;;
-    *) printf '%s\n' 'Boopity returned an unexpected local address. Nothing was opened.' >&2; exit 1 ;;
-  esac
-fi
 opened=false
 browser_port=3000
-if [ "$quick_start" = true ]; then browser_port=$quick_port; fi
 if [ -n "${DOCKER_CONTEXT:-}" ]; then
   endpoint=$(docker context inspect "$DOCKER_CONTEXT" --format '{{.Endpoints.docker.Host}}' 2>/dev/null || true)
 else

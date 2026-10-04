@@ -5,8 +5,6 @@ the guide for what you need to do, and use a tagged release for your installatio
 
 ## Install and use Boopity
 
-- [Docker Quick Start for Mac](guides/docker-quick-start.md): launch a preconfigured
-  released image without typing commands.
 - [Installation and configuration](guides/self-hosting.md): run with Docker or
   Node on your own host.
 - [Getting started](guides/getting-started.md): complete the setup wizard and

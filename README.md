@@ -44,22 +44,17 @@ For development with live reload, see [Contributing](CONTRIBUTING.md).
 
 ## Run with Docker
 
-**On a Mac:** use the **Quick Start for Mac** ZIP attached to a release, when
-available. Unzip it, open Docker Desktop, then double-click **Start Boopity.command**
-at the top of the extracted folder. The released image is already selected;
-there are no commands or image hashes to copy. See the
-[Quick Start guide](docs/guides/docker-quick-start.md) for requirements and limits.
-
-**From a source checkout** (developers and other platforms):
+With Docker running, run this command from the source directory on macOS or Linux:
 
 ```sh
 sh scripts/start-docker.sh
 ```
 
-On macOS, you can also double-click `scripts/Start-Boopity.command` with Docker
-running. The launcher starts Boopity in the background and opens its private setup
+The command starts Boopity in the background and opens its private setup
 link locally. If a browser cannot be opened, it prints the link instead. Run the
-launcher again to reopen setup, or to open sign-in after setup is complete.
+command again to reopen setup, or to open sign-in after setup is complete.
+For manual Compose commands, including Windows, see the
+[Docker installation guide](docs/guides/self-hosting.md#start-with-docker-compose).
 
 The Compose file creates a persistent data volume, including the SQLite database;
 there is no connection string to enter. It binds the app to localhost. For a hosted installation, configure HTTPS
