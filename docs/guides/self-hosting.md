@@ -25,9 +25,11 @@ extension points, not implemented drivers. The runtime is pinned and covered by 
 ## Use your own hosting provider
 
 Choose a host you already use or one that meets the requirements above. Boopity
-does not require a particular provider, provision servers or include provider-specific
-deployment templates. You manage the hosting account; Boopity's wizard handles
-your business, email delivery, appearance and sign-in settings.
+does not require a particular provider or provision servers. An optional
+[Render template and guide](render.md) preconfigure a new installation; the
+application itself uses the same configuration contract on every host. You manage
+the hosting account; Boopity's wizard handles your business, email delivery,
+appearance and sign-in settings.
 
 1. Deploy the repository's `Dockerfile`, or build and run the Node app as shown below.
    If using a prebuilt image, use a reviewed release image pinned by digest with

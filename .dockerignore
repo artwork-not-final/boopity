@@ -23,4 +23,5 @@ tests
 backups
 .idea
 .github
+render.yaml
 *.tsbuildinfo

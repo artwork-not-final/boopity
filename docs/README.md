@@ -7,6 +7,8 @@ the guide for what you need to do, and use a tagged release for your installatio
 
 - [Installation and configuration](guides/self-hosting.md): run with Docker or
   Node on your own host.
+- [Install on Render](guides/render.md): an optional preconfigured Docker deployment
+  with persistent storage; live-host acceptance is still pending.
 - [Getting started](guides/getting-started.md): complete the setup wizard and
   return to an unfinished setup.
 - [Email setup](guides/email-setup.md): connect an email service for sign-in codes.

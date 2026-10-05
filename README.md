@@ -18,6 +18,14 @@ and follow the [installation and backup guides](docs/README.md).
 Built with React, Vite, Hono, Better Auth, Tailwind CSS and shadcn-derived components.
 Bring your own hosting: Boopity runs with Docker or Node on a host you choose.
 
+## Install without a local terminal
+
+The optional [Render installation guide](docs/guides/render.md) preconfigures the
+published Docker image, website address and persistent disk. Budget about
+US$7.25/month before extras; review Render's price before deploying. The new
+template still needs a live Render acceptance check. Other hosts remain supported
+through the [standard installation guide](docs/guides/self-hosting.md).
+
 ## Run locally
 
 Use Node 24.21.0 (see `.nvmrc`). Run these commands from the repository root:
