@@ -1,0 +1,35 @@
+# Optional Render installation. Review costs before deploying; see docs/guides/render.md.
+# Pins the reviewed Boopity 1.0.0 image, not a moving tag or a source build.
+# Also turn Blueprint Auto Sync off in Render; autoDeployTrigger does not control it.
+previews:
+  generation: off
+services:
+  - type: web
+    name: boopity
+    runtime: image
+    plan: 0.5c-512mb
+    numInstances: 1
+    autoDeployTrigger: off
+    image:
+      url: ghcr.io/artwork-not-final/boopity@sha256:a753f4e0b63cf6d89573ce41cd3b85bda171b78e1808298e9c690dc60c318ecd
+    healthCheckPath: /api/ready
+    disk:
+      name: boopity-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: APP_URL
+        fromService:
+          type: web
+          name: boopity
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: DATA_DIR
+        value: /data
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: "3000"
+      - key: NODE_ENV
+        value: production
+      - key: BOOPITY_OPEN_BROWSER
+        value: "false"

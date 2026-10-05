@@ -18,6 +18,12 @@ database connection string. Do not ask sitters to pick an access method.
   the replacement-link commands below. Boopity cannot open a browser on a remote
   sitter's computer or provision an arbitrary hosting account.
 
+The optional [Render template](../guides/render.md) wires Render's default HTTPS
+URL into `APP_URL` using a Blueprint self-reference. This is explicit deployment
+configuration, not platform detection in the application. It uses the same private
+startup link and stores generated keys on the persistent disk, without prompting
+for a setup password or provider credentials during deployment.
+
 Once an owner exists, the launcher opens `/app` for normal sign-in and does not
 issue a setup credential. Before ownership, rerunning it replaces earlier setup
 links and sessions, without clearing saved settings. These helpers use the existing
