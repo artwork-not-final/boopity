@@ -33,7 +33,11 @@ const featureDependencies: Record<string, string[]> = {
     "settings/EmailSettings",
     "settings/GoogleSettings",
   ],
-  settings: ["auth/Login", "payments/PaymentSettings"],
+  settings: [
+    "auth/Login",
+    "auth/useEmailCodeCooldown",
+    "payments/PaymentSettings",
+  ],
 };
 
 function boundaryError(from: string, target: string): string | null {

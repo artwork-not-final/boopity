@@ -34,11 +34,18 @@ export function useInstallationLifecycle({
     const providerError = new URLSearchParams(window.location.search).get(
       "error",
     );
+    if (
+      new URLSearchParams(window.location.search).get("notice") ===
+      "email_changed"
+    )
+      setMessage("Your email was changed. Sign in with your new address.");
     if (providerError)
       setError(
-        providerError === "account_not_linked"
-          ? "Sign in with an email code, then try Google with the same owner or invited client email."
-          : "Google sign-in failed. Try an email code or contact the sitter.",
+        providerError === "account_access_denied"
+          ? "This Google account doesn’t have access. Try another Google account or sign in with an email code."
+          : providerError === "account_not_linked"
+            ? "Sign in with an email code, then try Google with the same owner or invited client email."
+            : "Google sign-in failed. Try an email code or contact the sitter.",
       );
     // Remove private fragments before any requests. Keep setup credentials only
     // in memory until explicit confirmation, never in storage or callback URLs.
@@ -65,7 +72,7 @@ export function useInstallationLifecycle({
       }
       await refreshLatest();
     })().catch(reportLatest);
-  }, [hasSetupLink, invalidSetupLink, inviteToken, setError]);
+  }, [hasSetupLink, invalidSetupLink, inviteToken, setError, setMessage]);
   useEffect(() => {
     // Opening a new fragment on this same page does not remount React. Handle
     // that navigation too, removing the credential before updating the UI.

@@ -216,12 +216,18 @@ try {
       `/api/auth/callback/google?code=synthetic&state=${encodeURIComponent(url.searchParams.get("state")!)}`,
     );
     assert.equal(callback.status, expectedStatus);
+    return callback;
   };
   await googleSignIn(owner);
   assert.equal((await owner("/api/owner/session")).status, 200);
   googleEmail = "stranger@example.test";
   const stranger = browser();
-  await googleSignIn(stranger, 403);
+  const denied = await googleSignIn(stranger, 303);
+  assert.equal(
+    denied.headers.get("Location"),
+    "/login?error=account_access_denied",
+  );
+  assert.equal(await denied.text(), "");
   assert.equal((await stranger("/api/owner/session")).status, 401);
   assert.equal(
     runtime.db.connection.prepare("SELECT COUNT(*) AS n FROM user").get()?.n,

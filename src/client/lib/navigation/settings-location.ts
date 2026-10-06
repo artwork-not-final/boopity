@@ -1,5 +1,6 @@
 import { readWorkspaceLocation, workspaceHref } from "./workspace-location";
 export const sections = [
+  { id: "account", label: "Your account", title: "Your account" },
   { id: "appearance", label: "Appearance", title: "Business" },
   { id: "email", label: "Email delivery", title: "Email delivery" },
   { id: "google", label: "Google sign-in", title: "Google sign-in" },

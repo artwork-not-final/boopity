@@ -36,7 +36,7 @@ src/client/
     services/            Services and rates
     payments/            Payment activity, booking payments, provider settings
     rules/               Client portal and availability rules
-    settings/            Business, email, Google, and settings composition
+    settings/            Account, business, email, Google, and settings composition
   components/
     ui/                  Customized shadcn-derived primitives
     forms/               Field, Choice, search and form sections
@@ -68,7 +68,8 @@ There are a few explicit cross-feature composition points:
 
 - Bookings use client/pet and service types, the species label, and booking payments.
 - Setup uses the sign-in flow and the business/email/Google settings forms.
-- Settings compose sign-in recovery and payment settings.
+- Settings compose sign-in recovery and payment settings, and reuse the sign-in
+  code cooldown for verified account-email changes.
 
 The allowlist in `tests/tooling/architecture.test.ts` documents exact modules.
 Review new dependencies rather than broadening the rule to allow entire folders.

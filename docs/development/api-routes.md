@@ -16,7 +16,19 @@ inventory must change deliberately when a route is added or removed.
 - `/api/auth/*` below is a dispatcher, not unrestricted Better Auth access. Its
   allowlist in `server/auth/routes.ts` permits session lookup (GET/POST), sign-out,
   sending/verifying sign-in email codes, Google redirect sign-in and its callback.
-  Password registration/reset, email changes and raw OTP lookup remain closed.
+  Password registration/reset, Better Auth's generic email-change endpoints and
+  raw OTP lookup remain closed. Failed Google browser callbacks return to the
+  same-origin sign-in page with an allowlisted error code, never raw provider JSON.
+- `/api/account/email` is owner-only after setup. A session-bound request sends
+  distinct five-minute codes to the current and proposed inboxes. Both proofs,
+  current ownership, session validity and target-email availability are checked
+  before a transactional update. Digests are keyed, attempts are bounded, resends
+  rotate the challenge without resetting the shared attempt budget, and failed
+  delivery invalidates the request. Changes preserve the owner's ID and business
+  records, revoke owner sessions and Google links, and invalidate operator access.
+  The supported single-process SQLite runtime serializes auth writes and account
+  mutations before loading bindings so in-flight callbacks cannot recreate revoked
+  sessions or provider links. This is not a multi-process deployment guarantee.
 - `/api/business/*` requires a verified, active owner or admitted client and a
   completed installation. `/owner/*` adds an owner check. Shared booking/payment
   handlers enforce role and household ownership within the handler/service.
@@ -45,12 +57,16 @@ HEAD /api/ready
 ### Setup, owner settings and authentication
 
 ```text
+DELETE /api/account/email
 DELETE /api/setup/logo
+GET /api/account/email
 GET /api/auth/*
 GET /api/owner/session
 GET /api/setup/entry
 GET /api/setup/status
 POST /api/auth/*
+POST /api/account/email
+POST /api/account/email/confirm
 POST /api/setup/complete
 POST /api/setup/identity
 POST /api/setup/lock

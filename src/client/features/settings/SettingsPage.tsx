@@ -10,6 +10,7 @@ import { EmailSettings } from "./EmailSettings";
 import { GoogleSettings } from "./GoogleSettings";
 import { ActionFeedbackProvider } from "../../components/feedback/ActionFeedback";
 import type { ActionFeedback } from "../../lib/types/action-feedback";
+import { AccountSettings } from "./AccountSettings";
 
 export function SettingsPage({
   section,
@@ -50,6 +51,14 @@ export function SettingsPage({
         dismissMessage={dismissMessage}
         error={error}
       >
+        {section === "account" && setup.owner && (
+          <AccountSettings
+            owner={setup.owner}
+            onEmailChanged={() =>
+              window.location.assign("/login?notice=email_changed")
+            }
+          />
+        )}
         {section === "appearance" && (
           <Appearance
             key={setup.version}
