@@ -57,6 +57,7 @@ export type AppVariables = {
   requestId: string;
   userName: string;
   userEmail: string;
+  accountSessionId: string;
 };
 
 export type AppEnv = {

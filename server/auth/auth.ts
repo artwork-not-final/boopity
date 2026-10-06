@@ -74,6 +74,7 @@ function buildAuth(env: Bindings) {
           google: {
             clientId: env.GOOGLE_CLIENT_ID,
             clientSecret: env.GOOGLE_CLIENT_SECRET,
+            prompt: "select_account" as const,
           },
         }
       : undefined;
@@ -202,6 +203,7 @@ function buildAuth(env: Bindings) {
               if (!user || !(await canAuthenticate(env, user.email)))
                 throw new APIError("FORBIDDEN", {
                   message: "This account cannot sign in to this installation.",
+                  code: "ACCOUNT_ACCESS_DENIED",
                 });
             }
           },
@@ -217,6 +219,7 @@ function buildAuth(env: Bindings) {
             ) {
               throw new APIError("FORBIDDEN", {
                 message: "This account cannot join this installation.",
+                code: "ACCOUNT_ACCESS_DENIED",
               });
             }
           },

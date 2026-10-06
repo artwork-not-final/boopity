@@ -18,6 +18,9 @@ import { invitationRoutes } from "../business/invitations";
 import { expireRequests } from "../business/bookings";
 import { PaymentService } from "../payments/service";
 import { paymentMode } from "../../src/shared/payments";
+import { googleCallbackErrors } from "../auth/google-callback";
+import { accountRoutes } from "../auth/account-routes";
+import { accountMutationLock } from "../auth/account-lock";
 
 const assetTypes: Record<string, string> = {
   js: "text/javascript; charset=utf-8",
@@ -36,6 +39,7 @@ export function createNodeApp(
   paymentOverride?: PaymentService,
 ) {
   const app = new Hono<AppEnv>();
+  app.use("/api/auth/callback/google", googleCallbackErrors);
   app.use("*", async (c, next) => {
     const requestId = crypto.randomUUID();
     c.set("requestId", requestId);
@@ -81,7 +85,6 @@ export function createNodeApp(
       await next();
       return;
     }
-    c.env = control ? await control.bindings() : env;
     const ip = c.req.header("cf-connecting-ip") ?? "local";
     if (!(await env.API_RATE_LIMITER!.limit({ key: `node:${ip}` })).success) {
       c.header("Retry-After", "60");
@@ -132,6 +135,15 @@ export function createNodeApp(
         c.json({ error: "Request is too large (2 MB maximum)." }, 413),
     }),
   );
+  // Reject bad origins, throttled requests and oversized bodies before they can
+  // queue behind authentication. Load fresh bindings only after taking the lock.
+  if (control) app.use("*", accountMutationLock(env.DB));
+  app.use("*", async (c, next) => {
+    const readinessProbe =
+      ["GET", "HEAD"].includes(c.req.method) && c.req.path === "/api/ready";
+    if (control && !readinessProbe) c.env = await control.bindings();
+    await next();
+  });
   app.onError(handleRequestError);
   app.on(["GET", "HEAD"], "/api/ready", async (c) => {
     await env.DB.prepare("SELECT 1").first();
@@ -162,6 +174,7 @@ export function createNodeApp(
     });
   });
   if (control) {
+    app.route("/api/account", accountRoutes());
     app.route("/api", setupRoutes(control));
     app.route("/api/portal", invitationRoutes());
     app.route("/api/business", businessRoutes(payments, control.payments));

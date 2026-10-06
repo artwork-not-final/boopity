@@ -14,6 +14,7 @@ import { App } from "../../src/client/app/App";
 import { Appearance } from "../../src/client/features/settings/Appearance";
 import { EmailSettings } from "../../src/client/features/settings/EmailSettings";
 import { GoogleSettings } from "../../src/client/features/settings/GoogleSettings";
+import { AccountSettings } from "../../src/client/features/settings/AccountSettings";
 import { Identity } from "../../src/client/features/setup/Identity";
 import { Login } from "../../src/client/features/auth/Login";
 import { GuidedClaim } from "../../src/client/features/setup/GuidedClaim";
@@ -210,6 +211,115 @@ function installation(
     throw new Error(`Unexpected request: ${url}`);
   };
 }
+
+it("shows a friendly Google access error with both sign-in options", async () => {
+  window.history.replaceState(null, "", "/login?error=account_access_denied");
+  installation(null, true);
+  await mount(createElement(App));
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+    "This Google account doesn’t have access.",
+  );
+  expect(button("Continue with Google")).toBeDefined();
+  expect(button("Send code")).toBeDefined();
+  expect(container.textContent).not.toContain("ACCOUNT_ACCESS_DENIED");
+});
+
+it("explains signing back in after a confirmed email change", async () => {
+  window.history.replaceState(null, "", "/login?notice=email_changed");
+  installation(null, true);
+  await mount(createElement(App));
+  expect(container.textContent).toContain(
+    "Your email was changed. Sign in with your new address.",
+  );
+});
+
+it("verifies both inboxes in account settings, then navigates only after server confirmation", async () => {
+  const id = "00000000-0000-4000-8000-000000000010";
+  const pending = {
+    id,
+    newEmail: "new@example.test",
+    expiresAt: Date.now() + 300_000,
+  };
+  const complete = vi.fn();
+  respond = (url, init) => {
+    if (url === "/api/account/email")
+      return Response.json(
+        init?.method === "POST" ? pending : { pending: null },
+      );
+    if (url === "/api/account/email/confirm")
+      return Response.json({ ok: true });
+    throw new Error(`Unexpected request: ${url}`);
+  };
+  await mount(
+    createElement(AccountSettings, {
+      owner: { name: "Owner", email: "owner@example.test" },
+      onEmailChanged: complete,
+    }),
+  );
+  expect(container.textContent).toContain("owner@example.test");
+  await enter("New email", "new@example.test");
+  await submit();
+  expect(container.textContent).toContain("Check both inboxes");
+  expect(container.textContent).toContain("new@example.test");
+  expect(button("Confirm email change").disabled).toBe(true);
+  await enter("Code from your current email", "123456");
+  expect(button("Confirm email change").disabled).toBe(true);
+  await enter("Code from your new email", "654321");
+  await submit();
+  expect(body(requests.length - 1)).toEqual({
+    id,
+    currentCode: "123456",
+    newCode: "654321",
+  });
+  expect(complete).toHaveBeenCalledTimes(1);
+  expect(window.localStorage.length).toBe(0);
+  expect(window.sessionStorage.length).toBe(0);
+});
+
+it("restores a pending change on reload and keeps invalid codes on the form for correction", async () => {
+  const pending = {
+    id: "00000000-0000-4000-8000-000000000010",
+    newEmail: "new@example.test",
+    expiresAt: Date.now() + 300_000,
+  };
+  const complete = vi.fn();
+  respond = (url, init) =>
+    url.endsWith("/confirm")
+      ? Response.json({ error: "Check both codes." }, { status: 400 })
+      : Response.json(init?.method === "DELETE" ? { ok: true } : { pending });
+  await mount(
+    createElement(AccountSettings, {
+      owner: { name: "Owner", email: "owner@example.test" },
+      onEmailChanged: complete,
+    }),
+  );
+  await enter("Code from your current email", "123456");
+  await enter("Code from your new email", "654321");
+  await submit();
+  expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+    "Check both codes.",
+  );
+  expect(input("Code from your current email").value).toBe("123456");
+  expect(complete).not.toHaveBeenCalled();
+  await click("Cancel change");
+  expect(container.textContent).toContain("Change your email");
+  expect(container.textContent).not.toContain("Check both inboxes");
+});
+
+it("shows the account settings route inside the ordinary settings shell", async () => {
+  window.history.replaceState(null, "", "/app/settings/account");
+  installation(state(true), true);
+  const original = respond;
+  respond = (url, init) =>
+    url === "/api/account/email"
+      ? Response.json({ pending: null })
+      : original(url, init);
+  await mount(createElement(App));
+  expect(container.querySelector("h1")?.textContent).toBe("Settings");
+  expect(container.querySelector("h2")?.textContent).toBe("Your account");
+  expect(container.textContent).toContain("Change your email");
+  expect(window.location.pathname).toBe("/app/settings/account");
+});
 
 it("focuses the initial setup heading after the lazy wizard loads without stealing focus on refresh", async () => {
   window.history.replaceState(null, "", "/setup/account");

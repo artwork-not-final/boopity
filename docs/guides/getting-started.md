@@ -62,6 +62,22 @@ Use normal email-code or Google sign-in from then on. Initial setup links and
 passwords cannot reopen ownership. Settings stay separate from setup. If your
 installer supplied a setup password, ask them to remove it from the hosting settings.
 
+## Change your account email
+
+Open **Settings → Your account**, enter your new email, and select **Send
+verification codes**. Enter the separate codes from your current and new inboxes,
+then confirm. Both codes expire after five minutes; resending replaces both.
+Your current email stays active until the change succeeds.
+
+You will be signed out on all devices. Sign back in with a code sent to your new
+email, or with Google using that same address. The old Google connection is removed;
+your clients, pets, bookings and payments stay with your account. **Email delivery**
+settings control outgoing messages, not your sign-in address.
+
+If you cannot access your current inbox, ask your installer to use
+[account recovery](../development/installer-access.md) instead. Do not delete the
+installation or create a replacement owner.
+
 ## Installing on your own computer?
 
 Follow [the local installation instructions](self-hosting.md#start-locally).

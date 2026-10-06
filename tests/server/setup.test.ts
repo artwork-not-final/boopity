@@ -1745,6 +1745,7 @@ describe("secure first-run setup", () => {
       });
       expect(start.status).toBe(200);
       const url = new URL((await start.json()).url);
+      expect(url.searchParams.get("prompt")).toBe("select_account");
       expect(url.searchParams.get("redirect_uri")).toBe(
         origin + "/api/auth/callback/google",
       );
@@ -1782,7 +1783,12 @@ describe("secure first-run setup", () => {
     });
     googleEmail = "stranger@example.test";
     const stranger = f.browser();
-    await signin(stranger);
+    const denied = await signin(stranger);
+    expect(denied.headers.get("Location")).toBe(
+      "/login?error=account_access_denied",
+    );
+    expect(denied.status).toBe(303);
+    expect(await denied.text()).toBe("");
     expect((await stranger.request("/api/owner/session")).status).toBe(401);
     expect(
       await f.db.prepare("SELECT COUNT(*) AS n FROM user").first(),
@@ -1792,7 +1798,10 @@ describe("secure first-run setup", () => {
         "INSERT INTO user(id,name,email,email_verified,created_at,updated_at) VALUES ('stranger','Stranger','stranger@example.test',1,0,0)",
       )
       .run();
-    await signin(stranger);
+    const deniedAgain = await signin(stranger);
+    expect(deniedAgain.headers.get("Location")).toBe(
+      "/login?error=account_access_denied",
+    );
     expect((await stranger.request("/api/owner/session")).status).toBe(401);
     expect(
       await f.db
@@ -1807,6 +1816,38 @@ describe("secure first-run setup", () => {
         })
       ).status,
     ).toBe(403);
+    // Changing the owner email removes the old Google binding. Only the newly
+    // verified address may subsequently establish a Google session for this ID.
+    f.db.connection.exec("UPDATE installation SET setup_state='ready'");
+    const ownerId = (await f.control.owner())!.id;
+    const change = await client.request("/api/account/email", "POST", {
+      email: "replacement@example.test",
+    });
+    expect(change.status).toBe(200);
+    const pending = await change.json();
+    const inboxCode = (email: string) =>
+      delivered
+        .filter((mail) => mail.to === email)
+        .at(-1)!
+        .html.match(/<strong>(\d{6})<\/strong>/)![1];
+    expect(
+      (
+        await client.request("/api/account/email/confirm", "POST", {
+          id: pending.id,
+          currentCode: inboxCode(address),
+          newCode: inboxCode("replacement@example.test"),
+        })
+      ).status,
+    ).toBe(200);
+    googleEmail = address;
+    expect((await signin(f.browser())).headers.get("Location")).toBe(
+      "/login?error=account_access_denied",
+    );
+    googleEmail = "replacement@example.test";
+    const replacement = f.browser();
+    expect((await signin(replacement)).status).toBe(302);
+    expect((await replacement.request("/api/owner/session")).status).toBe(200);
+    expect((await f.control.owner())!.id).toBe(ownerId);
   });
   it("uses recovery only to repair settings, never to finish setup or impersonate the owner", async () => {
     const f = make(),

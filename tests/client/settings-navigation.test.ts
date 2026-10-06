@@ -22,14 +22,17 @@ describe("post-installation settings", () => {
     const wizard = renderToStaticMarkup(createElement(EmailSetupGuide));
     expect(wizard).toContain("Verify your inbox");
   });
-  it.each<SettingsSection>(["appearance", "email", "google", "payments"])(
-    "keeps the %s section in a reloadable URL",
-    (section) => {
-      const path = settingsPath(section);
-      expect(ownerDestination(path)).toEqual({ path, section });
-      expect(ownerDestination(`${path}/`)).toEqual({ path, section });
-    },
-  );
+  it.each<SettingsSection>([
+    "account",
+    "appearance",
+    "email",
+    "google",
+    "payments",
+  ])("keeps the %s section in a reloadable URL", (section) => {
+    const path = settingsPath(section);
+    expect(ownerDestination(path)).toEqual({ path, section });
+    expect(ownerDestination(`${path}/`)).toEqual({ path, section });
+  });
   it.each(["/app/settings", "/app/settings/", "/app/settings/unknown"])(
     "defaults %s to appearance",
     (path) => {
@@ -54,7 +57,13 @@ describe("post-installation settings", () => {
       });
     },
   );
-  it.each<SettingsSection>(["appearance", "email", "google", "payments"])(
+  it.each<SettingsSection>([
+    "account",
+    "appearance",
+    "email",
+    "google",
+    "payments",
+  ])(
     "renders %s as ordinary settings, without first-run controls",
     (section) => {
       const html = renderToStaticMarkup(
@@ -66,7 +75,7 @@ describe("post-installation settings", () => {
         }),
       );
       expect(html).toContain('aria-label="Settings categories"');
-      expect(html.match(/data-variant="tab-line"/g)).toHaveLength(4);
+      expect(html.match(/data-variant="tab-line"/g)).toHaveLength(5);
       expect(html).toContain('aria-current="page"');
       expect(html).not.toContain("Back to workspace");
       expect(html).not.toContain("<aside");

@@ -48,6 +48,7 @@ export function largeListFixture(
       if (
         ![
           "owner@example.test",
+          "new-owner@example.test",
           "alice@example.test",
           "bob@example.test",
         ].includes(message.to)
