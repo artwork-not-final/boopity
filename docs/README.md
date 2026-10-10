@@ -23,6 +23,7 @@ the guide for what you need to do, and use a tagged release for your installatio
 
 ## Prepare a release
 
+- [Boopity 1.0.2](releases/setup-transition-patch.md): setup transitions and Sharp security patch.
 - [Release checklist](releases/releasing.md): validation and publication requirements.
 - [Container review](releases/container-review.md): image findings, historical
   checks, and remaining release limits.
