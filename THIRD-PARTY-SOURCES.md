@@ -21,17 +21,17 @@ The archive must contain:
   and a SHA-256 manifest covering every companion file.
 - Original Debian source packages (`.dsc`, upstream archives, Debian patches and
   packaging/build rules) for every installed source/version pair, with the signed
-  repository indexes used by APT. Both current architectures use the same 56
-  source/version pairs. Installed copyright files and common licenses are retained.
+  repository indexes used by APT. The exact source/version pairs are recorded
+  per image. Installed copyright files and common licenses are retained.
 - Node 24.21.0's complete source archive, its upstream checksum list, Node's
   combined notice, and the pinned Docker Node build recipe. Node's embedded
   dependencies and build instructions are in that source archive.
 - Lockfile-integrity-verified npm package archives for the union of installed
   ARM64/AMD64 packages and browser/CSS dependencies, plus missing-notice supplements.
   These are upstream packages, not a claim that every npm file is preferred source.
-- Sharp 0.35.4 source and sharp-libvips 1.3.3 build scripts, platform toolchain files,
+- Sharp 0.35.5 source and sharp-libvips 1.3.4 build scripts, platform toolchain files,
   version inventory, external patches, each native dependency's source archive,
-  and the 350 registry crate sources/checksums in librsvg 2.62.91's Cargo.lock.
+  and all registry crate sources/checksums in librsvg 2.63.2's Cargo.lock.
 
 The native collection includes GLib's bundled GVDB and libvips' bundled libnsgif.
 It includes a conservative superset (for example proxy-libintl, which the glibc
@@ -42,9 +42,10 @@ Do not infer which features are active from the source archive count alone.
 
 Boopity does not patch the upstream native binaries installed by the npm lockfile.
 The upstream sharp-libvips recipe **does** modify its dependencies: retain its
-complete `build/posix.sh`, platform configuration, inline edits and these four
-external patches: GLib without GRegex, mozjpeg's pinned commit patch, libultrahdr
-PR 383 and the libvips C++ SONAME patch. Preserve the downloaded patch bytes and
+complete `build/posix.sh`, platform configuration, inline edits and these five
+external patches: GLib without GRegex, mozjpeg's pinned commit patch, librsvg's
+embedded-image memory-limit patch, libultrahdr PR 383 and the libvips C++ SONAME
+patch. Preserve the downloaded patch bytes and
 checksums rather than relying on a mutable pull-request URL.
 
 The Linux recipe statically combines native dependencies into `libvips-cpp.so`
@@ -82,7 +83,7 @@ or signature check preventing replacement. Read-only runtime files protect an
 installation; they do not prevent building a derivative image.
 
 The shared library is at
-`/app/node_modules/@img/sharp-libvips-linux-ARCH/lib/libvips-cpp.so.8.18.6`, where
+`/app/node_modules/@img/sharp-libvips-linux-ARCH/lib/libvips-cpp.so.8.18.7`, where
 ARCH is `arm64` or `x64`. Inspect the exact image inventory for the filename.
 Rebuild the combined library with the recorded ABI/SONAME, then copy it into a new
 image based on the reviewed image. Keep the final `USER node`, ownership and
@@ -94,7 +95,7 @@ The original [LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.html),
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html) and
 [MPL executable-distribution terms](https://www.mozilla.org/en-US/MPL/2.0/)
 govern where applicable. Cairo's source retains its original LGPL-2.1/MPL-1.1
-choices; sharp-libvips' notice identifies its use under MPL-2.0. Both original
+choices; sharp-libvips 1.3.4's notice identifies its use under MPL-1.1. Original
 texts and provenance are retained rather than rewriting upstream notices.
 
 ## Updating the materials

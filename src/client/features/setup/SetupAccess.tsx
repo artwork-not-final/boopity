@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Login } from "../auth/Login";
+import { LoadingState } from "../../components/feedback/LoadingState";
 import { GuidedClaim } from "./GuidedClaim";
 import { HostingSetupHelp } from "./HostingSetupHelp";
 import { SetupPasswordLogin } from "./SetupPasswordLogin";
@@ -46,6 +48,7 @@ export function SetupAccess({
   afterClaim: () => void;
   clearFeedback: () => void;
 }) {
+  const [unlocking, setUnlocking] = useState(false);
   const help = setupHelpFromPath(
     new URL(useLocalLocation(), "http://localhost").pathname,
   );
@@ -55,6 +58,17 @@ export function SetupAccess({
     clearFeedback();
     navigateLocal(setupHelpPath(next));
   }
+  async function unlock(...args: Parameters<Run>) {
+    setUnlocking(true);
+    try {
+      // The consumed link is cleared immediately, but the session snapshot
+      // must finish refreshing before we choose another access screen.
+      await run(...args);
+    } finally {
+      setUnlocking(false);
+    }
+  }
+  if (unlocking) return <LoadingState label="Starting setup…" />;
   return (
     <div className="grid w-full max-w-md gap-4">
       {view === "owner" ? (
@@ -79,7 +93,7 @@ export function SetupAccess({
             returning={started}
             manualCode={view === "code"}
             busy={busy}
-            run={run}
+            run={view === "link" ? unlock : run}
             linkToken={linkToken}
             clearLink={clearLink}
           />

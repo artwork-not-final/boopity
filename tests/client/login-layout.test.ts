@@ -163,7 +163,7 @@ describe("standalone sign-in layout", () => {
       "const showingAccountPage = showingInvitation || showingSignIn;",
     );
     expect(source).toContain(
-      "const centeredEntryPage = showingAccountPage || showingSetupEntry;",
+      "const centeredEntryPage = !info || showingAccountPage || showingSetupEntry;",
     );
     const html = renderToStaticMarkup(
       createElement(BrandLayout, {
