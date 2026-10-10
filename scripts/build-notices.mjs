@@ -47,10 +47,9 @@ export function packageNotices(root, directory) {
     text +=
       "\n\n" +
       readFileSync(join(root, "licenses", supplements[key]), "utf8").trim();
-  if (
-    /^@img\/sharp-libvips-linux-(?:arm64|x64)$/.test(pkg.name) &&
-    pkg.version === "1.3.3"
-  ) {
+  if (/^@img\/sharp-libvips-linux-(?:arm64|x64)$/.test(pkg.name)) {
+    if (!["1.3.3", "1.3.4"].includes(pkg.version))
+      throw new Error(`Unreviewed native license version: ${key}`);
     text += "\n\n" + readFileSync(join(directory, "README.md"), "utf8").trim();
     text +=
       "\n\n" +

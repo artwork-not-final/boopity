@@ -99,4 +99,48 @@ describe("distribution notices", () => {
     );
     expect(text("sharp-libvips-build.txt")).toContain("Apache License");
   });
+  it.each(["1.3.3", "1.3.4"])(
+    "includes LGPL terms and replacement guidance for native library %s",
+    (version) => {
+      const root = fixture();
+      const path = join(root, "node_modules", "native-fixture");
+      mkdirSync(path);
+      mkdirSync(join(root, "licenses"));
+      writeFileSync(
+        join(path, "package.json"),
+        JSON.stringify({ name: "@img/sharp-libvips-linux-x64", version }),
+      );
+      writeFileSync(join(path, "README.md"), "Native replacement guidance");
+      writeFileSync(join(path, "LICENSE"), "Original native notices");
+      for (const name of ["sharp-libvips-LGPL.txt", "GPL-3.0.txt"])
+        writeFileSync(
+          join(root, "licenses", name),
+          readFileSync(new URL(`../../licenses/${name}`, import.meta.url)),
+        );
+      const result = packageNotices(root, path);
+      for (const expected of [
+        "Native replacement guidance",
+        "Original native notices",
+        "GNU LESSER GENERAL PUBLIC LICENSE",
+        "GNU GENERAL PUBLIC LICENSE",
+      ])
+        expect(result.text).toContain(expected);
+    },
+  );
+  it("requires a notice review before shipping a new native library version", () => {
+    const root = fixture();
+    const path = join(root, "node_modules", "native-fixture");
+    mkdirSync(path);
+    writeFileSync(
+      join(path, "package.json"),
+      JSON.stringify({
+        name: "@img/sharp-libvips-linux-arm64",
+        version: "99.0.0",
+      }),
+    );
+    writeFileSync(join(path, "LICENSE"), "Original native notices");
+    expect(() => packageNotices(root, path)).toThrow(
+      "Unreviewed native license version",
+    );
+  });
 });
