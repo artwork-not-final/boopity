@@ -6,8 +6,7 @@ import { useInstallationLifecycle } from "./useInstallationLifecycle";
 import { lazy, Suspense, useEffect, useState, useRef } from "react";
 
 import { Button } from "../components/ui/button";
-import { Notice } from "../components/feedback/Notice";
-import { Card, CardContent } from "../components/ui/card";
+import { LoadingState } from "../components/feedback/LoadingState";
 import { defaultBranding, type Branding } from "../../shared/branding";
 
 import { InvitationWelcome } from "../features/auth/InvitationWelcome";
@@ -144,6 +143,7 @@ export function App() {
   }
   async function retryConnection() {
     setBusy(true);
+    setRefreshError("");
     try {
       await refresh();
     } catch (error) {
@@ -278,8 +278,8 @@ export function App() {
   const showingSetupEntry = Boolean(
     info && !info.ownerClaimed && !access && !setup && !recovery,
   );
-  const centeredEntryPage = showingAccountPage || showingSetupEntry;
-  const displayedError = error || refreshError;
+  const centeredEntryPage = !info || showingAccountPage || showingSetupEntry;
+  const displayedError = (!info && refreshError) || error || refreshError;
   return (
     <BrandLayout
       active={active}
@@ -297,7 +297,7 @@ export function App() {
       busy={busy}
       onSignOut={logout}
     >
-      {!inWorkspace && !setup && !showingAccountPage && (
+      {info && !inWorkspace && !setup && !showingAccountPage && (
         <div
           className={
             showingSetupEntry
@@ -320,10 +320,10 @@ export function App() {
         !(ownerReady && destination.section) && (
           <div
             role="alert"
-            className={`mb-5 rounded-xl border border-destructive/30 bg-card p-4 text-sm text-destructive${showingSetupEntry ? " w-full max-w-md break-words" : ""}`}
+            className={`mb-5 rounded-xl border border-destructive/30 bg-card p-4 text-sm text-destructive${centeredEntryPage ? " w-full max-w-md break-words" : ""}`}
           >
             {displayedError}
-            {!error && refreshError && info && (
+            {refreshError && (!error || !info) && (
               <Button
                 type="button"
                 variant="outline"
@@ -345,27 +345,11 @@ export function App() {
           />
         </div>
       )}
-      <Suspense
-        fallback={
-          <p role="status" className="py-6 text-sm text-muted-foreground">
-            Loading page…
-          </p>
-        }
-      >
+      <Suspense fallback={<LoadingState />}>
         {!info ? (
-          <Card>
-            <CardContent className="py-6">
-              <p>Checking your installation…</p>
-              <Button
-                className="mt-4"
-                variant="outline"
-                disabled={busy}
-                onClick={() => void retryConnection()}
-              >
-                Retry connection
-              </Button>
-            </CardContent>
-          </Card>
+          refreshError ? null : (
+            <LoadingState />
+          )
         ) : access?.role === "client" ? (
           <Workspace
             key={access.user.email}
@@ -401,7 +385,7 @@ export function App() {
               after={leaveInstallerAccess}
             />
           ) : entry === null ? (
-            <Notice>Checking setup…</Notice>
+            <LoadingState />
           ) : recovery ? (
             <div className="grid max-w-xl gap-4">
               <Unlock

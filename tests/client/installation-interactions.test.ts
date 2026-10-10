@@ -212,6 +212,65 @@ function installation(
   };
 }
 
+it.each(["/login", "/app/bookings", "/setup"])(
+  "shows only a centered loader while the initial session loads at %s",
+  async (path) => {
+    window.history.replaceState(null, "", path);
+    installation(state(true), true);
+    const healthy = respond;
+    const pending = deferredResponse();
+    respond = (url, init) =>
+      url === "/api/setup/status" ? pending.promise : healthy(url, init);
+    await mount(createElement(App));
+    expect(container.querySelector('[role="status"]')?.textContent).toBe(
+      "Loading…",
+    );
+    expect(container.querySelector("main")?.className).toContain(
+      "items-center justify-center",
+    );
+    expect(container.querySelector("h1")).toBeNull();
+    expect(container.querySelector("button")).toBeNull();
+    expect(container.textContent).not.toMatch(/installation|Set up|Sign in/);
+
+    await act(async () => pending.resolve(Response.json(state(true))));
+    await act(async () => vi.dynamicImportSettled());
+    expect(container.textContent).toContain("Test workspace");
+    expect(container.querySelector('[role="status"]')).toBeNull();
+    expect(window.location.pathname).toBe("/app/bookings");
+  },
+);
+
+it("offers retry only after an initial connection failure and loads neutrally during retry", async () => {
+  installation(state(true), true);
+  const healthy = respond;
+  respond = () => {
+    throw new TypeError("Failed to fetch");
+  };
+  await mount(createElement(App));
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+    "We couldn’t connect to Boopity. Please try again.",
+  );
+  expect(container.querySelector('[role="status"]')).toBeNull();
+  expect(container.querySelector("h1")).toBeNull();
+  expect(button("Retry connection").disabled).toBe(false);
+
+  const pending = deferredResponse();
+  respond = (url, init) =>
+    url === "/api/installation" ? pending.promise : healthy(url, init);
+  await click("Retry connection");
+  expect(container.querySelector('[role="alert"]')).toBeNull();
+  expect(container.querySelector('[role="status"]')?.textContent).toBe(
+    "Loading…",
+  );
+  expect(container.querySelector("button")).toBeNull();
+  await act(async () => pending.resolve(Response.json(info(true))));
+  await act(async () => vi.dynamicImportSettled());
+  expect(container.textContent).toContain("Test workspace");
+  expect(
+    requests.every(({ init }) => !init?.method || init.method === "GET"),
+  ).toBe(true);
+});
+
 it("shows a friendly Google access error with both sign-in options", async () => {
   window.history.replaceState(null, "", "/login?error=account_access_denied");
   installation(null, true);
@@ -1307,6 +1366,124 @@ it("scrubs a private setup link before bootstrap requests and never unlocks with
     token,
     kind: "setup",
   });
+});
+
+it("keeps the setup transition visible through unlock and the session refresh", async () => {
+  const token = "b".repeat(43);
+  window.history.replaceState(null, "", `/setup#setup=${token}`);
+  installation(null);
+  const healthy = respond;
+  const unlock = deferredResponse();
+  const status = deferredResponse();
+  let unlocking = false;
+  respond = (url, init) => {
+    if (url === "/api/setup/entry")
+      return Response.json({ mode: "token", started: false });
+    if (url === "/api/setup/unlock") {
+      unlocking = true;
+      return unlock.promise;
+    }
+    if (url === "/api/setup/status" && unlocking) return status.promise;
+    return healthy(url, init);
+  };
+  await mount(createElement(App));
+  await click("Start setup");
+  function expectStarting() {
+    expect(container.querySelector('[role="status"]')?.textContent).toBe(
+      "Starting setup…",
+    );
+    expect(container.textContent).not.toMatch(
+      /Open Boopity from your installer|Your account/,
+    );
+    expect(container.querySelector("form")).toBeNull();
+    expect(container.textContent).not.toContain(token);
+    expect(window.location.hash).toBe("");
+  }
+  expectStarting();
+  await act(async () => unlock.resolve(Response.json({ ok: true })));
+  expectStarting();
+  expect(
+    requests.filter(({ url }) => url === "/api/setup/status"),
+  ).toHaveLength(2);
+  const fresh = state();
+  fresh.pending = { name: null, email: null, mailVerifiedAt: null };
+  await act(async () => status.resolve(Response.json(fresh)));
+  await act(async () => vi.dynamicImportSettled());
+  expect(container.querySelector("#setup-content")?.textContent).toBe(
+    "Your account",
+  );
+  expect(container.textContent).not.toContain("Starting setup…");
+  expect(
+    requests.filter(({ url }) => url === "/api/setup/unlock"),
+  ).toHaveLength(1);
+});
+
+it("ends the setup loading state and shows the error when the private link is rejected", async () => {
+  window.history.replaceState(null, "", `/setup#setup=${"c".repeat(43)}`);
+  installation(null);
+  const healthy = respond;
+  respond = (url, init) => {
+    if (url === "/api/setup/entry")
+      return Response.json({ mode: "token", started: false });
+    if (url === "/api/setup/unlock")
+      return Response.json(
+        { error: "This setup link has expired." },
+        { status: 401 },
+      );
+    return healthy(url, init);
+  };
+  await mount(createElement(App));
+  await click("Start setup");
+  expect(container.querySelector('[role="status"]')).toBeNull();
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+    "This setup link has expired.",
+  );
+  expect(container.textContent).toContain("Open Boopity from your installer");
+  expect(container.textContent).not.toContain("Your account");
+  expect(
+    requests.filter(({ url }) => url === "/api/setup/unlock"),
+  ).toHaveLength(1);
+});
+
+it("can retry a failed setup refresh without reusing the consumed private link", async () => {
+  window.history.replaceState(null, "", `/setup#setup=${"d".repeat(43)}`);
+  installation(null);
+  const healthy = respond;
+  let unlocked = false;
+  let failRefresh = true;
+  const fresh = state();
+  fresh.pending = { name: null, email: null, mailVerifiedAt: null };
+  respond = (url, init) => {
+    if (url === "/api/setup/entry")
+      return Response.json({ mode: "token", started: false });
+    if (url === "/api/setup/unlock") {
+      unlocked = true;
+      return Response.json({ ok: true });
+    }
+    if (url === "/api/setup/status" && unlocked)
+      return failRefresh
+        ? new Response(null, { status: 503 })
+        : Response.json(fresh);
+    return healthy(url, init);
+  };
+  await mount(createElement(App));
+  await click("Start setup");
+  expect(container.textContent).not.toContain("Starting setup…");
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+    "Your settings could not be loaded.",
+  );
+  expect(window.location.hash).toBe("");
+
+  failRefresh = false;
+  await click("Try again");
+  await act(async () => vi.dynamicImportSettled());
+  expect(container.querySelector("#setup-content")?.textContent).toBe(
+    "Your account",
+  );
+  expect(container.querySelector('[role="alert"]')).toBeNull();
+  expect(requests.filter(({ init }) => init?.method === "POST")).toHaveLength(
+    1,
+  );
 });
 
 it("keeps setup password help and validation feedback in the centered layout", async () => {
